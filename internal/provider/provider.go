@@ -3,10 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
 // provider satisfies the tfsdk.Provider interface and usually is included
@@ -17,7 +19,8 @@ type provider struct {
 	// implementations can then make calls using this client.
 	//
 	// TODO: If appropriate, implement upstream provider SDK or HTTP client.
-	// client vendorsdk.ExampleClient
+	// client vendorsdk.HostClient
+	client api.Client
 
 	// configured is set to true at the end of the Configure method.
 	// This can be used in Resource and DataSource implementations to verify
@@ -32,7 +35,8 @@ type provider struct {
 
 // providerData can be used to store data from the Terraform configuration.
 type providerData struct {
-	Example types.String `tfsdk:"example"`
+	API_Key      types.String `tfsdk:"api_key"`
+	API_Endpoint types.String `tfsdk:"api_endpoint"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -45,31 +49,57 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	}
 
 	// Configuration values are now available.
-	// if data.Example.Null { /* ... */ }
+	// if data.Host.Null { /* ... */ }
 
 	// If the upstream provider SDK or HTTP client requires configuration, such
 	// as authentication or logging, this is a great opportunity to do so.
+	if data.API_Key.Unknown {
+		resp.Diagnostics.AddError(
+			"Unknown Provider Configuration Value",
+			"API_Key not defined. Either define a terraform variable, or set `DOG_API_KEY` environment variable",
+		)
+		return
+	}
+	if data.API_Endpoint.Unknown {
+		resp.Diagnostics.AddError(
+			"Unknown Provider Configuration Value",
+			"API_Endpoint not defined. Either define a terraform variable, or set `DOG_API_ENDPOINT` environment variable",
+		)
+		return
+	}
+
+	if data.API_Key.Null {
+		data.API_Key.Value = os.Getenv("DOG_API_KEY")
+	}
+	if data.API_Endpoint.Null {
+		data.API_Endpoint.Value = os.Getenv("DOG_API_ENDPOINT")
+	}
 
 	p.configured = true
 }
 
 func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceType, diag.Diagnostics) {
 	return map[string]tfsdk.ResourceType{
-		"scaffolding_example": exampleResourceType{},
+		"dog_host": hostResourceType{},
 	}, nil
 }
 
 func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSourceType, diag.Diagnostics) {
 	return map[string]tfsdk.DataSourceType{
-		"scaffolding_example": exampleDataSourceType{},
+		"dog_host": hostDataSourceType{},
 	}, nil
 }
 
 func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"example": {
-				MarkdownDescription: "Example provider attribute",
+			"api_endpoint": {
+				MarkdownDescription: "API endpoint URL",
+				Optional:            true,
+				Type:                types.StringType,
+			},
+			"api_key": {
+				MarkdownDescription: "API Key",
 				Optional:            true,
 				Type:                types.StringType,
 			},
