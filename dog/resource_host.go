@@ -1,4 +1,4 @@
-package provider
+package dog
 
 import (
 	"context"
@@ -24,27 +24,27 @@ func (t hostResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			},
 			"environment": {
 				MarkdownDescription: "Host environment",
-				Optional:            false,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"group": {
 				MarkdownDescription: "Host group",
-				Optional:            false,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"hostkey": {
 				MarkdownDescription: "Host key",
-				Optional:            false,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"location": {
 				MarkdownDescription: "Host location",
-				Optional:            false,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"name": {
 				MarkdownDescription: "Host name",
-				Optional:            false,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"id": {

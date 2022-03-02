@@ -1,4 +1,4 @@
-module github.com/relaypro-open/terraform-provider-dog
+module terraform-provider-dog
 
 go 1.17
 
