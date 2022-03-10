@@ -3,12 +3,14 @@ package dog
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
 type hostResourceType struct{}
@@ -68,7 +70,7 @@ func (t hostResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (t
 }
 
 type hostResourceData struct {
-	Active      *string      `tfsdk:"active"`
+	Active      string       `tfsdk:"active"`
 	Environment string       `tfsdk:"environment"`
 	Group       string       `tfsdk:"group"`
 	ID          types.String `tfsdk:"id"`
@@ -82,24 +84,51 @@ type hostResource struct {
 }
 
 func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	var data hostResourceData
+	var state Host
 
-	diags := req.Config.Get(ctx, &data)
+	var plan hostResourceData
+	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// host, err := d.provider.client.CreateHost(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
-	//     return
-	// }
-	hostID := data.ID.Value
-	host, statusCode, err := r.provider.client.GetHost(hostID, nil)
+	newHost := api.HostCreateRequest{
+		Active:      plan.Active,
+		Environment: plan.Environment,
+		Group:       plan.Group,
+		HostKey:     plan.HostKey,
+		Location:    plan.Location,
+		Name:        plan.Name,
+	}
+	host, statusCode, err := r.provider.client.CreateHost(newHost, nil)
+	//response := api.HostCreateResponse{
+	//	ID:     host.ID,
+	//	Result: host.Result,
+	//}
+	log.Printf(fmt.Sprintf("host: %+v\n", host))
+	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
+	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
+	h := Host{
+		Active:      types.String{Value: host.Active},
+		Environment: types.String{Value: host.Environment},
+		Group:       types.String{Value: host.Group},
+		ID:          types.String{Value: host.ID},
+		HostKey:     types.String{Value: host.HostKey},
+		Location:    types.String{Value: host.Location},
+		Name:        types.String{Value: host.Name},
+	}
+	//h := Host{
+	//	Active:      host.Active,
+	//	Environment: host.Environment,
+	//	Group:       host.Group,
+	//	ID:          host.ID,
+	//	HostKey:     host.HostKey,
+	//	Location:    host.Location,
+	//	Name:        host.Name,
+	//}
+	state = h
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
@@ -111,14 +140,15 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 
 	// For the purposes of this host code, hardcoding a response value to
 	// save into the Terraform state.
-	data.ID = types.String{Value: host.ID}
+	//plan.ID = types.String{Value: state.ID}
+	plan.ID = state.ID
 
 	// write logs using the tflog package
 	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
 	// for more information
 	tflog.Trace(ctx, "created a resource")
 
-	diags = resp.State.Set(ctx, &data)
+	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
 

@@ -11,6 +11,12 @@ default: install
 build:
 	go build -o ./bin/${BINARY}
 
+debug-build:
+	go build -gcflags="all=-N -l" -o ./bin/${BINARY}
+
+debug:
+	dlv exec --accept-multiclient --continue --headless ./bin/terraform-provider-dog -- -debug
+
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
 	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386

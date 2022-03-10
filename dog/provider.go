@@ -47,6 +47,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	//resp.Diagnostics.AddError("data", fmt.Sprintf("data: %+v\n", data))
 
 	// Configuration values are now available.
 	// if data.Host.Null { /* ... */ }
@@ -74,6 +75,11 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 	if data.API_Endpoint.Null {
 		data.API_Endpoint.Value = os.Getenv("DOG_API_ENDPOINT")
 	}
+	//resp.Diagnostics.AddError("data.API_Key.Value", fmt.Sprintf("data.API_Key.Value: %+v\n", data.API_Key.Value))
+	//resp.Diagnostics.AddError("data.API_Endpoint.Value", fmt.Sprintf("data.API_Endpoint.Value: %+v\n", data.API_Endpoint.Value))
+
+	p.client = *api.NewClient(data.API_Key.Value, data.API_Endpoint.Value)
+	//p.client = *api.NewClient(data.API_Key.Value)
 
 	p.configured = true
 }
