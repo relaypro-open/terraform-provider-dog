@@ -103,10 +103,6 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		Name:        plan.Name,
 	}
 	host, statusCode, err := r.provider.client.CreateHost(newHost, nil)
-	//response := api.HostCreateResponse{
-	//	ID:     host.ID,
-	//	Result: host.Result,
-	//}
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
@@ -119,15 +115,6 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		Location:    types.String{Value: host.Location},
 		Name:        types.String{Value: host.Name},
 	}
-	//h := Host{
-	//	Active:      host.Active,
-	//	Environment: host.Environment,
-	//	Group:       host.Group,
-	//	ID:          host.ID,
-	//	HostKey:     host.HostKey,
-	//	Location:    host.Location,
-	//	Name:        host.Name,
-	//}
 	state = h
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
@@ -138,9 +125,6 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		return
 	}
 
-	// For the purposes of this host code, hardcoding a response value to
-	// save into the Terraform state.
-	//plan.ID = types.String{Value: state.ID}
 	plan.ID = state.ID
 
 	// write logs using the tflog package
@@ -162,13 +146,6 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// host, err := d.provider.client.ReadHost(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
-	//     return
-	// }
 	hostID := state.ID.Value
 
 	host, statusCode, err := r.provider.client.GetHost(hostID, nil)
@@ -218,23 +195,29 @@ func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 }
 
 func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	var data hostResourceData
+	var state Host
 
-	diags := req.State.Get(ctx, &data)
+	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// host, err := d.provider.client.DeleteHost(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete host, got error: %s", err))
-	//     return
-	// }
+	hostID := state.ID.Value
+	host, statusCode, err := r.provider.client.DeleteHost(hostID, nil)
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
+		return
+	}
+	tflog.Trace(ctx, fmt.Sprintf("Host deleted: %+v\n", host))
 
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
 }
 
