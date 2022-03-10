@@ -173,25 +173,74 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 }
 
 func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	var data hostResourceData
+	//var data hostResourceData
 
-	diags := req.Plan.Get(ctx, &data)
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
+	var state Host
+
+	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// host, err := d.provider.client.UpdateHost(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update host, got error: %s", err))
-	//     return
-	// }
+	hostID := state.ID.Value
 
-	diags = resp.State.Set(ctx, &data)
+	var plan hostResourceData
+	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	newHost := api.HostUpdateRequest{
+		Active:      plan.Active,
+		Environment: plan.Environment,
+		Group:       plan.Group,
+		HostKey:     plan.HostKey,
+		Location:    plan.Location,
+		Name:        plan.Name,
+	}
+	host, statusCode, err := r.provider.client.UpdateHost(hostID, newHost, nil)
+	log.Printf(fmt.Sprintf("host: %+v\n", host))
+	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
+	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
+	h := Host{
+		Active:      types.String{Value: host.Active},
+		Environment: types.String{Value: host.Environment},
+		Group:       types.String{Value: host.Group},
+		ID:          types.String{Value: host.ID},
+		HostKey:     types.String{Value: host.HostKey},
+		Location:    types.String{Value: host.Location},
+		Name:        types.String{Value: host.Name},
+	}
+	state = h
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
+		return
+	}
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+
+	plan.ID = state.ID
+
+	// write logs using the tflog package
+	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
+	// for more information
+	tflog.Trace(ctx, "created a resource")
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
