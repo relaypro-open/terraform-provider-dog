@@ -13,3 +13,14 @@ type Host struct {
 }
 
 type HostList []Host
+
+type Group struct {
+	//Created        int    `json:"created,omitempty"` //TODO: created has both int and string entries
+	Description    types.String `tfsdk:"description"`
+	ID             types.String `tfsdk:"id"`
+	Name           types.String `tfsdk:"name"`
+	ProfileName    types.String `tfsdk:"profile_name"`
+	ProfileVersion types.String `tfsdk:"profile_version"`
+}
+
+type GroupList []Group
