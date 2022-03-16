@@ -89,7 +89,7 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	var plan hostResourceData
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
+	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -173,14 +173,6 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 }
 
 func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	//var data hostResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Host
 
 	diags := req.State.Get(ctx, &state)

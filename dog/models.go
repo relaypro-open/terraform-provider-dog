@@ -2,6 +2,8 @@ package dog
 
 import "github.com/hashicorp/terraform-plugin-framework/types"
 
+type HostList []Host
+
 type Host struct {
 	Active      types.String `tfsdk:"active"`
 	Environment types.String `tfsdk:"environment"`
@@ -12,7 +14,7 @@ type Host struct {
 	Name        types.String `tfsdk:"name"`
 }
 
-type HostList []Host
+type GroupList []Group
 
 type Group struct {
 	//Created        int    `json:"created,omitempty"` //TODO: created has both int and string entries
@@ -23,4 +25,19 @@ type Group struct {
 	ProfileVersion types.String `tfsdk:"profile_version"`
 }
 
-type GroupList []Group
+type ServiceList []Service
+
+type Service struct {
+	Created  types.Int64    `tfsdk:"created"`
+	ID       types.String   `tfsdk:"id"`
+	Services []PortProtocol `tfsdk:"services"`
+	Name     types.String   `tfsdk:"name"`
+	Version  types.Int64    `tfsdk:"version"`
+}
+
+type Services []PortProtocol
+
+type PortProtocol struct {
+	Ports    []string     `tfsdk:"ports"`
+	Protocol types.String `tfsdk:"protocol"`
+}
