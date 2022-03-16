@@ -8,11 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 type serviceDataSourceType struct{}
 
 func (t serviceDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	tflog.Debug(ctx, "GetSchema 1\n")
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Service data source",
@@ -50,6 +52,7 @@ type serviceDataSource struct {
 }
 
 func (d serviceDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+	tflog.Debug(ctx, "Read 1\n")
 	var data serviceDataSourceData
 
 	var resourceState struct {
@@ -72,7 +75,7 @@ func (d serviceDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 	services, statusCode, err := d.provider.client.GetServices(nil)
 	var h Service
 	for _, service := range services {
-		var s Services
+		var s []PortProtocol
 		for _, port_protocol := range service.Services {
 			var pp PortProtocol
 			pp = PortProtocol{
@@ -82,7 +85,7 @@ func (d serviceDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 			s = append(s, pp)
 		}
 		h = Service{
-			Created:  types.Int64{Value: int64(service.Created)},
+			//Created: types.Int64{Value: int64(service.Created)},
 			ID:       types.String{Value: service.ID},
 			Services: s,
 			Name:     types.String{Value: service.Name},

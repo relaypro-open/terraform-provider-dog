@@ -28,7 +28,7 @@ type Group struct {
 type ServiceList []Service
 
 type Service struct {
-	Created  types.Int64    `tfsdk:"created"`
+	//Created types.Int64  `tfsdk:"created"`
 	ID       types.String   `tfsdk:"id"`
 	Services []PortProtocol `tfsdk:"services"`
 	Name     types.String   `tfsdk:"name"`

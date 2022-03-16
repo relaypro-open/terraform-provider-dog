@@ -19,11 +19,11 @@ func (t serviceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"created": {
-				MarkdownDescription: "Service created timestamp",
-				Optional:            true,
-				Type:                types.Int64Type,
-			},
+			//"created": {
+			//	MarkdownDescription: "Service created timestamp",
+			//	Optional:            true,
+			//	Type:                types.Int64Type,
+			//},
 			"services": {
 				MarkdownDescription: "List of Services",
 				Required:            true,
@@ -73,7 +73,7 @@ func (t serviceResourceType) NewResource(ctx context.Context, in tfsdk.Provider)
 }
 
 type serviceResourceData struct {
-	Created  int            `tfsdk:"created"`
+	//Created int          `tfsdk:"created"`
 	ID       types.String   `tfsdk:"id"`
 	Services []PortProtocol `tfsdk:"services"`
 	Name     string         `tfsdk:"name"`
@@ -85,19 +85,23 @@ type serviceResource struct {
 }
 
 func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
+	tflog.Debug(ctx, "Create 1\n")
 	var state Service
 
 	var plan serviceResourceData
 	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var newServices []api.Services
+	tflog.Debug(ctx, "Create 2\n")
+	var newServices []api.PortProtocol
 	for _, port_protocol := range plan.Services {
-		var pp api.Services
-		pp = api.Services{
+		var pp api.PortProtocol
+		pp = api.PortProtocol{
 			Ports:    port_protocol.Ports,
 			Protocol: port_protocol.Protocol.Value,
 		}
@@ -109,9 +113,10 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		Name:     plan.Name,
 		Services: newServices,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewService: %+v\n", newService))
 	service, statusCode, err := r.provider.client.CreateService(newService, nil)
-	log.Printf(fmt.Sprintf("service: %+v\n", service))
-	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
 	var s Services
 	for _, port_protocol := range service.Services {
 		var pp PortProtocol
@@ -122,7 +127,7 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		s = append(s, pp)
 	}
 	h := Service{
-		Created:  types.Int64{Value: int64(service.Created)},
+		//Created: types.Int64{Value: int64(service.Created)},
 		ID:       types.String{Value: service.ID},
 		Services: s,
 		Name:     types.String{Value: service.Name},
@@ -150,6 +155,7 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 }
 
 func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	tflog.Debug(ctx, "Read 1\n")
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -180,7 +186,7 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 		s = append(s, pp)
 	}
 	h := Service{
-		Created:  types.Int64{Value: int64(service.Created)},
+		//Created: types.Int64{Value: int64(service.Created)},
 		ID:       types.String{Value: service.ID},
 		Services: s,
 		Name:     types.String{Value: service.Name},
@@ -192,6 +198,7 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 }
 
 func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+	tflog.Debug(ctx, "Update 1\n")
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -210,10 +217,10 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var newServices []api.Services
+	var newServices []api.PortProtocol
 	for _, port_protocol := range plan.Services {
-		var pp api.Services
-		pp = api.Services{
+		var pp api.PortProtocol
+		pp = api.PortProtocol{
 			Ports:    port_protocol.Ports,
 			Protocol: port_protocol.Protocol.Value,
 		}
@@ -228,7 +235,7 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 	service, statusCode, err := r.provider.client.UpdateService(serviceID, newService, nil)
 	log.Printf(fmt.Sprintf("service: %+v\n", service))
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
-	//resp.Diagnostics.AddError("service", fmt.Sprintf("service: %+v\n", service))
+	resp.Diagnostics.AddError("service", fmt.Sprintf("service: %+v\n", service))
 	var s Services
 	for _, port_protocol := range service.Services {
 		var pp PortProtocol
@@ -239,7 +246,7 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		s = append(s, pp)
 	}
 	h := Service{
-		Created:  types.Int64{Value: int64(service.Created)},
+		//Created: types.Int64{Value: int64(service.Created)},
 		ID:       types.String{Value: service.ID},
 		Services: s,
 		Name:     types.String{Value: service.Name},
@@ -268,6 +275,7 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 }
 
 func (r serviceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	tflog.Debug(ctx, "Delete 1\n")
 	var state Service
 
 	diags := req.State.Get(ctx, &state)

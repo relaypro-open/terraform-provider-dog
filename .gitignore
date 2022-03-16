@@ -1,3 +1,5 @@
+_output/
+vendor/
 *.dll
 *.exe
 .DS_Store

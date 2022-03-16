@@ -88,6 +88,7 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 
 	var plan hostResourceData
 	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
 	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
 	if resp.Diagnostics.HasError() {
