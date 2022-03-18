@@ -89,6 +89,8 @@ func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceT
 		"dog_host":    hostResourceType{},
 		"dog_group":   groupResourceType{},
 		"dog_service": serviceResourceType{},
+		"dog_zone":    zoneResourceType{},
+		"dog_link":    linkResourceType{},
 	}, nil
 }
 
@@ -97,6 +99,8 @@ func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSou
 		"dog_host":    hostDataSourceType{},
 		"dog_group":   groupDataSourceType{},
 		"dog_service": serviceDataSourceType{},
+		"dog_zone":    zoneDataSourceType{},
+		"dog_link":    linkDataSourceType{},
 	}, nil
 }
 
