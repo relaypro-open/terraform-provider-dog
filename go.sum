@@ -354,6 +354,8 @@ github.com/relaypro-open/dog_api_golang v0.0.0-20220317161122-e082d311884e h1:X5
 github.com/relaypro-open/dog_api_golang v0.0.0-20220317161122-e082d311884e/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220317184020-4a6cc4530fc2 h1:0J7CjcimsuGLEMNVSl+VVVMCruS627rXYyEa52x9MI0=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220317184020-4a6cc4530fc2/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
+github.com/relaypro-open/dog_api_golang v0.0.0-20220318162456-fecdfd68ca28 h1:GvwypXD7oMfyY3hY1XMgIMP7rTPsyosayMuP+pAH0mc=
+github.com/relaypro-open/dog_api_golang v0.0.0-20220318162456-fecdfd68ca28/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3VRLtww=

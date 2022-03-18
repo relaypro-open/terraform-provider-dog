@@ -82,3 +82,35 @@ type SSLOptions struct {
 	ServerNameIndication types.String `tfsdk:"server_name_indication"`
 	Verify               types.String `tfsdk:"verify"`
 }
+
+type ProfileList []Profile
+
+type Profile struct {
+	//Created     types.Int64  `tfsdk:"created"`
+	Description types.String `tfsdk:"description"`
+	ID          types.String `tfsdk:"id"`
+	Name        types.String `tfsdk:"name"`
+	Rules       Rules        `tfsdk:"rules"`
+	Version     types.String `tfsdk:"version"`
+}
+
+type Rules struct {
+	Inbound  []Rule `tfsdk:"inbound"`
+	Outbound []Rule `tfsdk:"outbound"`
+}
+
+type Rule struct {
+	Action       types.String `tfsdk:"action"`
+	Active       types.Bool   `tfsdk:"active"`
+	Comment      types.String `tfsdk:"comment"`
+	Environments []string     `tfsdk:"environments"`
+	Group        types.String `tfsdk:"group"`
+	GroupType    types.String `tfsdk:"group_type"`
+	Interface    types.String `tfsdk:"interface"`
+	Log          types.Bool   `tfsdk:"log"`
+	LogPrefix    types.String `tfsdk:"log_prefix"`
+	Order        types.Int64  `tfsdk:"order"`
+	Service      types.String `tfsdk:"service"`
+	States       []string     `tfsdk:"states"`
+	Type         types.String `tfsdk:"type"`
+}

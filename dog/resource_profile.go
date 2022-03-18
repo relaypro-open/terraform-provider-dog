@@ -1,0 +1,656 @@
+package dog
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	api "github.com/relaypro-open/dog_api_golang/api"
+)
+
+type profileResourceType struct{}
+
+func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return tfsdk.Schema{
+		Attributes: map[string]tfsdk.Attribute{
+			// This description is used by the documentation generator and the language server.
+			//"created": {
+			//	MarkdownDescription: "Profile created timestamp",
+			//	Optional:            true,
+			//	Type:                types.Int64Type,
+			//},
+			"description": {
+				MarkdownDescription: "Profile description",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"name": {
+				MarkdownDescription: "Profile name",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"rules": {
+				MarkdownDescription: "Profile rules",
+				Required:            true,
+				Type: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"inbound": types.ListType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"action":  types.StringType,
+									"active":  types.BoolType,
+									"comment": types.StringType,
+									"environments": types.ListType{
+										ElemType: types.StringType,
+									},
+									"group":      types.StringType,
+									"group_type": types.StringType,
+									"interface":  types.StringType,
+									"log":        types.BoolType,
+									"log_prefix": types.StringType,
+									"order":      types.Int64Type,
+									"service":    types.StringType,
+									"states": types.ListType{
+										ElemType: types.StringType,
+									},
+									"type": types.StringType,
+								},
+							},
+						},
+						"outbound": types.ListType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"action":  types.StringType,
+									"active":  types.BoolType,
+									"comment": types.StringType,
+									"environments": types.ListType{
+										ElemType: types.StringType,
+									},
+									"group":      types.StringType,
+									"group_type": types.StringType,
+									"interface":  types.StringType,
+									"log":        types.BoolType,
+									"log_prefix": types.StringType,
+									"order":      types.Int64Type,
+									"service":    types.StringType,
+									"states": types.ListType{
+										ElemType: types.StringType,
+									},
+									"type": types.StringType,
+								},
+							},
+						},
+					},
+					//}),
+				},
+			},
+			//Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
+			//Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+			//"inbound": {
+			//	MarkdownDescription: "Inbound Rules",
+			//	Required:            true,
+			//	Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+			//		"action": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"active": {
+			//			Type:     types.BoolType,
+			//			Required: true,
+			//		},
+			//		"comment": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"environments": {
+			//			Type: types.ListType{
+			//				ElemType: types.StringType,
+			//			},
+			//			Required: true,
+			//		},
+			//		"group": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"group_type": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"interface": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"log": {
+			//			Type:     types.BoolType,
+			//			Required: true,
+			//		},
+			//		"log_prefix": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"order": {
+			//			Type:     types.Int64Type,
+			//			Required: true,
+			//		},
+			//		"service": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"states": {
+			//			Type: types.ListType{
+			//				ElemType: types.StringType,
+			//			},
+			//			Required: true,
+			//		},
+			//		"type": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//	}, tfsdk.ListNestedAttributesOptions{}),
+			//},
+			//"outbound": {
+			//	MarkdownDescription: "outbound Rules",
+			//	Required:            true,
+			//	Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+			//		"action": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"active": {
+			//			Type:     types.BoolType,
+			//			Required: true,
+			//		},
+			//		"comment": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"environments": {
+			//			Type: types.ListType{
+			//				ElemType: types.StringType,
+			//			},
+			//			Required: true,
+			//		},
+			//		"group": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"group_type": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"interface": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"log": {
+			//			Type:     types.BoolType,
+			//			Required: true,
+			//		},
+			//		"log_prefix": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"order": {
+			//			Type:     types.Int64Type,
+			//			Required: true,
+			//		},
+			//		"service": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//		"states": {
+			//			Type: types.ListType{
+			//				ElemType: types.StringType,
+			//			},
+			//			Required: true,
+			//		},
+			//		"type": {
+			//			Type:     types.StringType,
+			//			Required: true,
+			//		},
+			//	}, tfsdk.ListNestedAttributesOptions{}),
+			//},
+			//}, tfsdk.MapNestedAttributesOptions{}),
+			"version": {
+				MarkdownDescription: "Profile version",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"id": {
+				Computed:            true,
+				MarkdownDescription: "Profile identifier",
+				PlanModifiers: tfsdk.AttributePlanModifiers{
+					tfsdk.UseStateForUnknown(),
+				},
+				Type: types.StringType,
+			},
+		},
+	}, nil
+}
+
+func (t profileResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
+	provider, diags := convertProviderType(in)
+
+	return profileResource{
+		provider: provider,
+	}, diags
+}
+
+type profileResourceData struct {
+	//Created     int          `tfsdk:"created"`
+	Description string       `tfsdk:"description"`
+	ID          types.String `tfsdk:"id"`
+	Name        string       `tfsdk:"name"`
+	Rules       Rules        `tfsdk:"rules"`
+	Version     string       `tfsdk:"version"`
+}
+
+type profileResource struct {
+	provider provider
+}
+
+func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
+	tflog.Debug(ctx, "Create 1\n")
+	var state Profile
+
+	var plan profileResourceData
+	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
+	resp.Diagnostics.Append(diags...)
+	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	tflog.Debug(ctx, "Create 2\n")
+	var inboundRules []api.Rule
+	for _, inbound_rule := range plan.Rules.Inbound {
+		rule := api.Rule{
+			Action:       inbound_rule.Action.Value,
+			Active:       inbound_rule.Active.Value,
+			Comment:      inbound_rule.Comment.Value,
+			Environments: inbound_rule.Environments,
+			Group:        inbound_rule.Group.Value,
+			GroupType:    inbound_rule.GroupType.Value,
+			Interface:    inbound_rule.Interface.Value,
+			Log:          inbound_rule.Log.Value,
+			LogPrefix:    inbound_rule.LogPrefix.Value,
+			Order:        int(inbound_rule.Order.Value),
+			Service:      inbound_rule.Service.Value,
+			States:       inbound_rule.States,
+			Type:         inbound_rule.Type.Value,
+		}
+		inboundRules = append(inboundRules, rule)
+	}
+	var outboundRules []api.Rule
+	for _, outbound_rule := range plan.Rules.Outbound {
+		rule := api.Rule{
+			Action:       outbound_rule.Action.Value,
+			Active:       outbound_rule.Active.Value,
+			Comment:      outbound_rule.Comment.Value,
+			Environments: outbound_rule.Environments,
+			Group:        outbound_rule.Group.Value,
+			GroupType:    outbound_rule.GroupType.Value,
+			Interface:    outbound_rule.Interface.Value,
+			Log:          outbound_rule.Log.Value,
+			LogPrefix:    outbound_rule.LogPrefix.Value,
+			Order:        int(outbound_rule.Order.Value),
+			Service:      outbound_rule.Service.Value,
+			States:       outbound_rule.States,
+			Type:         outbound_rule.Type.Value,
+		}
+		outboundRules = append(outboundRules, rule)
+	}
+
+	newProfile := api.ProfileCreateRequest{
+		Description: plan.Description,
+		Name:        plan.Name,
+		Rules: api.Rules{
+			Inbound:  inboundRules,
+			Outbound: outboundRules,
+		},
+		Version: plan.Version,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewProfile: %+v\n", newProfile))
+	profile, statusCode, err := r.provider.client.CreateProfile(newProfile, nil)
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
+	var newInboundRules []Rule
+	for _, inbound_rule := range profile.Rules.Inbound {
+		rule := Rule{
+			Action:       types.String{Value: inbound_rule.Action},
+			Active:       types.Bool{Value: inbound_rule.Active},
+			Comment:      types.String{Value: inbound_rule.Comment},
+			Environments: inbound_rule.Environments,
+			Group:        types.String{Value: inbound_rule.Group},
+			GroupType:    types.String{Value: inbound_rule.GroupType},
+			Interface:    types.String{Value: inbound_rule.Interface},
+			Log:          types.Bool{Value: inbound_rule.Log},
+			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(inbound_rule.Order)},
+			Service:      types.String{Value: inbound_rule.Service},
+			States:       inbound_rule.States,
+			Type:         types.String{Value: inbound_rule.Type},
+		}
+		newInboundRules = append(newInboundRules, rule)
+	}
+	var newOutboundRules []Rule
+	for _, outbound_rule := range profile.Rules.Outbound {
+		rule := Rule{
+			Action:       types.String{Value: outbound_rule.Action},
+			Active:       types.Bool{Value: outbound_rule.Active},
+			Comment:      types.String{Value: outbound_rule.Comment},
+			Environments: outbound_rule.Environments,
+			Group:        types.String{Value: outbound_rule.Group},
+			GroupType:    types.String{Value: outbound_rule.GroupType},
+			Interface:    types.String{Value: outbound_rule.Interface},
+			Log:          types.Bool{Value: outbound_rule.Log},
+			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(outbound_rule.Order)},
+			Service:      types.String{Value: outbound_rule.Service},
+			States:       outbound_rule.States,
+			Type:         types.String{Value: outbound_rule.Type},
+		}
+		newOutboundRules = append(newOutboundRules, rule)
+	}
+	h := Profile{
+		//Created:     types.Int64{Value: int64(profile.Created)},
+		Description: types.String{Value: profile.Description},
+		ID:          types.String{Value: profile.ID},
+		Name:        types.String{Value: profile.Name},
+		Rules: Rules{
+			Inbound:  newInboundRules,
+			Outbound: newOutboundRules,
+		},
+		Version: types.String{Value: profile.Version},
+	}
+	state = h
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+		return
+	}
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+
+	plan.ID = state.ID
+
+	// write logs using the tflog package
+	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
+	// for more information
+	tflog.Trace(ctx, "created a resource")
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	tflog.Debug(ctx, "Read 1\n")
+	var state Profile
+
+	diags := req.State.Get(ctx, &state)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ state: %+v\n", state))
+	tflog.Debug(ctx, "Read 2\n")
+	resp.Diagnostics.Append(diags...)
+	tflog.Debug(ctx, "Read 3\n")
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.Value
+
+	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
+		return
+	}
+	var newInboundRules []Rule
+	for _, inbound_rule := range profile.Rules.Inbound {
+		tflog.Debug(ctx, fmt.Sprintf("inbound_rule: %+v\n", inbound_rule))
+		var environments []string
+		for _, env := range inbound_rule.Environments {
+			environments = append(environments, env)
+		}
+		var states []string
+		for _, state := range inbound_rule.States {
+			states = append(states, state)
+		}
+		rule := Rule{
+			Action:       types.String{Value: inbound_rule.Action},
+			Active:       types.Bool{Value: inbound_rule.Active},
+			Comment:      types.String{Value: inbound_rule.Comment},
+			Environments: environments,
+			Group:        types.String{Value: inbound_rule.Group},
+			GroupType:    types.String{Value: inbound_rule.GroupType},
+			Interface:    types.String{Value: inbound_rule.Interface},
+			Log:          types.Bool{Value: inbound_rule.Log},
+			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(inbound_rule.Order)},
+			Service:      types.String{Value: inbound_rule.Service},
+			States:       states,
+			Type:         types.String{Value: inbound_rule.Type},
+		}
+		newInboundRules = append(newInboundRules, rule)
+	}
+	var newOutboundRules []Rule
+	for _, outbound_rule := range profile.Rules.Outbound {
+		rule := Rule{
+			Action:       types.String{Value: outbound_rule.Action},
+			Active:       types.Bool{Value: outbound_rule.Active},
+			Comment:      types.String{Value: outbound_rule.Comment},
+			Environments: outbound_rule.Environments,
+			Group:        types.String{Value: outbound_rule.Group},
+			GroupType:    types.String{Value: outbound_rule.GroupType},
+			Interface:    types.String{Value: outbound_rule.Interface},
+			Log:          types.Bool{Value: outbound_rule.Log},
+			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(outbound_rule.Order)},
+			Service:      types.String{Value: outbound_rule.Service},
+			States:       outbound_rule.States,
+			Type:         types.String{Value: outbound_rule.Type},
+		}
+		newOutboundRules = append(newOutboundRules, rule)
+	}
+	h := Profile{
+		//Created:     types.Int64{Value: int64(profile.Created)},
+		Description: types.String{Value: profile.Description},
+		ID:          types.String{Value: profile.ID},
+		Name:        types.String{Value: profile.Name},
+		Rules: Rules{
+			Inbound:  newInboundRules,
+			Outbound: newOutboundRules,
+		},
+		Version: types.String{Value: profile.Version},
+	}
+	state = h
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+	tflog.Debug(ctx, "Update 1\n")
+	var state Profile
+
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.Value
+
+	var plan profileResourceData
+	diags = req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	var inboundRules []api.Rule
+	for _, inbound_rule := range plan.Rules.Inbound {
+		rule := api.Rule{
+			Action:       inbound_rule.Action.Value,
+			Active:       inbound_rule.Active.Value,
+			Comment:      inbound_rule.Comment.Value,
+			Environments: inbound_rule.Environments,
+			Group:        inbound_rule.Group.Value,
+			GroupType:    inbound_rule.GroupType.Value,
+			Interface:    inbound_rule.Interface.Value,
+			Log:          inbound_rule.Log.Value,
+			LogPrefix:    inbound_rule.LogPrefix.Value,
+			Order:        int(inbound_rule.Order.Value),
+			Service:      inbound_rule.Service.Value,
+			States:       inbound_rule.States,
+			Type:         inbound_rule.Type.Value,
+		}
+		inboundRules = append(inboundRules, rule)
+	}
+	var outboundRules []api.Rule
+	for _, outbound_rule := range plan.Rules.Outbound {
+		rule := api.Rule{
+			Action:       outbound_rule.Action.Value,
+			Active:       outbound_rule.Active.Value,
+			Comment:      outbound_rule.Comment.Value,
+			Environments: outbound_rule.Environments,
+			Group:        outbound_rule.Group.Value,
+			GroupType:    outbound_rule.GroupType.Value,
+			Interface:    outbound_rule.Interface.Value,
+			Log:          outbound_rule.Log.Value,
+			LogPrefix:    outbound_rule.LogPrefix.Value,
+			Order:        int(outbound_rule.Order.Value),
+			Service:      outbound_rule.Service.Value,
+			States:       outbound_rule.States,
+			Type:         outbound_rule.Type.Value,
+		}
+		outboundRules = append(outboundRules, rule)
+	}
+
+	newProfile := api.ProfileUpdateRequest{
+		Description: plan.Description,
+		Name:        plan.Name,
+		Rules: api.Rules{
+			Inbound:  inboundRules,
+			Outbound: outboundRules,
+		},
+		Version: plan.Version,
+	}
+
+	profile, statusCode, err := r.provider.client.UpdateProfile(profileID, newProfile, nil)
+	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Debug(ctx, fmt.Sprintf("profile: %+v\n", profile))
+	//resp.Diagnostics.AddError("profile", fmt.Sprintf("profile: %+v\n", profile))
+	var newInboundRules []Rule
+	for _, inbound_rule := range profile.Rules.Inbound {
+		rule := Rule{
+			Action:       types.String{Value: inbound_rule.Action},
+			Active:       types.Bool{Value: inbound_rule.Active},
+			Comment:      types.String{Value: inbound_rule.Comment},
+			Environments: inbound_rule.Environments,
+			Group:        types.String{Value: inbound_rule.Group},
+			GroupType:    types.String{Value: inbound_rule.GroupType},
+			Interface:    types.String{Value: inbound_rule.Interface},
+			Log:          types.Bool{Value: inbound_rule.Log},
+			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(inbound_rule.Order)},
+			Service:      types.String{Value: inbound_rule.Service},
+			States:       inbound_rule.States,
+			Type:         types.String{Value: inbound_rule.Type},
+		}
+		newInboundRules = append(newInboundRules, rule)
+	}
+	var newOutboundRules []Rule
+	for _, outbound_rule := range profile.Rules.Outbound {
+		rule := Rule{
+			Action:       types.String{Value: outbound_rule.Action},
+			Active:       types.Bool{Value: outbound_rule.Active},
+			Comment:      types.String{Value: outbound_rule.Comment},
+			Environments: outbound_rule.Environments,
+			Group:        types.String{Value: outbound_rule.Group},
+			GroupType:    types.String{Value: outbound_rule.GroupType},
+			Interface:    types.String{Value: outbound_rule.Interface},
+			Log:          types.Bool{Value: outbound_rule.Log},
+			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
+			Order:        types.Int64{Value: int64(outbound_rule.Order)},
+			Service:      types.String{Value: outbound_rule.Service},
+			States:       outbound_rule.States,
+			Type:         types.String{Value: outbound_rule.Type},
+		}
+		newOutboundRules = append(newOutboundRules, rule)
+	}
+	h := Profile{
+		//Created:     types.Int64{Value: int64(profile.Created)},
+		Description: types.String{Value: profile.Description},
+		ID:          types.String{Value: profile.ID},
+		Name:        types.String{Value: profile.Name},
+		Rules: Rules{
+			Inbound:  newInboundRules,
+			Outbound: newOutboundRules,
+		},
+		Version: types.String{Value: profile.Version},
+	}
+	state = h
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+		return
+	}
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+
+	plan.ID = state.ID
+
+	// write logs using the tflog package
+	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
+	// for more information
+	tflog.Trace(ctx, "created a resource")
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
+}
+
+func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+	tflog.Debug(ctx, "Delete 1\n")
+	var state Profile
+
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.Value
+	profile, statusCode, err := r.provider.client.DeleteProfile(profileID, nil)
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
+		return
+	}
+	tflog.Debug(ctx, fmt.Sprintf("Profile deleted: %+v\n", profile))
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	resp.State.RemoveResource(ctx)
+}
+
+func (r profileResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
+	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
+}
