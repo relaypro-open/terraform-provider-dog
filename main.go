@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"terraform-provider-dog/dog"
+	dog "terraform-provider-dog/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 )
