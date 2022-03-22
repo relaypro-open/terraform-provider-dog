@@ -118,6 +118,7 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 				MarkdownDescription: "API Key",
 				Optional:            true,
 				Type:                types.StringType,
+				Sensitive:           true,
 			},
 		},
 	}, nil

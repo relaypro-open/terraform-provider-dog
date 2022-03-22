@@ -8,16 +8,18 @@ import (
 )
 
 func TestAccHostResource(t *testing.T) {
+	name := "test"
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccHostResourceConfig("one"),
+				Config: testAccHostResourceConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("droid-qa-aws03", "active", "active"),
-					resource.TestCheckResourceAttr("droid-qa-aws03", "environment", "*"),
+					resource.TestCheckResourceAttr("dog_host.droid-qa-aws03", "active", "active"),
+					resource.TestCheckResourceAttr("dog_host.droid-qa-aws03", "environment", "*"),
+					resource.TestCheckResourceAttr("dog_host.droid-qa-aws03", "name", name),
 				),
 			},
 			// ImportState testing
@@ -33,7 +35,7 @@ func TestAccHostResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccHostResourceConfig("two"),
+				Config: testAccHostResourceConfig(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("dog_host.droid-qa-aws03", "active", "retired"),
 				),
@@ -43,8 +45,20 @@ func TestAccHostResource(t *testing.T) {
 	})
 }
 
-func testAccHostResourceConfig(configurableAttribute string) string {
+func testAccHostResourceConfig(name string) string {
 	return fmt.Sprintf(`
+terraform {
+  required_providers {
+    dog = {
+      source = "github.com/relaypro-open/dog"
+    }
+  }
+}
+  provider "dog" {
+    api_key = "my-key"
+    api_endpoint = "http://dog-ubuntu-server.lxd:7070/api/V2"
+  }
+
 resource "dog_host" "droid-qa-aws03" {
   name = %[1]q
   active = "active"
@@ -53,5 +67,5 @@ resource "dog_host" "droid-qa-aws03" {
   hostkey = "d4eb483c-99a1-11ec-bcff-03dfdfc9eeb8"
   location = "*"
 }
-`, configurableAttribute)
+`, name)
 }
