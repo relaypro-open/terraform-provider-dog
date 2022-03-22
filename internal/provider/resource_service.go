@@ -84,20 +84,7 @@ type serviceResource struct {
 	provider provider
 }
 
-func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
-	tflog.Debug(ctx, "Create 1\n")
-	var state Service
-
-	var plan serviceResourceData
-	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
-	resp.Diagnostics.Append(diags...)
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	tflog.Debug(ctx, "Create 2\n")
+func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
 	var newServices []api.PortProtocol
 	for _, port_protocol := range plan.Services {
 		var pp api.PortProtocol
@@ -113,10 +100,29 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		Name:     plan.Name,
 		Services: newServices,
 	}
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewService: %+v\n", newService))
-	service, statusCode, err := r.provider.client.CreateService(newService, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
+	return newService
+}
+
+func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
+	var newServices []api.PortProtocol
+	for _, port_protocol := range plan.Services {
+		var pp api.PortProtocol
+		pp = api.PortProtocol{
+			Ports:    port_protocol.Ports,
+			Protocol: port_protocol.Protocol.Value,
+		}
+		newServices = append(newServices, pp)
+	}
+
+	newService := api.ServiceUpdateRequest{
+		Version:  plan.Version,
+		Name:     plan.Name,
+		Services: newServices,
+	}
+	return newService
+}
+
+func ApiToService(service api.Service) Service {
 	var s Services
 	for _, port_protocol := range service.Services {
 		var pp PortProtocol
@@ -132,7 +138,30 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		Name:     types.String{Value: service.Name},
 		Version:  types.Int64{Value: int64(service.Version)},
 	}
-	state = h
+	return h
+}
+
+func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
+	tflog.Debug(ctx, "Create 1\n")
+	var state Service
+
+	var plan serviceResourceData
+	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
+	resp.Diagnostics.Append(diags...)
+	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	tflog.Debug(ctx, "Create 2\n")
+	newService := ServiceToCreateRequest(plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewService: %+v\n", newService))
+	service, statusCode, err := r.provider.client.CreateService(newService, nil)
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
+
+	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
@@ -175,23 +204,7 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service, got error: %s", err))
 		return
 	}
-	var s Services
-	for _, port_protocol := range service.Services {
-		var pp PortProtocol
-		pp = PortProtocol{
-			Ports:    port_protocol.Ports,
-			Protocol: types.String{Value: port_protocol.Protocol},
-		}
-		s = append(s, pp)
-	}
-	h := Service{
-		//Created: types.Int64{Value: int64(service.Created)},
-		ID:       types.String{Value: service.ID},
-		Services: s,
-		Name:     types.String{Value: service.Name},
-		Version:  types.Int64{Value: int64(service.Version)},
-	}
-	state = h
+	state = ApiToService(service)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -216,41 +229,12 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var newServices []api.PortProtocol
-	for _, port_protocol := range plan.Services {
-		var pp api.PortProtocol
-		pp = api.PortProtocol{
-			Ports:    port_protocol.Ports,
-			Protocol: port_protocol.Protocol.Value,
-		}
-		newServices = append(newServices, pp)
-	}
-	newService := api.ServiceUpdateRequest{
-		Version:  plan.Version,
-		Name:     plan.Name,
-		Services: newServices,
-	}
-
+	newService := ServiceToUpdateRequest(plan)
 	service, statusCode, err := r.provider.client.UpdateService(serviceID, newService, nil)
 	log.Printf(fmt.Sprintf("service: %+v\n", service))
 	tflog.Debug(ctx, fmt.Sprintf("service: %+v\n", service))
 	//resp.Diagnostics.AddError("service", fmt.Sprintf("service: %+v\n", service))
-	var s Services
-	for _, port_protocol := range service.Services {
-		var pp PortProtocol
-		pp = PortProtocol{
-			Ports:    port_protocol.Ports,
-			Protocol: types.String{Value: port_protocol.Protocol},
-		}
-		s = append(s, pp)
-	}
-	h := Service{
-		ID:       types.String{Value: service.ID},
-		Services: s,
-		Name:     types.String{Value: service.Name},
-		Version:  types.Int64{Value: int64(service.Version)},
-	}
-	state = h
+	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return

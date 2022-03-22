@@ -71,13 +71,7 @@ func (d groupDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReque
 	// provider client data and make a call using it.
 	groups, statusCode, err := d.provider.client.GetGroups(nil)
 	for _, group := range groups {
-		h := Group{
-			Description:    types.String{Value: group.Description},
-			ID:             types.String{Value: group.ID},
-			Name:           types.String{Value: group.Name},
-			ProfileName:    types.String{Value: group.ProfileName},
-			ProfileVersion: types.String{Value: group.ProfileVersion},
-		}
+		h := ApiToGroup(group)
 		resourceState.Groups = append(resourceState.Groups, h)
 	}
 	if statusCode < 200 && statusCode > 299 {

@@ -16,26 +16,26 @@ func TestAccHostResource(t *testing.T) {
 			{
 				Config: testAccHostResourceConfig("one"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("host.test", "configurable_attribute", "one"),
-					resource.TestCheckResourceAttr("host.test", "id", "host-id"),
+					resource.TestCheckResourceAttr("droid-qa-aws03", "active", "active"),
+					resource.TestCheckResourceAttr("droid-qa-aws03", "environment", "*"),
 				),
 			},
 			// ImportState testing
 			{
-				ResourceName:      "host.test",
+				ResourceName:      "dog_host.droid-qa-aws03",
 				ImportState:       true,
 				ImportStateVerify: true,
 				// This is not normally necessary, but is here because this
 				// host code does not have an actual upstream service.
 				// Once the Read method is able to refresh information from
 				// the upstream service, this can be removed.
-				ImportStateVerifyIgnore: []string{"configurable_attribute"},
+				// ImportStateVerifyIgnore: []string{"configurable_attribute"},
 			},
 			// Update and Read testing
 			{
 				Config: testAccHostResourceConfig("two"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("host.test", "configurable_attribute", "two"),
+					resource.TestCheckResourceAttr("dog_host.droid-qa-aws03", "active", "retired"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -45,8 +45,13 @@ func TestAccHostResource(t *testing.T) {
 
 func testAccHostResourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
-resource "host" "test" {
-  configurable_attribute = %[1]q
+resource "dog_host" "droid-qa-aws03" {
+  name = %[1]q
+  active = "active"
+  environment = "*"
+  group = "update_group"
+  hostkey = "d4eb483c-99a1-11ec-bcff-03dfdfc9eeb8"
+  location = "*"
 }
 `, configurableAttribute)
 }

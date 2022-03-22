@@ -74,55 +74,7 @@ func (d profileDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 	// provider client data and make a call using it.
 	profiles, statusCode, err := d.provider.client.GetProfiles(nil)
 	for _, profile := range profiles {
-		var newInboundRules []Rule
-		for _, inbound_rule := range profile.Rules.Inbound {
-			rule := Rule{
-				Action:       types.String{Value: inbound_rule.Action},
-				Active:       types.Bool{Value: inbound_rule.Active},
-				Comment:      types.String{Value: inbound_rule.Comment},
-				Environments: inbound_rule.Environments,
-				Group:        types.String{Value: inbound_rule.Group},
-				GroupType:    types.String{Value: inbound_rule.GroupType},
-				Interface:    types.String{Value: inbound_rule.Interface},
-				Log:          types.Bool{Value: inbound_rule.Log},
-				LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
-				Order:        types.Int64{Value: int64(inbound_rule.Order)},
-				Service:      types.String{Value: inbound_rule.Service},
-				States:       inbound_rule.States,
-				Type:         types.String{Value: inbound_rule.Type},
-			}
-			newInboundRules = append(newInboundRules, rule)
-		}
-		var newOutboundRules []Rule
-		for _, outbound_rule := range profile.Rules.Inbound {
-			rule := Rule{
-				Action:       types.String{Value: outbound_rule.Action},
-				Active:       types.Bool{Value: outbound_rule.Active},
-				Comment:      types.String{Value: outbound_rule.Comment},
-				Environments: outbound_rule.Environments,
-				Group:        types.String{Value: outbound_rule.Group},
-				GroupType:    types.String{Value: outbound_rule.GroupType},
-				Interface:    types.String{Value: outbound_rule.Interface},
-				Log:          types.Bool{Value: outbound_rule.Log},
-				LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
-				Order:        types.Int64{Value: int64(outbound_rule.Order)},
-				Service:      types.String{Value: outbound_rule.Service},
-				States:       outbound_rule.States,
-				Type:         types.String{Value: outbound_rule.Type},
-			}
-			newOutboundRules = append(newOutboundRules, rule)
-		}
-		h := Profile{
-			//Created:     types.Int64{Value: int64(profile.Created)},
-			Description: types.String{Value: profile.Description},
-			ID:          types.String{Value: profile.ID},
-			Name:        types.String{Value: profile.Name},
-			Rules: Rules{
-				Inbound:  newInboundRules,
-				Outbound: newOutboundRules,
-			},
-			Version: types.String{Value: profile.Version},
-		}
+		h := ApiToProfile(profile)
 		resourceState.Profiles = append(resourceState.Profiles, h)
 	}
 	if statusCode < 200 && statusCode > 299 {

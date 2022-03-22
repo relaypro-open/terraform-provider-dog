@@ -73,24 +73,8 @@ func (d serviceDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 	// If applicable, this is a great opportunity to initialize any necessary
 	// provider client data and make a call using it.
 	services, statusCode, err := d.provider.client.GetServices(nil)
-	var h Service
 	for _, service := range services {
-		var s []PortProtocol
-		for _, port_protocol := range service.Services {
-			var pp PortProtocol
-			pp = PortProtocol{
-				Ports:    port_protocol.Ports,
-				Protocol: types.String{Value: port_protocol.Protocol},
-			}
-			s = append(s, pp)
-		}
-		h = Service{
-			//Created: types.Int64{Value: int64(service.Created)},
-			ID:       types.String{Value: service.ID},
-			Services: s,
-			Name:     types.String{Value: service.Name},
-			Version:  types.Int64{Value: int64(service.Version)},
-		}
+		h := ApiToService(service)
 		resourceState.Services = append(resourceState.Services, h)
 	}
 	if statusCode < 200 && statusCode > 299 {

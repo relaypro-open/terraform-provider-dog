@@ -83,6 +83,43 @@ type hostResource struct {
 	provider provider
 }
 
+func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
+	newHost := api.HostCreateRequest{
+		Active:      plan.Active,
+		Environment: plan.Environment,
+		Group:       plan.Group,
+		HostKey:     plan.HostKey,
+		Location:    plan.Location,
+		Name:        plan.Name,
+	}
+	return newHost
+}
+
+func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
+	newHost := api.HostUpdateRequest{
+		Active:      plan.Active,
+		Environment: plan.Environment,
+		Group:       plan.Group,
+		HostKey:     plan.HostKey,
+		Location:    plan.Location,
+		Name:        plan.Name,
+	}
+	return newHost
+}
+
+func ApiToHost(host api.Host) Host {
+	h := Host{
+		Active:      types.String{Value: host.Active},
+		Environment: types.String{Value: host.Environment},
+		Group:       types.String{Value: host.Group},
+		ID:          types.String{Value: host.ID},
+		HostKey:     types.String{Value: host.HostKey},
+		Location:    types.String{Value: host.Location},
+		Name:        types.String{Value: host.Name},
+	}
+	return h
+}
+
 func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	var state Host
 
@@ -95,28 +132,12 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		return
 	}
 
-	newHost := api.HostCreateRequest{
-		Active:      plan.Active,
-		Environment: plan.Environment,
-		Group:       plan.Group,
-		HostKey:     plan.HostKey,
-		Location:    plan.Location,
-		Name:        plan.Name,
-	}
+	newHost := HostToCreateRequest(plan)
 	host, statusCode, err := r.provider.client.CreateHost(newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
-	h := Host{
-		Active:      types.String{Value: host.Active},
-		Environment: types.String{Value: host.Environment},
-		Group:       types.String{Value: host.Group},
-		ID:          types.String{Value: host.ID},
-		HostKey:     types.String{Value: host.HostKey},
-		Location:    types.String{Value: host.Location},
-		Name:        types.String{Value: host.Name},
-	}
-	state = h
+	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
@@ -158,17 +179,7 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
 		return
 	}
-	h := Host{
-		Active:      types.String{Value: host.Active},
-		Environment: types.String{Value: host.Environment},
-		Group:       types.String{Value: host.Group},
-		ID:          types.String{Value: host.ID},
-		HostKey:     types.String{Value: host.HostKey},
-		Location:    types.String{Value: host.Location},
-		Name:        types.String{Value: host.Name},
-	}
-
-	state = h
+	state = ApiToHost(host)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -192,29 +203,12 @@ func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	newHost := api.HostUpdateRequest{
-		Active:      plan.Active,
-		Environment: plan.Environment,
-		Group:       plan.Group,
-		HostKey:     plan.HostKey,
-		Location:    plan.Location,
-		Name:        plan.Name,
-	}
+	newHost := HostToUpdateRequest(plan)
 	host, statusCode, err := r.provider.client.UpdateHost(hostID, newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
-	h := Host{
-		Active:      types.String{Value: host.Active},
-		Environment: types.String{Value: host.Environment},
-		Group:       types.String{Value: host.Group},
-		ID:          types.String{Value: host.ID},
-		HostKey:     types.String{Value: host.HostKey},
-		Location:    types.String{Value: host.Location},
-		Name:        types.String{Value: host.Name},
-	}
-	state = h
+	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return

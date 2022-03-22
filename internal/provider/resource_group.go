@@ -72,6 +72,37 @@ type groupResource struct {
 	provider provider
 }
 
+func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
+	newGroup := api.GroupCreateRequest{
+		Description:    plan.Description,
+		Name:           plan.Name,
+		ProfileName:    plan.ProfileName,
+		ProfileVersion: plan.ProfileVersion,
+	}
+	return newGroup
+}
+
+func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
+	newGroup := api.GroupUpdateRequest{
+		Description:    plan.Description,
+		Name:           plan.Name,
+		ProfileName:    plan.ProfileName,
+		ProfileVersion: plan.ProfileVersion,
+	}
+	return newGroup
+}
+
+func ApiToGroup(group api.Group) Group {
+	h := Group{
+		Description:    types.String{Value: group.Description},
+		ID:             types.String{Value: group.ID},
+		Name:           types.String{Value: group.Name},
+		ProfileName:    types.String{Value: group.ProfileName},
+		ProfileVersion: types.String{Value: group.ProfileVersion},
+	}
+	return h
+}
+
 func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
 	var state Group
 
@@ -83,25 +114,11 @@ func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 		return
 	}
 
-	newGroup := api.GroupCreateRequest{
-		Description:    plan.Description,
-		Name:           plan.Name,
-		ProfileName:    plan.ProfileName,
-		ProfileVersion: plan.ProfileVersion,
-	}
-
+	newGroup := GroupToCreateRequest(plan)
 	group, statusCode, err := r.provider.client.CreateGroup(newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
-	//resp.Diagnostics.AddError("group", fmt.Sprintf("group: %+v\n", group))
-	h := Group{
-		Description:    types.String{Value: group.Description},
-		ID:             types.String{Value: group.ID},
-		Name:           types.String{Value: group.Name},
-		ProfileName:    types.String{Value: group.ProfileName},
-		ProfileVersion: types.String{Value: group.ProfileVersion},
-	}
-	state = h
+	state = ApiToGroup(group)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
@@ -143,15 +160,7 @@ func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
 		return
 	}
-	h := Group{
-		Description:    types.String{Value: group.Description},
-		ID:             types.String{Value: group.ID},
-		Name:           types.String{Value: group.Name},
-		ProfileName:    types.String{Value: group.ProfileName},
-		ProfileVersion: types.String{Value: group.ProfileVersion},
-	}
-
-	state = h
+	state = ApiToGroup(group)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -184,24 +193,12 @@ func (r groupResource) Update(ctx context.Context, req tfsdk.UpdateResourceReque
 		return
 	}
 
-	newGroup := api.GroupUpdateRequest{
-		Description:    plan.Description,
-		Name:           plan.Name,
-		ProfileName:    plan.ProfileName,
-		ProfileVersion: plan.ProfileVersion,
-	}
+	newGroup := GroupToUpdateRequest(plan)
 	group, statusCode, err := r.provider.client.UpdateGroup(groupID, newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	//resp.Diagnostics.AddError("group", fmt.Sprintf("group: %+v\n", group))
-	h := Group{
-		Description:    types.String{Value: group.Description},
-		ID:             types.String{Value: group.ID},
-		Name:           types.String{Value: group.Name},
-		ProfileName:    types.String{Value: group.ProfileName},
-		ProfileVersion: types.String{Value: group.ProfileVersion},
-	}
-	state = h
+	state = ApiToGroup(group)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return

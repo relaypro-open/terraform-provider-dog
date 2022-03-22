@@ -19,12 +19,6 @@ type profileResourceType struct{}
 func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			// This description is used by the documentation generator and the language server.
-			//"created": {
-			//	MarkdownDescription: "Profile created timestamp",
-			//	Optional:            true,
-			//	Type:                types.Int64Type,
-			//},
 			"description": {
 				MarkdownDescription: "Profile description",
 				Required:            true,
@@ -87,136 +81,8 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 							},
 						},
 					},
-					//}),
 				},
 			},
-			//Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
-			//Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-			//"inbound": {
-			//	MarkdownDescription: "Inbound Rules",
-			//	Required:            true,
-			//	Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-			//		"action": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"active": {
-			//			Type:     types.BoolType,
-			//			Required: true,
-			//		},
-			//		"comment": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"environments": {
-			//			Type: types.ListType{
-			//				ElemType: types.StringType,
-			//			},
-			//			Required: true,
-			//		},
-			//		"group": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"group_type": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"interface": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"log": {
-			//			Type:     types.BoolType,
-			//			Required: true,
-			//		},
-			//		"log_prefix": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"order": {
-			//			Type:     types.Int64Type,
-			//			Required: true,
-			//		},
-			//		"service": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"states": {
-			//			Type: types.ListType{
-			//				ElemType: types.StringType,
-			//			},
-			//			Required: true,
-			//		},
-			//		"type": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//	}, tfsdk.ListNestedAttributesOptions{}),
-			//},
-			//"outbound": {
-			//	MarkdownDescription: "outbound Rules",
-			//	Required:            true,
-			//	Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-			//		"action": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"active": {
-			//			Type:     types.BoolType,
-			//			Required: true,
-			//		},
-			//		"comment": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"environments": {
-			//			Type: types.ListType{
-			//				ElemType: types.StringType,
-			//			},
-			//			Required: true,
-			//		},
-			//		"group": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"group_type": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"interface": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"log": {
-			//			Type:     types.BoolType,
-			//			Required: true,
-			//		},
-			//		"log_prefix": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"order": {
-			//			Type:     types.Int64Type,
-			//			Required: true,
-			//		},
-			//		"service": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//		"states": {
-			//			Type: types.ListType{
-			//				ElemType: types.StringType,
-			//			},
-			//			Required: true,
-			//		},
-			//		"type": {
-			//			Type:     types.StringType,
-			//			Required: true,
-			//		},
-			//	}, tfsdk.ListNestedAttributesOptions{}),
-			//},
-			//}, tfsdk.MapNestedAttributesOptions{}),
 			"version": {
 				MarkdownDescription: "Profile version",
 				Required:            true,
@@ -255,20 +121,7 @@ type profileResource struct {
 	provider provider
 }
 
-func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
-	tflog.Debug(ctx, "Create 1\n")
-	var state Profile
-
-	var plan profileResourceData
-	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
-	resp.Diagnostics.Append(diags...)
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
-	if resp.Diagnostics.HasError() {
-		return
-	}
-	tflog.Debug(ctx, "Create 2\n")
+func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 	var inboundRules []api.Rule
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := api.Rule{
@@ -317,188 +170,10 @@ func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		},
 		Version: plan.Version,
 	}
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewProfile: %+v\n", newProfile))
-	profile, statusCode, err := r.provider.client.CreateProfile(newProfile, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
-	var newInboundRules []Rule
-	for _, inbound_rule := range profile.Rules.Inbound {
-		rule := Rule{
-			Action:       types.String{Value: inbound_rule.Action},
-			Active:       types.Bool{Value: inbound_rule.Active},
-			Comment:      types.String{Value: inbound_rule.Comment},
-			Environments: inbound_rule.Environments,
-			Group:        types.String{Value: inbound_rule.Group},
-			GroupType:    types.String{Value: inbound_rule.GroupType},
-			Interface:    types.String{Value: inbound_rule.Interface},
-			Log:          types.Bool{Value: inbound_rule.Log},
-			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(inbound_rule.Order)},
-			Service:      types.String{Value: inbound_rule.Service},
-			States:       inbound_rule.States,
-			Type:         types.String{Value: inbound_rule.Type},
-		}
-		newInboundRules = append(newInboundRules, rule)
-	}
-	var newOutboundRules []Rule
-	for _, outbound_rule := range profile.Rules.Outbound {
-		rule := Rule{
-			Action:       types.String{Value: outbound_rule.Action},
-			Active:       types.Bool{Value: outbound_rule.Active},
-			Comment:      types.String{Value: outbound_rule.Comment},
-			Environments: outbound_rule.Environments,
-			Group:        types.String{Value: outbound_rule.Group},
-			GroupType:    types.String{Value: outbound_rule.GroupType},
-			Interface:    types.String{Value: outbound_rule.Interface},
-			Log:          types.Bool{Value: outbound_rule.Log},
-			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(outbound_rule.Order)},
-			Service:      types.String{Value: outbound_rule.Service},
-			States:       outbound_rule.States,
-			Type:         types.String{Value: outbound_rule.Type},
-		}
-		newOutboundRules = append(newOutboundRules, rule)
-	}
-	h := Profile{
-		//Created:     types.Int64{Value: int64(profile.Created)},
-		Description: types.String{Value: profile.Description},
-		ID:          types.String{Value: profile.ID},
-		Name:        types.String{Value: profile.Name},
-		Rules: Rules{
-			Inbound:  newInboundRules,
-			Outbound: newOutboundRules,
-		},
-		Version: types.String{Value: profile.Version},
-	}
-	state = h
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
-		return
-	}
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-
-	plan.ID = state.ID
-
-	// write logs using the tflog package
-	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
-	// for more information
-	tflog.Trace(ctx, "created a resource")
-
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
+	return newProfile
 }
 
-func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
-	var state Profile
-
-	diags := req.State.Get(ctx, &state)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ state: %+v\n", state))
-	tflog.Debug(ctx, "Read 2\n")
-	resp.Diagnostics.Append(diags...)
-	tflog.Debug(ctx, "Read 3\n")
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	profileID := state.ID.Value
-
-	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
-		return
-	}
-	var newInboundRules []Rule
-	for _, inbound_rule := range profile.Rules.Inbound {
-		tflog.Debug(ctx, fmt.Sprintf("inbound_rule: %+v\n", inbound_rule))
-		var environments []string
-		for _, env := range inbound_rule.Environments {
-			environments = append(environments, env)
-		}
-		var states []string
-		for _, state := range inbound_rule.States {
-			states = append(states, state)
-		}
-		rule := Rule{
-			Action:       types.String{Value: inbound_rule.Action},
-			Active:       types.Bool{Value: inbound_rule.Active},
-			Comment:      types.String{Value: inbound_rule.Comment},
-			Environments: environments,
-			Group:        types.String{Value: inbound_rule.Group},
-			GroupType:    types.String{Value: inbound_rule.GroupType},
-			Interface:    types.String{Value: inbound_rule.Interface},
-			Log:          types.Bool{Value: inbound_rule.Log},
-			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(inbound_rule.Order)},
-			Service:      types.String{Value: inbound_rule.Service},
-			States:       states,
-			Type:         types.String{Value: inbound_rule.Type},
-		}
-		newInboundRules = append(newInboundRules, rule)
-	}
-	var newOutboundRules []Rule
-	for _, outbound_rule := range profile.Rules.Outbound {
-		rule := Rule{
-			Action:       types.String{Value: outbound_rule.Action},
-			Active:       types.Bool{Value: outbound_rule.Active},
-			Comment:      types.String{Value: outbound_rule.Comment},
-			Environments: outbound_rule.Environments,
-			Group:        types.String{Value: outbound_rule.Group},
-			GroupType:    types.String{Value: outbound_rule.GroupType},
-			Interface:    types.String{Value: outbound_rule.Interface},
-			Log:          types.Bool{Value: outbound_rule.Log},
-			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(outbound_rule.Order)},
-			Service:      types.String{Value: outbound_rule.Service},
-			States:       outbound_rule.States,
-			Type:         types.String{Value: outbound_rule.Type},
-		}
-		newOutboundRules = append(newOutboundRules, rule)
-	}
-	h := Profile{
-		//Created:     types.Int64{Value: int64(profile.Created)},
-		Description: types.String{Value: profile.Description},
-		ID:          types.String{Value: profile.ID},
-		Name:        types.String{Value: profile.Name},
-		Rules: Rules{
-			Inbound:  newInboundRules,
-			Outbound: newOutboundRules,
-		},
-		Version: types.String{Value: profile.Version},
-	}
-	state = h
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-}
-
-func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	tflog.Debug(ctx, "Update 1\n")
-	var state Profile
-
-	diags := req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	profileID := state.ID.Value
-
-	var plan profileResourceData
-	diags = req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
-	if resp.Diagnostics.HasError() {
-		return
-	}
+func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 	var inboundRules []api.Rule
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := api.Rule{
@@ -547,11 +222,10 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		},
 		Version: plan.Version,
 	}
+	return newProfile
+}
 
-	profile, statusCode, err := r.provider.client.UpdateProfile(profileID, newProfile, nil)
-	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
-	tflog.Debug(ctx, fmt.Sprintf("profile: %+v\n", profile))
-	//resp.Diagnostics.AddError("profile", fmt.Sprintf("profile: %+v\n", profile))
+func ApiToProfile(profile api.Profile) Profile {
 	var newInboundRules []Rule
 	for _, inbound_rule := range profile.Rules.Inbound {
 		rule := Rule{
@@ -601,7 +275,104 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		},
 		Version: types.String{Value: profile.Version},
 	}
-	state = h
+	return h
+}
+
+func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
+	tflog.Debug(ctx, "Create 1\n")
+	var state Profile
+
+	var plan profileResourceData
+	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
+	resp.Diagnostics.Append(diags...)
+	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	tflog.Debug(ctx, "Create 2\n")
+	newProfile := ProfileToCreateRequest(plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewProfile: %+v\n", newProfile))
+	profile, statusCode, err := r.provider.client.CreateProfile(newProfile, nil)
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
+	state = ApiToProfile(profile)
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+		return
+	}
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+
+	plan.ID = state.ID
+
+	// write logs using the tflog package
+	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
+	// for more information
+	tflog.Trace(ctx, "created a resource")
+
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+	tflog.Debug(ctx, "Read 1\n")
+	var state Profile
+
+	diags := req.State.Get(ctx, &state)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ state: %+v\n", state))
+	tflog.Debug(ctx, "Read 2\n")
+	resp.Diagnostics.Append(diags...)
+	tflog.Debug(ctx, "Read 3\n")
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.Value
+
+	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
+	if statusCode < 200 && statusCode > 299 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
+	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
+		return
+	}
+	state = ApiToProfile(profile)
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+}
+
+func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+	tflog.Debug(ctx, "Update 1\n")
+	var state Profile
+
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profileID := state.ID.Value
+
+	var plan profileResourceData
+	diags = req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	newProfile := ProfileToUpdateRequest(plan)
+	profile, statusCode, err := r.provider.client.UpdateProfile(profileID, newProfile, nil)
+	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Debug(ctx, fmt.Sprintf("profile: %+v\n", profile))
+	state = ApiToProfile(profile)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 		return

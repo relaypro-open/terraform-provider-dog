@@ -103,18 +103,7 @@ type linkResource struct {
 	provider provider
 }
 
-func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, "Create 1\n")
-	var state Link
-
-	var plan linkResourceData
-	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
+func LinkToCreateRequest(plan linkResourceData) api.LinkCreateRequest {
 	newLink := api.LinkCreateRequest{
 		AddressHandling: plan.AddressHandling,
 		Connection: api.Connection{
@@ -138,10 +127,37 @@ func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		Enabled:        plan.Enabled,
 		Name:           plan.Name,
 	}
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewLink: %+v\n", newLink))
-	link, statusCode, err := r.provider.client.CreateLink(newLink, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
+	return newLink
+}
+
+func LinkToUpdateRequest(plan linkResourceData) api.LinkUpdateRequest {
+	newLink := api.LinkUpdateRequest{
+		AddressHandling: plan.AddressHandling,
+		Connection: api.Connection{
+			ApiPort:  int(plan.Connection.ApiPort.Value),
+			Host:     plan.Connection.Host.Value,
+			Password: plan.Connection.Password.Value,
+			Port:     int(plan.Connection.Port.Value),
+			SSLOptions: api.SSLOptions{
+				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
+				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
+				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
+				KeyFile:              plan.Connection.SSLOptions.KeyFile.Value,
+				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.Value,
+				Verify:               plan.Connection.SSLOptions.Verify.Value,
+			},
+			User:        plan.Connection.User.Value,
+			VirtualHost: plan.Connection.VirtualHost.Value,
+		},
+		ConnectionType: plan.ConnectionType,
+		Direction:      plan.Direction,
+		Enabled:        plan.Enabled,
+		Name:           plan.Name,
+	}
+	return newLink
+}
+
+func ApiToLink(link api.Link) Link {
 	h := Link{
 		ID:              types.String{Value: link.ID},
 		AddressHandling: types.String{Value: link.AddressHandling},
@@ -166,7 +182,26 @@ func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		Enabled:        types.Bool{Value: link.Enabled},
 		Name:           types.String{Value: link.Name},
 	}
-	state = h
+	return h
+}
+
+func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, "Create 1\n")
+	var state Link
+
+	var plan linkResourceData
+	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	newLink := LinkToCreateRequest(plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewLink: %+v\n", newLink))
+	link, statusCode, err := r.provider.client.CreateLink(newLink, nil)
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
+	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
@@ -209,31 +244,7 @@ func (r linkResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read link, got error: %s", err))
 		return
 	}
-	h := Link{
-		ID:              types.String{Value: link.ID},
-		AddressHandling: types.String{Value: link.AddressHandling},
-		Connection: Connection{
-			ApiPort:  types.Int64{Value: int64(link.Connection.ApiPort)},
-			Host:     types.String{Value: link.Connection.Host},
-			Password: types.String{Value: link.Connection.Password},
-			Port:     types.Int64{Value: int64(link.Connection.Port)},
-			SSLOptions: SSLOptions{
-				CaCertFile:           types.String{Value: link.Connection.SSLOptions.CaCertFile},
-				CertFile:             types.String{Value: link.Connection.SSLOptions.CertFile},
-				FailIfNoPeerCert:     types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
-				KeyFile:              types.String{Value: link.Connection.SSLOptions.KeyFile},
-				ServerNameIndication: types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
-				Verify:               types.String{Value: link.Connection.SSLOptions.Verify},
-			},
-			User:        types.String{Value: link.Connection.User},
-			VirtualHost: types.String{Value: link.Connection.VirtualHost},
-		},
-		ConnectionType: types.String{Value: link.ConnectionType},
-		Direction:      types.String{Value: link.Direction},
-		Enabled:        types.Bool{Value: link.Enabled},
-		Name:           types.String{Value: link.Name},
-	}
-	state = h
+	state = ApiToLink(link)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -258,59 +269,13 @@ func (r linkResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	newLink := api.LinkUpdateRequest{
-		AddressHandling: plan.AddressHandling,
-		Connection: api.Connection{
-			ApiPort:  int(plan.Connection.ApiPort.Value),
-			Host:     plan.Connection.Host.Value,
-			Password: plan.Connection.Password.Value,
-			Port:     int(plan.Connection.Port.Value),
-			SSLOptions: api.SSLOptions{
-				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
-				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
-				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
-				KeyFile:              plan.Connection.SSLOptions.KeyFile.Value,
-				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.Value,
-				Verify:               plan.Connection.SSLOptions.Verify.Value,
-			},
-			User:        plan.Connection.User.Value,
-			VirtualHost: plan.Connection.VirtualHost.Value,
-		},
-		ConnectionType: plan.ConnectionType,
-		Direction:      plan.Direction,
-		Enabled:        plan.Enabled,
-		Name:           plan.Name,
-	}
+	newLink := LinkToUpdateRequest(plan)
 
 	link, statusCode, err := r.provider.client.UpdateLink(linkID, newLink, nil)
 	log.Printf(fmt.Sprintf("link: %+v\n", link))
 	tflog.Debug(ctx, fmt.Sprintf("link: %+v\n", link))
 	//resp.Diagnostics.AddError("link", fmt.Sprintf("link: %+v\n", link))
-	h := Link{
-		ID:              types.String{Value: link.ID},
-		AddressHandling: types.String{Value: link.AddressHandling},
-		Connection: Connection{
-			ApiPort:  types.Int64{Value: int64(link.Connection.ApiPort)},
-			Host:     types.String{Value: link.Connection.Host},
-			Password: types.String{Value: link.Connection.Password},
-			Port:     types.Int64{Value: int64(link.Connection.Port)},
-			SSLOptions: SSLOptions{
-				CaCertFile:           types.String{Value: link.Connection.SSLOptions.CaCertFile},
-				CertFile:             types.String{Value: link.Connection.SSLOptions.CertFile},
-				FailIfNoPeerCert:     types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
-				KeyFile:              types.String{Value: link.Connection.SSLOptions.KeyFile},
-				ServerNameIndication: types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
-				Verify:               types.String{Value: link.Connection.SSLOptions.Verify},
-			},
-			User:        types.String{Value: link.Connection.User},
-			VirtualHost: types.String{Value: link.Connection.VirtualHost},
-		},
-		ConnectionType: types.String{Value: link.ConnectionType},
-		Direction:      types.String{Value: link.Direction},
-		Enabled:        types.Bool{Value: link.Enabled},
-		Name:           types.String{Value: link.Name},
-	}
-	state = h
+	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return

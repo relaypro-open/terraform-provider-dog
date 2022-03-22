@@ -71,15 +71,7 @@ func (d hostDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 	// provider client data and make a call using it.
 	hosts, statusCode, err := d.provider.client.GetHosts(nil)
 	for _, host := range hosts {
-		h := Host{
-			Active:      types.String{Value: host.Active},
-			Environment: types.String{Value: host.Environment},
-			Group:       types.String{Value: host.Group},
-			ID:          types.String{Value: host.ID},
-			HostKey:     types.String{Value: host.HostKey},
-			Location:    types.String{Value: host.Location},
-			Name:        types.String{Value: host.Name},
-		}
+		h := ApiToHost(host)
 		resourceState.Hosts = append(resourceState.Hosts, h)
 	}
 	if statusCode < 200 && statusCode > 299 {

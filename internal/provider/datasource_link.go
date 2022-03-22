@@ -74,69 +74,9 @@ func (d linkDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 	// provider client data and make a call using it.
 	links, statusCode, err := d.provider.client.GetLinks(nil)
 	for _, link := range links {
-		h := Link{
-			ID:              types.String{Value: link.ID},
-			AddressHandling: types.String{Value: link.AddressHandling},
-			Connection: Connection{
-				ApiPort:  types.Int64{Value: int64(link.Connection.ApiPort)},
-				Host:     types.String{Value: link.Connection.Host},
-				Password: types.String{Value: link.Connection.Password},
-				Port:     types.Int64{Value: int64(link.Connection.Port)},
-				SSLOptions: SSLOptions{
-					CaCertFile:           types.String{Value: link.Connection.SSLOptions.CaCertFile},
-					CertFile:             types.String{Value: link.Connection.SSLOptions.CaCertFile},
-					FailIfNoPeerCert:     types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
-					KeyFile:              types.String{Value: link.Connection.SSLOptions.KeyFile},
-					ServerNameIndication: types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
-					Verify:               types.String{Value: link.Connection.SSLOptions.Verify},
-				},
-				User:        types.String{Value: link.Connection.User},
-				VirtualHost: types.String{Value: link.Connection.VirtualHost},
-			},
-			ConnectionType: types.String{Value: link.ConnectionType},
-			Direction:      types.String{Value: link.Direction},
-			Enabled:        types.Bool{Value: link.Enabled},
-			Name:           types.String{Value: link.Name},
-		}
+		h := ApiToLink(link)
 		resourceState.Links = append(resourceState.Links, h)
 	}
-	//Connection: types.Object{
-	//	AttrTypes: map[string]attr.Type{
-	//		"api_port":     types.Int64Type,
-	//		"host":         types.StringType,
-	//		"password":     types.StringType,
-	//		"port":         types.Int64Type,
-	//		"ssl_options":  types.ObjectType,
-	//		"user":         types.StringType,
-	//		"virtual_host": types.StringType,
-	//	},
-	//	Attrs: map[string]attr.Value{
-	//		"api_port": types.Int64{Value: link.Connection.ApiPort},
-	//		"host":     types.String{Value: link.Connection.Host},
-	//		"password": types.String{Value: link.Connection.Password},
-	//		"port":     types.Int64{Value: link.Connection.Port},
-	//		"ssl_options": types.Object{
-	//			AttrTypes: map[string]attr.Type{
-	//				"cacertfile":             types.StringType,
-	//				"certfile":               types.StringType,
-	//				"fail_if_no_peer_cert":   types.BoolType,
-	//				"keyfile":                types.StringType,
-	//				"server_name_indication": types.StringType,
-	//				"verify":                 types.StringType,
-	//			},
-	//			Attrs: map[string]attr.Value{
-	//				"cacertfile":             types.String{Value: link.Connection.SSLOptions.CaCertFile},
-	//				"certfile":               types.String{Value: link.Connection.SSLOptions.CertFile},
-	//				"fail_if_no_peer_cert":   types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
-	//				"keyfile":                types.String{Value: link.Connection.SSLOptions.KeyFile},
-	//				"server_name_indication": types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
-	//				"verify":                 types.String{Value: link.Connection.SSLOptions.Verify},
-	//			},
-	//		},
-	//		User:        types.String{Value: link.Connection.User},
-	//		VirtualHost: types.String{Value: link.Connection.VirtualHost},
-	//	},
-	//},
 	if statusCode < 200 && statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return

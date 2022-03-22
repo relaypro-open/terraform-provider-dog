@@ -74,20 +74,7 @@ func (d zoneDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 	// provider client data and make a call using it.
 	zones, statusCode, err := d.provider.client.GetZones(nil)
 	for _, zone := range zones {
-		var ipv4Addresses []string
-		for _, ipv4 := range zone.IPv4Addresses {
-			ipv4Addresses = append(ipv4Addresses, ipv4)
-		}
-		var ipv6Addresses []string
-		for _, ipv6 := range zone.IPv6Addresses {
-			ipv6Addresses = append(ipv6Addresses, ipv6)
-		}
-		h := Zone{
-			ID:            types.String{Value: zone.ID},
-			IPv4Addresses: ipv4Addresses,
-			IPv6Addresses: ipv6Addresses,
-			Name:          types.String{Value: zone.Name},
-		}
+		h := ApiToZone(zone)
 		resourceState.Zones = append(resourceState.Zones, h)
 	}
 	if statusCode < 200 && statusCode > 299 {

@@ -69,17 +69,7 @@ type zoneResource struct {
 	provider provider
 }
 
-func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, "Create 1\n")
-	var state Zone
-
-	var plan zoneResourceData
-	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+func ZoneToCreateRequest(plan zoneResourceData) api.ZoneCreateRequest {
 	var ipv4Addresses []string
 	for _, ipv4 := range plan.IPv4Addresses {
 		ipv4Addresses = append(ipv4Addresses, ipv4)
@@ -93,26 +83,27 @@ func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		IPv6Addresses: ipv6Addresses,
 		Name:          plan.Name,
 	}
-	//resourceState.Zones = append(resourceState.Zones, h)
-	//var newZones []api.PortProtocol
-	//for _, port_protocol := range state {
-	//	var pp api.PortProtocol
-	//	pp = api.PortProtocol{
-	//		Ports:    port_protocol.Ports,
-	//		Protocol: port_protocol.Protocol.Value,
-	//	}
-	//	newZones = append(newZones, pp)
-	//}
+	return newZone
+}
 
-	//newZone := api.ZoneCreateRequest{
-	//	Version: plan.Version,
-	//	Name:    plan.Name,
-	//	Zones:   newZones,
-	//}
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewZone: %+v\n", newZone))
-	zone, statusCode, err := r.provider.client.CreateZone(newZone, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
+func ZoneToUpdateRequest(plan zoneResourceData) api.ZoneUpdateRequest {
+	var ipv4Addresses []string
+	for _, ipv4 := range plan.IPv4Addresses {
+		ipv4Addresses = append(ipv4Addresses, ipv4)
+	}
+	var ipv6Addresses []string
+	for _, ipv6 := range plan.IPv6Addresses {
+		ipv6Addresses = append(ipv6Addresses, ipv6)
+	}
+	newZone := api.ZoneUpdateRequest{
+		IPv4Addresses: ipv4Addresses,
+		IPv6Addresses: ipv6Addresses,
+		Name:          plan.Name,
+	}
+	return newZone
+}
+
+func ApiToZone(zone api.Zone) Zone {
 	var newIpv4Addresses []string
 	for _, ipv4 := range zone.IPv4Addresses {
 		newIpv4Addresses = append(newIpv4Addresses, ipv4)
@@ -127,22 +118,26 @@ func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		IPv6Addresses: newIpv6Addresses,
 		Name:          types.String{Value: zone.Name},
 	}
-	//var s Zones
-	//for _, port_protocol := range zone.Zones {
-	//	var pp PortProtocol
-	//	pp = PortProtocol{
-	//		Ports:    port_protocol.Ports,
-	//		Protocol: types.String{Value: port_protocol.Protocol},
-	//	}
-	//	s = append(s, pp)
-	//}
-	//h := Zone{
-	//	ID:      types.String{Value: zone.ID},
-	//	Zones:   s,
-	//	Name:    types.String{Value: zone.Name},
-	//	Version: types.Int64{Value: int64(zone.Version)},
-	//}
-	state = h
+	return h
+}
+
+func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+	tflog.Debug(ctx, "Create 1\n")
+	var state Zone
+
+	var plan zoneResourceData
+	diags := req.Plan.Get(ctx, &plan)
+	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	newZone := ZoneToCreateRequest(plan)
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewZone: %+v\n", newZone))
+	zone, statusCode, err := r.provider.client.CreateZone(newZone, nil)
+	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
+	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
+	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
@@ -185,22 +180,7 @@ func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zone, got error: %s", err))
 		return
 	}
-	var ipv4Addresses []string
-	for _, ipv4 := range zone.IPv4Addresses {
-		ipv4Addresses = append(ipv4Addresses, ipv4)
-	}
-	var ipv6Addresses []string
-	for _, ipv6 := range zone.IPv6Addresses {
-		ipv6Addresses = append(ipv6Addresses, ipv6)
-	}
-	h := Zone{
-		ID:            types.String{Value: zone.ID},
-		IPv4Addresses: ipv4Addresses,
-		IPv6Addresses: ipv6Addresses,
-		Name:          types.String{Value: zone.Name},
-	}
-	//resourceState.Zones = append(resourceState.Zones, h)
-	state = h
+	state = ApiToZone(zone)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -225,39 +205,11 @@ func (r zoneResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	var ipv4Addresses []string
-	for _, ipv4 := range plan.IPv4Addresses {
-		ipv4Addresses = append(ipv4Addresses, ipv4)
-	}
-	var ipv6Addresses []string
-	for _, ipv6 := range plan.IPv6Addresses {
-		ipv6Addresses = append(ipv6Addresses, ipv6)
-	}
-	newZone := api.ZoneUpdateRequest{
-		IPv4Addresses: ipv4Addresses,
-		IPv6Addresses: ipv6Addresses,
-		Name:          plan.Name,
-	}
-
+	newZone := ZoneToUpdateRequest(plan)
 	zone, statusCode, err := r.provider.client.UpdateZone(zoneID, newZone, nil)
 	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
 	tflog.Debug(ctx, fmt.Sprintf("zone: %+v\n", zone))
-	//resp.Diagnostics.AddError("zone", fmt.Sprintf("zone: %+v\n", zone))
-	var newIpv4Addresses []string
-	for _, ipv4 := range zone.IPv4Addresses {
-		newIpv4Addresses = append(newIpv4Addresses, ipv4)
-	}
-	var newIpv6Addresses []string
-	for _, ipv6 := range zone.IPv6Addresses {
-		newIpv6Addresses = append(newIpv6Addresses, ipv6)
-	}
-	h := Zone{
-		ID:            types.String{Value: zone.ID},
-		IPv4Addresses: newIpv4Addresses,
-		IPv6Addresses: newIpv6Addresses,
-		Name:          types.String{Value: zone.Name},
-	}
-	state = h
+	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
