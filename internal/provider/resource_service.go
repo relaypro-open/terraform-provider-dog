@@ -85,7 +85,7 @@ type serviceResource struct {
 }
 
 func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
-	var newServices []api.PortProtocol
+	newServices := []api.PortProtocol{}
 	for _, port_protocol := range plan.Services {
 		var pp api.PortProtocol
 		pp = api.PortProtocol{
@@ -104,7 +104,7 @@ func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
 }
 
 func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
-	var newServices []api.PortProtocol
+	newServices := []api.PortProtocol{}
 	for _, port_protocol := range plan.Services {
 		var pp api.PortProtocol
 		pp = api.PortProtocol{
@@ -123,7 +123,7 @@ func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
 }
 
 func ApiToService(service api.Service) Service {
-	var s Services
+	s := Services{}
 	for _, port_protocol := range service.Services {
 		var pp PortProtocol
 		pp = PortProtocol{

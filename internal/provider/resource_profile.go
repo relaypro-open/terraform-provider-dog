@@ -122,7 +122,7 @@ type profileResource struct {
 }
 
 func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
-	var inboundRules []api.Rule
+	inboundRules := []api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := api.Rule{
 			Action:       inbound_rule.Action.Value,
@@ -141,7 +141,7 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 		}
 		inboundRules = append(inboundRules, rule)
 	}
-	var outboundRules []api.Rule
+	outboundRules := []api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
 		rule := api.Rule{
 			Action:       outbound_rule.Action.Value,
@@ -174,7 +174,7 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 }
 
 func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
-	var inboundRules []api.Rule
+	inboundRules := []api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := api.Rule{
 			Action:       inbound_rule.Action.Value,
@@ -193,7 +193,7 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 		}
 		inboundRules = append(inboundRules, rule)
 	}
-	var outboundRules []api.Rule
+	outboundRules := []api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
 		rule := api.Rule{
 			Action:       outbound_rule.Action.Value,
