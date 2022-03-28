@@ -40,6 +40,7 @@ func outputFiles(table string) (*bufio.Writer, *bufio.Writer) {
 	import_f, err := os.Create(fmt.Sprintf("/tmp/%s_import.sh", table))
 	check(err)
 	import_w := bufio.NewWriter(import_f)
+	fmt.Fprintf(import_w, "#!/bin/bash\n")
 
 	return tf_w, import_w
 }
@@ -286,4 +287,5 @@ func main() {
 	profile_export(session)
 	service_export(session)
 	zone_export(session)
+	fmt.Printf("check /tmp/ for output files\n")
 }
