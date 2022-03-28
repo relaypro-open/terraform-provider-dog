@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.8.0
 	github.com/hashicorp/terraform-plugin-log v0.3.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.12.0
-	github.com/relaypro-open/dog_api_golang v0.0.0-20220322180017-e5bc8b2e0940
+	github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e
 )
 
 require (
