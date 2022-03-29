@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -28,26 +27,61 @@ func (t linkResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			"connection": {
 				MarkdownDescription: "Connection specification",
 				Required:            true,
-				Type: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"api_port": types.Int64Type,
-						"host":     types.StringType,
-						"password": types.StringType,
-						"port":     types.Int64Type,
-						"ssl_options": types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"cacertfile":             types.StringType,
-								"certfile":               types.StringType,
-								"fail_if_no_peer_cert":   types.BoolType,
-								"keyfile":                types.StringType,
-								"server_name_indication": types.StringType,
-								"verify":                 types.StringType,
-							},
-						},
-						"user":         types.StringType,
-						"virtual_host": types.StringType,
+				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+					"api_port": {
+						Type:     types.Int64Type,
+						Required: true,
 					},
-				},
+					"host": {
+						Type:     types.StringType,
+						Required: true,
+					},
+					"password": {
+						Type:     types.StringType,
+						Required: true,
+					},
+					"port": {
+						Type:     types.Int64Type,
+						Required: true,
+					},
+					"ssl_options": {
+						Required: true,
+						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+							"cacertfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"certfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"fail_if_no_peer_cert": {
+								Type:     types.BoolType,
+								Required: true,
+							},
+							"keyfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"server_name_indication": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"verify": {
+								Type:     types.StringType,
+								Required: true,
+							},
+						}),
+					},
+					"user": {
+						Type:     types.StringType,
+						Required: true,
+					},
+					"virtual_host": {
+						Type:     types.StringType,
+						Required: true,
+					},
+				}),
 			},
 			"connection_type": {
 				MarkdownDescription: "Connection type",
@@ -206,7 +240,7 @@ func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -236,7 +270,7 @@ func (r linkResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	linkID := state.ID.Value
 
 	link, statusCode, err := r.provider.client.GetLink(linkID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -280,7 +314,7 @@ func (r linkResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -310,7 +344,9 @@ func (r linkResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 
 	linkID := state.ID.Value
 	link, statusCode, err := r.provider.client.DeleteLink(linkID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	tflog.Debug(ctx, fmt.Sprintf("type of statusCode is %T\n", statusCode))
+	tflog.Debug(ctx, fmt.Sprintf("statusCode, err: %d, %+v\n", statusCode, err))
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

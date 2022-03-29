@@ -142,7 +142,7 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -171,7 +171,7 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	hostID := state.ID.Value
 
 	host, statusCode, err := r.provider.client.GetHost(hostID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -213,7 +213,7 @@ func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -242,7 +242,7 @@ func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 
 	hostID := state.ID.Value
 	host, statusCode, err := r.provider.client.DeleteHost(hostID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

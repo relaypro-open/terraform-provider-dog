@@ -302,7 +302,7 @@ func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -335,7 +335,7 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	profileID := state.ID.Value
 
 	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -377,7 +377,7 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -407,7 +407,7 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 
 	profileID := state.ID.Value
 	profile, statusCode, err := r.provider.client.DeleteProfile(profileID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

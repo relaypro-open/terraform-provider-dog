@@ -192,7 +192,7 @@ func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -222,7 +222,7 @@ func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	zoneID := state.ID.Value
 
 	zone, statusCode, err := r.provider.client.GetZone(zoneID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -264,7 +264,7 @@ func (r zoneResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -294,7 +294,7 @@ func (r zoneResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 
 	zoneID := state.ID.Value
 	zone, statusCode, err := r.provider.client.DeleteZone(zoneID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

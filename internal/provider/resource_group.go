@@ -123,7 +123,7 @@ func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -152,7 +152,7 @@ func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 	groupID := state.ID.Value
 
 	group, statusCode, err := r.provider.client.GetGroup(groupID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -203,7 +203,7 @@ func (r groupResource) Update(ctx context.Context, req tfsdk.UpdateResourceReque
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -232,7 +232,7 @@ func (r groupResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReque
 
 	groupID := state.ID.Value
 	group, statusCode, err := r.provider.client.DeleteGroup(groupID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

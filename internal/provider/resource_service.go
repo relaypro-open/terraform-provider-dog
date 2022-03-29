@@ -166,7 +166,7 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -196,7 +196,7 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	serviceID := state.ID.Value
 
 	service, statusCode, err := r.provider.client.GetService(serviceID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -239,7 +239,7 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
 	}
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -269,7 +269,7 @@ func (r serviceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 
 	serviceID := state.ID.Value
 	service, statusCode, err := r.provider.client.DeleteService(serviceID, nil)
-	if statusCode < 200 && statusCode > 299 {
+	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
