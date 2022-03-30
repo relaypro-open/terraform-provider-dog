@@ -74,7 +74,7 @@ func (d linkDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 	// provider client data and make a call using it.
 	links, statusCode, err := d.provider.client.GetLinks(nil)
 	for _, link := range links {
-		h := ApiToLink(link)
+		h := ApiToLink(ctx, link)
 		resourceState.Links = append(resourceState.Links, h)
 	}
 	if statusCode < 200 && statusCode > 299 {
