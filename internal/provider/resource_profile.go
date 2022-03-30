@@ -19,11 +19,6 @@ type profileResourceType struct{}
 func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
-			"description": {
-				MarkdownDescription: "Profile description",
-				Required:            true,
-				Type:                types.StringType,
-			},
 			"name": {
 				MarkdownDescription: "Profile name",
 				Required:            true,
@@ -110,11 +105,10 @@ func (t profileResourceType) NewResource(ctx context.Context, in tfsdk.Provider)
 
 type profileResourceData struct {
 	//Created     int          `tfsdk:"created"`
-	Description string       `tfsdk:"description"`
-	ID          types.String `tfsdk:"id"`
-	Name        string       `tfsdk:"name"`
-	Rules       Rules        `tfsdk:"rules"`
-	Version     string       `tfsdk:"version"`
+	ID      types.String `tfsdk:"id"`
+	Name    string       `tfsdk:"name"`
+	Rules   Rules        `tfsdk:"rules"`
+	Version string       `tfsdk:"version"`
 }
 
 type profileResource struct {
@@ -162,8 +156,7 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 	}
 
 	newProfile := api.ProfileCreateRequest{
-		Description: plan.Description,
-		Name:        plan.Name,
+		Name: plan.Name,
 		Rules: api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
@@ -214,8 +207,7 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 	}
 
 	newProfile := api.ProfileUpdateRequest{
-		Description: plan.Description,
-		Name:        plan.Name,
+		Name: plan.Name,
 		Rules: api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
@@ -226,7 +218,7 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 }
 
 func ApiToProfile(profile api.Profile) Profile {
-	var newInboundRules []Rule
+	newInboundRules := []Rule{}
 	for _, inbound_rule := range profile.Rules.Inbound {
 		rule := Rule{
 			Action:       types.String{Value: inbound_rule.Action},
@@ -245,7 +237,7 @@ func ApiToProfile(profile api.Profile) Profile {
 		}
 		newInboundRules = append(newInboundRules, rule)
 	}
-	var newOutboundRules []Rule
+	newOutboundRules := []Rule{}
 	for _, outbound_rule := range profile.Rules.Outbound {
 		rule := Rule{
 			Action:       types.String{Value: outbound_rule.Action},
@@ -266,9 +258,8 @@ func ApiToProfile(profile api.Profile) Profile {
 	}
 	h := Profile{
 		//Created:     types.Int64{Value: int64(profile.Created)},
-		Description: types.String{Value: profile.Description},
-		ID:          types.String{Value: profile.ID},
-		Name:        types.String{Value: profile.Name},
+		ID:   types.String{Value: profile.ID},
+		Name: types.String{Value: profile.Name},
 		Rules: Rules{
 			Inbound:  newInboundRules,
 			Outbound: newOutboundRules,
@@ -335,7 +326,7 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	profileID := state.ID.Value
 
 	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
