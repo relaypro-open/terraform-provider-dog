@@ -140,8 +140,8 @@ github.com/hashicorp/terraform-json v0.13.0 h1:Li9L+lKD1FO5RVFRM1mMMIBDoUHslOniy
 github.com/hashicorp/terraform-json v0.13.0/go.mod h1:y5OdLBCT+rxbwnpxZs9kGL7R9ExU76+cpdY8zHwoazk=
 github.com/hashicorp/terraform-plugin-docs v0.7.0 h1:7XKAOYHAxghe7q4/vx468X43X9GikdQ2dxtmcu2gQv0=
 github.com/hashicorp/terraform-plugin-docs v0.7.0/go.mod h1:57CICKfW7/KbW4lPhKOledyT6vu1LeAOzuvWXsVaxUE=
-github.com/hashicorp/terraform-plugin-framework v0.6.0 h1:XLqZllW47OjWqTxBN5wfqrl76sGSoekqg3keyNqBUwI=
-github.com/hashicorp/terraform-plugin-framework v0.6.0/go.mod h1:dgISV1z4CKDmi3uu/YpcvHeCSLtaKgena9Ix27tkKIQ=
+github.com/hashicorp/terraform-plugin-framework v0.6.1 h1:zUblz+sQ8xEnW0MWWWYRja0mJMabGJig4uJUXSsuY98=
+github.com/hashicorp/terraform-plugin-framework v0.6.1/go.mod h1:dgISV1z4CKDmi3uu/YpcvHeCSLtaKgena9Ix27tkKIQ=
 github.com/hashicorp/terraform-plugin-go v0.8.0 h1:MvY43PcDj9VlBjYifBWCO/6j1wf106xU8d5Tob/WRs0=
 github.com/hashicorp/terraform-plugin-go v0.8.0/go.mod h1:E3GuvfX0Pz2Azcl6BegD6t51StXsVZMOYQoGO8mkHM0=
 github.com/hashicorp/terraform-plugin-log v0.3.0 h1:NPENNOjaJSVX0f7JJTl4f/2JKRPQ7S2ZN9B4NSqq5kA=
@@ -218,8 +218,6 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/posener/complete v1.1.1 h1:ccV59UEOTzVDnDUEFdT95ZzHVZ+5+158q8+SJb2QV5w=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
-github.com/relaypro-open/dog_api_golang v0.0.0-20220322180017-e5bc8b2e0940 h1:3iPW+HBZzrA61hr0Mcoqolg1Hv/IeSmb1oRFAgmGaDU=
-github.com/relaypro-open/dog_api_golang v0.0.0-20220322180017-e5bc8b2e0940/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e h1:1LxMRDmpkDiP6pCZHpRqN9C2VcwA2KlNSkDrUY9ygWs=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
