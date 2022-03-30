@@ -171,7 +171,7 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	hostID := state.ID.Value
 
 	host, statusCode, err := r.provider.client.GetHost(hostID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

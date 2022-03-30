@@ -196,7 +196,7 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	serviceID := state.ID.Value
 
 	service, statusCode, err := r.provider.client.GetService(serviceID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

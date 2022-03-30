@@ -222,7 +222,7 @@ func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	zoneID := state.ID.Value
 
 	zone, statusCode, err := r.provider.client.GetZone(zoneID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

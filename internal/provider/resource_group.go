@@ -152,7 +152,7 @@ func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 	groupID := state.ID.Value
 
 	group, statusCode, err := r.provider.client.GetGroup(groupID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
