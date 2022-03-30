@@ -8,23 +8,7 @@ import (
 	"strings"
 
 	"github.com/relaypro-open/dog_api_golang/api"
-	"gopkg.in/rethinkdb/rethinkdb-go.v6"
-	r "gopkg.in/rethinkdb/rethinkdb-go.v6"
 )
-
-func dbSession() *rethinkdb.Session {
-	//SetTags("rethinkdb", "json")
-	session, err := r.Connect(r.ConnectOpts{
-		Address:  "dog-ubuntu-server.lxd:28015",
-		Database: "dog",
-		Username: "admin",
-		Password: "",
-	})
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return session
-}
 
 func check(err error) {
 	if err != nil {
@@ -32,12 +16,22 @@ func check(err error) {
 	}
 }
 
-func outputFiles(table string) (*bufio.Writer, *bufio.Writer) {
-	tf_f, err := os.Create(fmt.Sprintf("/tmp/%s.tf", table))
+func toTerraformName(name string) string {
+	no_dots := strings.ReplaceAll(name, ".", "_")
+	no_open_parenthesis := strings.ReplaceAll(no_dots, "(", "_")
+	no_close_parenthesis := strings.ReplaceAll(no_open_parenthesis, ")", "_")
+	no_forward_slash := strings.ReplaceAll(no_close_parenthesis, "/", "_")
+	no_spaces := strings.ReplaceAll(no_forward_slash, " ", "_")
+	no_colons := strings.ReplaceAll(no_spaces, ":", "_")
+	return no_colons
+}
+
+func outputFiles(output_dir string, table string) (*bufio.Writer, *bufio.Writer) {
+	tf_f, err := os.Create(fmt.Sprintf("%s/%s.tf", output_dir, table))
 	check(err)
 	tf_w := bufio.NewWriter(tf_f)
 
-	import_f, err := os.Create(fmt.Sprintf("/tmp/%s_import.sh", table))
+	import_f, err := os.Create(fmt.Sprintf("%s/%s_import.sh", output_dir, table))
 	check(err)
 	import_w := bufio.NewWriter(import_f)
 	fmt.Fprintf(import_w, "#!/bin/bash\n")
@@ -45,9 +39,9 @@ func outputFiles(table string) (*bufio.Writer, *bufio.Writer) {
 	return tf_w, import_w
 }
 
-func link_export(session *rethinkdb.Session) {
+func link_export(output_dir string) {
 	fmt.Printf("link_export\n")
-	tf_w, import_w := outputFiles("link")
+	tf_w, import_w := outputFiles(output_dir, "link")
 
 	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
 
@@ -60,41 +54,41 @@ func link_export(session *rethinkdb.Session) {
 	}
 
 	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
+		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_link\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  address_handling = \"%s\"\n", row.AddressHandling)
-		fmt.Fprintf(tf_w, "  connection = \n")
-		fmt.Fprintf(tf_w, "  {\n")
-		fmt.Fprintf(tf_w, "    api_port = \"%d\"\n", row.Connection.ApiPort)
+		fmt.Fprintf(tf_w, "  connection = {\n")
+		fmt.Fprintf(tf_w, "    api_port = %d\n", row.Connection.ApiPort)
 		fmt.Fprintf(tf_w, "    host = \"%s\"\n", row.Connection.Host)
 		fmt.Fprintf(tf_w, "    password = \"%s\"\n", row.Connection.Password)
-		fmt.Fprintf(tf_w, "    port = \"%d\"\n", row.Connection.Port)
-		fmt.Fprintf(tf_w, "    ssl_options = \n")
-		fmt.Fprintf(tf_w, "      {\n")
-		fmt.Fprintf(tf_w, "        ca_cert_file = \"%s\"\n", row.Connection.SSLOptions.CaCertFile)
-		fmt.Fprintf(tf_w, "        cert_file = \"%s\"\n", row.Connection.SSLOptions.CertFile)
-		fmt.Fprintf(tf_w, "        fail_if_no_peer_cert = \"%t\"\n", row.Connection.SSLOptions.FailIfNoPeerCert)
+		fmt.Fprintf(tf_w, "    port = %d\n", row.Connection.Port)
+		fmt.Fprintf(tf_w, "    ssl_options = {\n")
+		fmt.Fprintf(tf_w, "        cacertfile = \"%s\"\n", row.Connection.SSLOptions.CaCertFile)
+		fmt.Fprintf(tf_w, "        certfile = \"%s\"\n", row.Connection.SSLOptions.CertFile)
+		fmt.Fprintf(tf_w, "        fail_if_no_peer_cert = %t\n", row.Connection.SSLOptions.FailIfNoPeerCert)
 		fmt.Fprintf(tf_w, "        keyfile = \"%s\"\n", row.Connection.SSLOptions.KeyFile)
 		fmt.Fprintf(tf_w, "        server_name_indication = \"%s\"\n", row.Connection.SSLOptions.ServerNameIndication)
 		fmt.Fprintf(tf_w, "        verify = \"%s\"\n", row.Connection.SSLOptions.Verify)
-		fmt.Fprintf(tf_w, "      }\n")
-		fmt.Fprintf(tf_w, "  },\n")
+		fmt.Fprintf(tf_w, "      },\n")
+		fmt.Fprintf(tf_w, "    user = \"%s\"\n", row.Connection.User)
+		fmt.Fprintf(tf_w, "    virtual_host = \"%s\"\n", row.Connection.VirtualHost)
+		fmt.Fprintf(tf_w, "  }\n")
 		fmt.Fprintf(tf_w, "  connection_type = \"%s\"\n", row.ConnectionType)
 		fmt.Fprintf(tf_w, "  direction = \"%s\"\n", row.Direction)
-		fmt.Fprintf(tf_w, "  enabled = \"%t\"\n", row.Enabled)
+		fmt.Fprintf(tf_w, "  enabled = %t\n", row.Enabled)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_link.%s %s\n", row.Name, row.ID)
+		fmt.Fprintf(import_w, "terraform import dog_link.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
 }
 
-func host_export(session *rethinkdb.Session) {
+func host_export(output_dir string) {
 	fmt.Printf("host_export\n")
-	tf_w, import_w := outputFiles("host")
+	tf_w, import_w := outputFiles(output_dir, "host")
 
 	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
 
@@ -107,7 +101,7 @@ func host_export(session *rethinkdb.Session) {
 	}
 
 	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
+		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  active = \"%s\"\n", row.Active)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
@@ -118,24 +112,15 @@ func host_export(session *rethinkdb.Session) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_host.%s %s\n", row.Name, row.ID)
+		fmt.Fprintf(import_w, "terraform import dog_host.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
 }
 
-func portprotocols_output(tf_w *bufio.Writer, portProtocols []api.PortProtocol) {
-	for _, port_protocol := range portProtocols {
-		fmt.Fprintf(tf_w, "      {\n")
-		fmt.Fprintf(tf_w, "        protocol = \"%s\"\n", port_protocol.Protocol)
-		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        ports = %q\n", port_protocol.Ports), "\" \"", "\",\""))
-		fmt.Fprintf(tf_w, "      }\n")
-	}
-}
-
-func group_export(session *rethinkdb.Session) {
+func group_export(output_dir string) {
 	fmt.Printf("group_export\n")
-	tf_w, import_w := outputFiles("group")
+	tf_w, import_w := outputFiles(output_dir, "group")
 
 	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
 
@@ -148,7 +133,7 @@ func group_export(session *rethinkdb.Session) {
 	}
 
 	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
+		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_group\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  description = \"%s\"\n", row.Description)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
@@ -157,15 +142,15 @@ func group_export(session *rethinkdb.Session) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", row.Name, row.ID)
+		fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
 }
 
-func service_export(session *rethinkdb.Session) {
+func service_export(output_dir string) {
 	fmt.Printf("service_export\n")
-	tf_w, import_w := outputFiles("service")
+	tf_w, import_w := outputFiles(output_dir, "service")
 
 	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
 
@@ -178,23 +163,34 @@ func service_export(session *rethinkdb.Session) {
 	}
 
 	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
+		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_service\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "  version = \"%d\"\n", row.Version)
+		fmt.Fprintf(tf_w, "  services = [\n")
 		portprotocols_output(tf_w, row.Services)
+		fmt.Fprintf(tf_w, "  ]\n")
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_service.%s %s\n", row.Name, row.ID)
+		fmt.Fprintf(import_w, "terraform import dog_service.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
 }
 
-func zone_export(session *rethinkdb.Session) {
+func portprotocols_output(tf_w *bufio.Writer, portProtocols []api.PortProtocol) {
+	for _, port_protocol := range portProtocols {
+		fmt.Fprintf(tf_w, "      {\n")
+		fmt.Fprintf(tf_w, "        protocol = \"%s\"\n", port_protocol.Protocol)
+		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        ports = %q\n", port_protocol.Ports), "\" \"", "\",\""))
+		fmt.Fprintf(tf_w, "      },\n")
+	}
+}
+
+func zone_export(output_dir string) {
 	fmt.Printf("zone_export\n")
-	tf_w, import_w := outputFiles("zone")
+	tf_w, import_w := outputFiles(output_dir, "zone")
 
 	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
 
@@ -207,7 +203,7 @@ func zone_export(session *rethinkdb.Session) {
 	}
 
 	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
+		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_zone\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv4_addresses = %q\n", row.IPv4Addresses), "\" \"", "\",\""))
@@ -215,7 +211,44 @@ func zone_export(session *rethinkdb.Session) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_zone.%s %s\n", row.Name, row.ID)
+		fmt.Fprintf(import_w, "terraform import dog_zone.%s %s\n", terraformName, row.ID)
+	}
+	tf_w.Flush()
+	import_w.Flush()
+}
+
+func profile_export(output_dir string) {
+	fmt.Printf("profile_export\n")
+	tf_w, import_w := outputFiles(output_dir, "profile")
+
+	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+
+	res, statusCode, err := c.GetProfiles(nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if statusCode != 200 {
+		log.Fatalln(err)
+	}
+
+	for _, row := range res {
+		terraformName := toTerraformName(row.Name)
+		fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
+		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+		fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
+		fmt.Fprintf(tf_w, "  rules = {\n")
+		inbound := row.Rules.Inbound
+		fmt.Fprintf(tf_w, "    inbound = [\n")
+		rules_output(tf_w, inbound)
+		fmt.Fprintf(tf_w, "    ]\n")
+		fmt.Fprintf(tf_w, "    outbound = [\n")
+		outbound := row.Rules.Outbound
+		rules_output(tf_w, outbound)
+		fmt.Fprintf(tf_w, "    ]\n")
+		fmt.Fprintf(tf_w, "  }\n")
+		fmt.Fprintf(tf_w, "}\n")
+
+		fmt.Fprintf(import_w, "terraform import dog_profile.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
@@ -238,54 +271,17 @@ func rules_output(tf_w *bufio.Writer, rules []api.Rule) {
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        states = %q\n", rule.States), "\" \"", "\",\""))
 		fmt.Fprintf(tf_w, "        type = \"%s\"\n", rule.Type)
 
-		fmt.Fprintf(tf_w, "      }\n")
+		fmt.Fprintf(tf_w, "      },\n")
 	}
-}
-
-func profile_export(session *rethinkdb.Session) {
-	fmt.Printf("profile_export\n")
-	tf_w, import_w := outputFiles("profile")
-
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
-
-	res, statusCode, err := c.GetProfiles(nil)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	if statusCode != 200 {
-		log.Fatalln(err)
-	}
-
-	for _, row := range res {
-		terraformName := strings.ReplaceAll(row.Name, ".", "_")
-		fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
-		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-		fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
-		fmt.Fprintf(tf_w, "  rules = {\n")
-		inbound := row.Rules.Inbound
-		fmt.Fprintf(tf_w, "    inbound = [\n")
-		rules_output(tf_w, inbound)
-		fmt.Fprintf(tf_w, "    ]\n")
-		fmt.Fprintf(tf_w, "    outbound = [\n")
-		outbound := row.Rules.Outbound
-		rules_output(tf_w, outbound)
-		fmt.Fprintf(tf_w, "    ]\n")
-		fmt.Fprintf(tf_w, "}\n")
-		fmt.Fprintf(tf_w, "\n")
-
-		fmt.Fprintf(import_w, "terraform import dog_profile.%s %s\n", row.Name, row.ID)
-	}
-	tf_w.Flush()
-	import_w.Flush()
 }
 
 func main() {
-	session := dbSession()
-	group_export(session)
-	host_export(session)
-	link_export(session)
-	profile_export(session)
-	service_export(session)
-	zone_export(session)
-	fmt.Printf("check /tmp/ for output files\n")
+	output_dir := "/tmp/"
+	group_export(output_dir)
+	host_export(output_dir)
+	link_export(output_dir)
+	profile_export(output_dir)
+	service_export(output_dir)
+	zone_export(output_dir)
+	fmt.Printf("check %s/ for output files\n", output_dir)
 }
