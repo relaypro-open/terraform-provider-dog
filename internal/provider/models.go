@@ -5,7 +5,6 @@ import "github.com/hashicorp/terraform-plugin-framework/types"
 type HostList []Host
 
 type Host struct {
-	Active      types.String `tfsdk:"active"`
 	Environment types.String `tfsdk:"environment"`
 	Group       types.String `tfsdk:"group"`
 	ID          types.String `tfsdk:"id"`

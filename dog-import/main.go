@@ -103,7 +103,6 @@ func host_export(output_dir string) {
 	for _, row := range res {
 		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
-		fmt.Fprintf(tf_w, "  active = \"%s\"\n", row.Active)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
 		fmt.Fprintf(tf_w, "  group = \"%s\"\n", row.Group)
 		fmt.Fprintf(tf_w, "  hostkey = \"%s\"\n", row.HostKey)

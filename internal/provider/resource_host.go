@@ -19,11 +19,6 @@ func (t hostResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"active": {
-				MarkdownDescription: "Host active state",
-				Optional:            true,
-				Type:                types.StringType,
-			},
 			"environment": {
 				MarkdownDescription: "Host environment",
 				Required:            true,
@@ -70,7 +65,6 @@ func (t hostResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (t
 }
 
 type hostResourceData struct {
-	Active      string       `tfsdk:"active"`
 	Environment string       `tfsdk:"environment"`
 	Group       string       `tfsdk:"group"`
 	ID          types.String `tfsdk:"id"`
@@ -85,7 +79,6 @@ type hostResource struct {
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 	newHost := api.HostCreateRequest{
-		Active:      plan.Active,
 		Environment: plan.Environment,
 		Group:       plan.Group,
 		HostKey:     plan.HostKey,
@@ -97,7 +90,6 @@ func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 
 func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 	newHost := api.HostUpdateRequest{
-		Active:      plan.Active,
 		Environment: plan.Environment,
 		Group:       plan.Group,
 		HostKey:     plan.HostKey,
@@ -109,7 +101,6 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 
 func ApiToHost(host api.Host) Host {
 	h := Host{
-		Active:      types.String{Value: host.Active},
 		Environment: types.String{Value: host.Environment},
 		Group:       types.String{Value: host.Group},
 		ID:          types.String{Value: host.ID},

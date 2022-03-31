@@ -220,6 +220,8 @@ github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndr
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e h1:1LxMRDmpkDiP6pCZHpRqN9C2VcwA2KlNSkDrUY9ygWs=
 github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
+github.com/relaypro-open/dog_api_golang v0.0.0-20220331180920-8a4705c0b31b h1:Ld6MnyKAFGrt1IJaXxNYK3VBtEeZyp786/Mk2P/gfG0=
+github.com/relaypro-open/dog_api_golang v0.0.0-20220331180920-8a4705c0b31b/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3VRLtww=
 github.com/russross/blackfriday v1.6.0/go.mod h1:ti0ldHuxg49ri4ksnFxlkCfN+hvslNlmVHqNRXXJNAY=
