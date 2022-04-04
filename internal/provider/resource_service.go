@@ -19,11 +19,6 @@ func (t serviceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
-			//"created": {
-			//	MarkdownDescription: "Service created timestamp",
-			//	Optional:            true,
-			//	Type:                types.Int64Type,
-			//},
 			"services": {
 				MarkdownDescription: "List of Services",
 				Required:            true,
@@ -73,11 +68,15 @@ func (t serviceResourceType) NewResource(ctx context.Context, in tfsdk.Provider)
 }
 
 type serviceResourceData struct {
-	//Created int          `tfsdk:"created"`
-	ID       types.String   `tfsdk:"id"`
-	Services []PortProtocol `tfsdk:"services"`
-	Name     string         `tfsdk:"name"`
-	Version  int            `tfsdk:"version"`
+	ID       types.String                `tfsdk:"id"`
+	Services []*portProtocolResourceData `tfsdk:"services"`
+	Name     string                      `tfsdk:"name"`
+	Version  int                         `tfsdk:"version"`
+}
+
+type portProtocolResourceData struct {
+	Ports    []string     `tfsdk:"ports"`
+	Protocol types.String `tfsdk:"protocol"`
 }
 
 type serviceResource struct {
@@ -85,10 +84,9 @@ type serviceResource struct {
 }
 
 func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
-	newServices := []api.PortProtocol{}
+	newServices := []*api.PortProtocol{}
 	for _, port_protocol := range plan.Services {
-		var pp api.PortProtocol
-		pp = api.PortProtocol{
+		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
 			Protocol: port_protocol.Protocol.Value,
 		}
@@ -104,10 +102,9 @@ func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
 }
 
 func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
-	newServices := []api.PortProtocol{}
+	newServices := []*api.PortProtocol{}
 	for _, port_protocol := range plan.Services {
-		var pp api.PortProtocol
-		pp = api.PortProtocol{
+		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
 			Protocol: port_protocol.Protocol.Value,
 		}
@@ -123,18 +120,17 @@ func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
 }
 
 func ApiToService(service api.Service) Service {
-	s := Services{}
+	newServices := []*PortProtocol{}
 	for _, port_protocol := range service.Services {
-		var pp PortProtocol
-		pp = PortProtocol{
+		pp := &PortProtocol{
 			Ports:    port_protocol.Ports,
 			Protocol: types.String{Value: port_protocol.Protocol},
 		}
-		s = append(s, pp)
+		newServices = append(newServices, pp)
 	}
 	h := Service{
 		ID:       types.String{Value: service.ID},
-		Services: s,
+		Services: newServices,
 		Name:     types.String{Value: service.Name},
 		Version:  types.Int64{Value: int64(service.Version)},
 	}

@@ -104,11 +104,31 @@ func (t profileResourceType) NewResource(ctx context.Context, in tfsdk.Provider)
 }
 
 type profileResourceData struct {
-	//Created     int          `tfsdk:"created"`
-	ID      types.String `tfsdk:"id"`
-	Name    string       `tfsdk:"name"`
-	Rules   Rules        `tfsdk:"rules"`
-	Version string       `tfsdk:"version"`
+	ID      types.String          `tfsdk:"id"`
+	Name    string                `tfsdk:"name"`
+	Rules   *profileResourceRules `tfsdk:"rules"`
+	Version string                `tfsdk:"version"`
+}
+
+type profileResourceRules struct {
+	Inbound  []*profileReseourceRule `tfsdk:"inbound"`
+	Outbound []*profileReseourceRule `tfsdk:"outbound"`
+}
+
+type profileReseourceRule struct {
+	Action       types.String `tfsdk:"action"`
+	Active       types.Bool   `tfsdk:"active"`
+	Comment      types.String `tfsdk:"comment"`
+	Environments []string     `tfsdk:"environments"`
+	Group        types.String `tfsdk:"group"`
+	GroupType    types.String `tfsdk:"group_type"`
+	Interface    types.String `tfsdk:"interface"`
+	Log          types.Bool   `tfsdk:"log"`
+	LogPrefix    types.String `tfsdk:"log_prefix"`
+	Order        types.Int64  `tfsdk:"order"`
+	Service      types.String `tfsdk:"service"`
+	States       []string     `tfsdk:"states"`
+	Type         types.String `tfsdk:"type"`
 }
 
 type profileResource struct {
@@ -116,9 +136,9 @@ type profileResource struct {
 }
 
 func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
-	inboundRules := []api.Rule{}
+	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
-		rule := api.Rule{
+		rule := &api.Rule{
 			Action:       inbound_rule.Action.Value,
 			Active:       inbound_rule.Active.Value,
 			Comment:      inbound_rule.Comment.Value,
@@ -135,9 +155,9 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 		}
 		inboundRules = append(inboundRules, rule)
 	}
-	outboundRules := []api.Rule{}
+	outboundRules := []*api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
-		rule := api.Rule{
+		rule := &api.Rule{
 			Action:       outbound_rule.Action.Value,
 			Active:       outbound_rule.Active.Value,
 			Comment:      outbound_rule.Comment.Value,
@@ -157,7 +177,7 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 
 	newProfile := api.ProfileCreateRequest{
 		Name: plan.Name,
-		Rules: api.Rules{
+		Rules: &api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
 		},
@@ -167,9 +187,9 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 }
 
 func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
-	inboundRules := []api.Rule{}
+	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
-		rule := api.Rule{
+		rule := &api.Rule{
 			Action:       inbound_rule.Action.Value,
 			Active:       inbound_rule.Active.Value,
 			Comment:      inbound_rule.Comment.Value,
@@ -186,9 +206,9 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 		}
 		inboundRules = append(inboundRules, rule)
 	}
-	outboundRules := []api.Rule{}
+	outboundRules := []*api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
-		rule := api.Rule{
+		rule := &api.Rule{
 			Action:       outbound_rule.Action.Value,
 			Active:       outbound_rule.Active.Value,
 			Comment:      outbound_rule.Comment.Value,
@@ -208,7 +228,7 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 
 	newProfile := api.ProfileUpdateRequest{
 		Name: plan.Name,
-		Rules: api.Rules{
+		Rules: &api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
 		},
@@ -218,9 +238,9 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 }
 
 func ApiToProfile(profile api.Profile) Profile {
-	newInboundRules := []Rule{}
+	newInboundRules := []*Rule{}
 	for _, inbound_rule := range profile.Rules.Inbound {
-		rule := Rule{
+		rule := &Rule{
 			Action:       types.String{Value: inbound_rule.Action},
 			Active:       types.Bool{Value: inbound_rule.Active},
 			Comment:      types.String{Value: inbound_rule.Comment},
@@ -237,9 +257,9 @@ func ApiToProfile(profile api.Profile) Profile {
 		}
 		newInboundRules = append(newInboundRules, rule)
 	}
-	newOutboundRules := []Rule{}
+	newOutboundRules := []*Rule{}
 	for _, outbound_rule := range profile.Rules.Outbound {
-		rule := Rule{
+		rule := &Rule{
 			Action:       types.String{Value: outbound_rule.Action},
 			Active:       types.Bool{Value: outbound_rule.Active},
 			Comment:      types.String{Value: outbound_rule.Comment},
@@ -260,7 +280,7 @@ func ApiToProfile(profile api.Profile) Profile {
 		//Created:     types.Int64{Value: int64(profile.Created)},
 		ID:   types.String{Value: profile.ID},
 		Name: types.String{Value: profile.Name},
-		Rules: Rules{
+		Rules: &Rules{
 			Inbound:  newInboundRules,
 			Outbound: newOutboundRules,
 		},

@@ -16,7 +16,6 @@ type Host struct {
 type GroupList []Group
 
 type Group struct {
-	//Created        int    `tfsdk:"created,omitempty"` //TODO: created has both int and string entries
 	Description    types.String `tfsdk:"description"`
 	ID             types.String `tfsdk:"id"`
 	Name           types.String `tfsdk:"name"`
@@ -27,11 +26,10 @@ type Group struct {
 type ServiceList []Service
 
 type Service struct {
-	//Created types.Int64  `tfsdk:"created"`
-	ID       types.String   `tfsdk:"id"`
-	Services []PortProtocol `tfsdk:"services"`
-	Name     types.String   `tfsdk:"name"`
-	Version  types.Int64    `tfsdk:"version"`
+	ID       types.String    `tfsdk:"id"`
+	Services []*PortProtocol `tfsdk:"services"`
+	Name     types.String    `tfsdk:"name"`
+	Version  types.Int64     `tfsdk:"version"`
 }
 
 type Services []PortProtocol
@@ -44,7 +42,6 @@ type PortProtocol struct {
 type ZoneList []Zone
 
 type Zone struct {
-	//Created       int          `tfsdk:"created"`
 	ID            types.String `tfsdk:"id"`
 	IPv4Addresses []string     `tfsdk:"ipv4_addresses"`
 	IPv6Addresses []string     `tfsdk:"ipv6_addresses"`
@@ -56,7 +53,7 @@ type LinkList []Link
 type Link struct {
 	ID              types.String `tfsdk:"id"`
 	AddressHandling types.String `tfsdk:"address_handling"`
-	Connection      Connection   `tfsdk:"connection"`
+	Connection      *Connection  `tfsdk:"connection"`
 	ConnectionType  types.String `tfsdk:"connection_type"`
 	Direction       types.String `tfsdk:"direction"`
 	Enabled         types.Bool   `tfsdk:"enabled"`
@@ -68,7 +65,7 @@ type Connection struct {
 	Host        types.String `tfsdk:"host"`
 	Password    types.String `tfsdk:"password"`
 	Port        types.Int64  `tfsdk:"port"`
-	SSLOptions  SSLOptions   `tfsdk:"ssl_options"`
+	SSLOptions  *SSLOptions  `tfsdk:"ssl_options"`
 	User        types.String `tfsdk:"user"`
 	VirtualHost types.String `tfsdk:"virtual_host"`
 }
@@ -88,13 +85,13 @@ type Profile struct {
 	//Created     types.Int64  `tfsdk:"created"`
 	ID      types.String `tfsdk:"id"`
 	Name    types.String `tfsdk:"name"`
-	Rules   Rules        `tfsdk:"rules"`
+	Rules   *Rules       `tfsdk:"rules"`
 	Version types.String `tfsdk:"version"`
 }
 
 type Rules struct {
-	Inbound  []Rule `tfsdk:"inbound"`
-	Outbound []Rule `tfsdk:"outbound"`
+	Inbound  []*Rule `tfsdk:"inbound"`
+	Outbound []*Rule `tfsdk:"outbound"`
 }
 
 type Rule struct {

@@ -158,6 +158,7 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	tflog.Debug(ctx, fmt.Sprintf("state: %+v\n", state))
 
 	hostID := state.ID.Value
 

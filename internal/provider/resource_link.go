@@ -135,23 +135,23 @@ func (t linkResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (t
 //}
 
 type linkResourceData struct {
-	AddressHandling types.String           `tfsdk:"address_handling"`
-	Connection      connectionResourceData `tfsdk:"connection"`
-	ConnectionType  types.String           `tfsdk:"connection_type"`
-	Direction       types.String           `tfsdk:"direction"`
-	Enabled         types.Bool             `tfsdk:"enabled"`
-	ID              types.String           `tfsdk:"id"`
-	Name            types.String           `tfsdk:"name"`
+	AddressHandling types.String            `tfsdk:"address_handling"`
+	Connection      *connectionResourceData `tfsdk:"connection"`
+	ConnectionType  types.String            `tfsdk:"connection_type"`
+	Direction       types.String            `tfsdk:"direction"`
+	Enabled         types.Bool              `tfsdk:"enabled"`
+	ID              types.String            `tfsdk:"id"`
+	Name            types.String            `tfsdk:"name"`
 }
 
 type connectionResourceData struct {
-	ApiPort     types.Int64           `tfsdk:"api_port"`
-	Host        types.String          `tfsdk:"host"`
-	Password    types.String          `tfsdk:"password"`
-	Port        types.Int64           `tfsdk:"port"`
-	SSLOptions  sslOptionsResouceData `tfsdk:"ssl_options"`
-	User        types.String          `tfsdk:"user"`
-	VirtualHost types.String          `tfsdk:"virtual_host"`
+	ApiPort     types.Int64            `tfsdk:"api_port"`
+	Host        types.String           `tfsdk:"host"`
+	Password    types.String           `tfsdk:"password"`
+	Port        types.Int64            `tfsdk:"port"`
+	SSLOptions  *sslOptionsResouceData `tfsdk:"ssl_options"`
+	User        types.String           `tfsdk:"user"`
+	VirtualHost types.String           `tfsdk:"virtual_host"`
 }
 
 type sslOptionsResouceData struct {
@@ -170,12 +170,12 @@ type linkResource struct {
 func LinkToCreateRequest(plan linkResourceData) api.LinkCreateRequest {
 	newLink := api.LinkCreateRequest{
 		AddressHandling: plan.AddressHandling.Value,
-		Connection: api.Connection{
+		Connection: &api.Connection{
 			ApiPort:  int(plan.Connection.ApiPort.Value),
 			Host:     plan.Connection.Host.Value,
 			Password: plan.Connection.Password.Value,
 			Port:     int(plan.Connection.Port.Value),
-			SSLOptions: api.SSLOptions{
+			SSLOptions: &api.SSLOptions{
 				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
 				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
 				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
@@ -197,12 +197,12 @@ func LinkToCreateRequest(plan linkResourceData) api.LinkCreateRequest {
 func LinkToUpdateRequest(plan linkResourceData) api.LinkUpdateRequest {
 	newLink := api.LinkUpdateRequest{
 		AddressHandling: plan.AddressHandling.Value,
-		Connection: api.Connection{
+		Connection: &api.Connection{
 			ApiPort:  int(plan.Connection.ApiPort.Value),
 			Host:     plan.Connection.Host.Value,
 			Password: plan.Connection.Password.Value,
 			Port:     int(plan.Connection.Port.Value),
-			SSLOptions: api.SSLOptions{
+			SSLOptions: &api.SSLOptions{
 				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
 				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
 				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
@@ -222,6 +222,33 @@ func LinkToUpdateRequest(plan linkResourceData) api.LinkUpdateRequest {
 }
 
 func ApiToLink(ctx context.Context, link api.Link) Link {
+	newLink := Link{
+		AddressHandling: types.String{Value: link.AddressHandling},
+		Connection: &Connection{
+			ApiPort:  types.Int64{Value: int64(link.Connection.ApiPort)},
+			Host:     types.String{Value: link.Connection.Host},
+			Password: types.String{Value: link.Connection.Password},
+			Port:     types.Int64{Value: int64(link.Connection.Port)},
+			SSLOptions: &SSLOptions{
+				CaCertFile:           types.String{Value: link.Connection.SSLOptions.CaCertFile},
+				CertFile:             types.String{Value: link.Connection.SSLOptions.CertFile},
+				FailIfNoPeerCert:     types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
+				KeyFile:              types.String{Value: link.Connection.SSLOptions.KeyFile},
+				ServerNameIndication: types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
+				Verify:               types.String{Value: link.Connection.SSLOptions.Verify},
+			},
+			User:        types.String{Value: link.Connection.User},
+			VirtualHost: types.String{Value: link.Connection.VirtualHost},
+		},
+		ConnectionType: types.String{Value: link.ConnectionType},
+		Direction:      types.String{Value: link.Direction},
+		Enabled:        types.Bool{Value: link.Enabled},
+		Name:           types.String{Value: link.Name},
+	}
+	return newLink
+}
+
+func XApiToLink(ctx context.Context, link api.Link) Link {
 	tflog.Debug(ctx, "ApiToLink 1\n")
 	var l Link
 
