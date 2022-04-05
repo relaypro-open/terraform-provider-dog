@@ -10,7 +10,7 @@ This provides the ability to manage the dog firewall management system via Terra
 
 - [Terraform](https://www.terraform.io/downloads.html) >= 1.0
 - [Go](https://golang.org/doc/install) >= 1.17
-- [dog](https://relaypro-open.github.io/dog/)
+- [dog](https://relaypro-open.github.io/dog/) >= 1.3
 
 ## Building The Provider
 
