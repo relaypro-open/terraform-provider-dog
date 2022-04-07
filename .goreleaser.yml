@@ -39,8 +39,9 @@ checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 signs:
-  - stdin_file: ./.gpg_password
-  - artifacts: checksum
+  - 
+    stdin_file: ./.gpg_password
+    artifacts: checksum
     args:
       # if you are using this in a GitHub action or some other automated pipeline, you 
       # need to pass the batch flag to indicate its not interactive.
