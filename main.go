@@ -1,14 +1,5 @@
 package main
 
-import (
-	"context"
-	"log"
-
-	dog "terraform-provider-dog/internal/provider"
-
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-)
-
 // Run "go generate" to format example terraform files and generate the docs for the registry/website
 
 // If you do not have terraform installed, you can remove the formatting command, but its suggested to
@@ -29,14 +20,14 @@ var (
 )
 
 func main() {
-	opts := tfsdk.ServeOpts{
-		// TODO: Update this string with the published name of your provider.
-		Name: "registry.terraform.io/hashicorp/scaffolding",
-	}
+	//opts := tfsdk.ServeOpts{
+	//	// TODO: Update this string with the published name of your provider.
+	//	Name: "registry.terraform.io/hashicorp/scaffolding",
+	//}
 
-	err := tfsdk.Serve(context.Background(), dog.New(version), opts)
+	//err := tfsdk.Serve(context.Background(), dog.New(version), opts)
 
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	//if err != nil {
+	//	log.Fatal(err.Error())
+	//}
 }

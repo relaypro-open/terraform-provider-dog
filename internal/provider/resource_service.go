@@ -35,7 +35,7 @@ func (t serviceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 							ElemType: types.StringType,
 						},
 					},
-				}, tfsdk.ListNestedAttributesOptions{}),
+				}),
 			},
 			"name": {
 				MarkdownDescription: "Service name",

@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
+VERSION=0.0.2
 OS_ARCH=linux_amd64
 
 default: install
@@ -36,7 +36,7 @@ github_release:
 
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mv ./bin/${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
 	go test -i $(TEST) || exit 1
