@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.12.0
 	github.com/hashicorp/terraform-plugin-framework v0.9.0
-	github.com/hashicorp/terraform-plugin-go v0.9.1
+	github.com/hashicorp/terraform-plugin-go v0.10.0
 	github.com/hashicorp/terraform-plugin-log v0.4.1
 	github.com/relaypro-open/dog_api_golang v0.0.0-20220404180949-2b89c4c16b8e
 )
