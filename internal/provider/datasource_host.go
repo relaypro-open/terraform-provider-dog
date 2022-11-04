@@ -3,7 +3,6 @@ package dog
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -50,42 +49,30 @@ type hostDataSource struct {
 }
 
 func (d hostDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
-	var data hostDataSourceData
+	var state HostList
 
-	var resourceState struct {
-		Hosts HostList `tfsdk:"hosts"`
+	res, statusCode, err := d.provider.client.GetHosts(nil)
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
 	}
-
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-	log.Printf("got here")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read hosts, got error: %s", err))
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	log.Printf("got here")
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	hosts, statusCode, err := d.provider.client.GetHosts(nil)
-	for _, host := range hosts {
-		h := ApiToHost(host)
-		resourceState.Hosts = append(resourceState.Hosts, h)
+	// Set state
+	for _, api_host := range res {
+		host := ApiToHost(api_host)
+		state = append(state, host)
 	}
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
-		return
-	}
-
-	// For the purposes of this host code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.String{Value: "Host.ID"}
-	diags = resp.State.Set(ctx, &resourceState)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }

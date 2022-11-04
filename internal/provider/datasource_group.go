@@ -3,7 +3,6 @@ package dog
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -28,6 +27,11 @@ func (t groupDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Type:                types.StringType,
 				Computed:            true,
 			},
+			"group_id": {
+				Required:    true,
+				Type:        types.StringType,
+				Description: "The ID of the group.",
+			},
 		},
 	}, nil
 }
@@ -50,42 +54,30 @@ type groupDataSource struct {
 }
 
 func (d groupDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
-	var data groupDataSourceData
+	var state GroupList
 
-	var resourceState struct {
-		Groups GroupList `tfsdk:"groups"`
+	res, statusCode, err := d.provider.client.GetGroups(nil)
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
 	}
-
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-	log.Printf("got here")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read groups, got error: %s", err))
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	log.Printf("got here")
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	groups, statusCode, err := d.provider.client.GetGroups(nil)
-	for _, group := range groups {
-		h := ApiToGroup(group)
-		resourceState.Groups = append(resourceState.Groups, h)
+	// Set state
+	for _, api_group := range res {
+		group := ApiToGroup(api_group)
+		state = append(state, group)
 	}
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
-		return
-	}
-
-	// For the purposes of this group code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.String{Value: "Group.ID"}
-	diags = resp.State.Set(ctx, &resourceState)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }

@@ -3,7 +3,6 @@ package dog
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -52,43 +51,30 @@ type zoneDataSource struct {
 }
 
 func (d zoneDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
-	var data zoneDataSourceData
+	var state ZoneList
 
-	var resourceState struct {
-		Zones ZoneList `tfsdk:"zones"`
+	res, statusCode, err := d.provider.client.GetZones(nil)
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
 	}
-
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-	log.Printf("got here")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zones, got error: %s", err))
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	log.Printf("got here")
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	zones, statusCode, err := d.provider.client.GetZones(nil)
-	for _, zone := range zones {
-		h := ApiToZone(zone)
-		resourceState.Zones = append(resourceState.Zones, h)
+	// Set state
+	for _, api_zone := range res {
+		zone := ApiToZone(api_zone)
+		state = append(state, zone)
 	}
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zone, got error: %s", err))
-		return
-	}
-
-	// For the purposes of this zone code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.String{Value: "Zone.ID"}
-	diags = resp.State.Set(ctx, &resourceState)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
