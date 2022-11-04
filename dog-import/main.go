@@ -148,18 +148,19 @@ func group_export(output_dir string) {
 	}
 
 	for _, row := range res {
-		terraformName := toTerraformName(row.Name)
-		tf_w := terraformOutputFile(output_dir, table, terraformName)
-		fmt.Fprintf(tf_w, "resource \"dog_group\" \"%s\" {\n", terraformName)
-		fmt.Fprintf(tf_w, "  description = \"%s\"\n", row.Description)
-		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-		fmt.Fprintf(tf_w, "  profile_name = \"%s\"\n", row.ProfileName)
-		fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
-		fmt.Fprintf(tf_w, "}\n")
-		fmt.Fprintf(tf_w, "\n")
-
-		fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", terraformName, row.ID)
-		tf_w.Flush()
+		if row.ID != "all-active" {
+			terraformName := toTerraformName(row.Name)
+			tf_w := terraformOutputFile(output_dir, table, terraformName)
+			fmt.Fprintf(tf_w, "resource \"dog_group\" \"%s\" {\n", terraformName)
+			fmt.Fprintf(tf_w, "  description = \"%s\"\n", row.Description)
+			fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+			fmt.Fprintf(tf_w, "  profile_name = \"%s\"\n", row.ProfileName)
+			fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
+			fmt.Fprintf(tf_w, "}\n")
+			fmt.Fprintf(tf_w, "\n")
+			fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", terraformName, row.ID)
+			tf_w.Flush()
+		}
 	}
 	import_w.Flush()
 }
