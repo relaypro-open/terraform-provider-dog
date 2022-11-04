@@ -36,7 +36,7 @@ jobs:
       # secret. If you would rather own your own GPG handling, please fork this action
       # or use an alternative one for key handling.
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@5v
+        uses: crazy-max/ghaction-import-gpg@v5
         id: import_gpg
         with:
           # These secrets will need to be configured for the repository:
