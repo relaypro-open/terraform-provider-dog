@@ -7,11 +7,41 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
-type groupDataSourceType struct{}
+type (
+	groupDataSource struct {
+		p dogProvider
+	}
 
-func (t groupDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	GroupList []Group
+
+	Group struct {
+		Description    types.String `tfsdk:"description"`
+		ID             types.String `tfsdk:"id"`
+		Name           types.String `tfsdk:"name"`
+		ProfileName    types.String `tfsdk:"profile_name"`
+		ProfileVersion types.String `tfsdk:"profile_version"`
+	}
+
+)
+
+var (
+	_ datasource.DataSource = (*groupDataSource)(nil)
+)
+
+func NewGroupDataSource() datasource.DataSource {
+	return &groupDataSource{}
+}
+
+
+func (*groupDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_group"
+}
+
+func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Group data source",
@@ -36,12 +66,24 @@ func (t groupDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 	}, nil
 }
 
-func (t groupDataSourceType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (d *groupDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
 
-	return groupDataSource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.p.dog = client
 }
 
 type groupDataSourceData struct {
@@ -49,14 +91,14 @@ type groupDataSourceData struct {
 	Id     types.String `tfsdk:"id"`
 }
 
-type groupDataSource struct {
-	provider provider
-}
+//type groupDataSource struct {
+//	provider provider
+//}
 
-func (d groupDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state GroupList
 
-	res, statusCode, err := d.provider.client.GetGroups(nil)
+	res, statusCode, err := d.p.dog.GetGroups(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return

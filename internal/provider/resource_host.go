@@ -8,14 +8,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-type hostResourceType struct{}
 
-func (t hostResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+type (
+	hostResource struct {
+		p dogProvider
+	}
+)
+
+var (
+	_ resource.Resource                = (*hostResource)(nil)
+	_ resource.ResourceWithImportState = (*hostResource)(nil)
+)
+
+func NewHostResource() resource.Resource {
+	return &hostResource{}
+}
+
+func (*hostResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_host"
+}
+
+
+func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
@@ -48,7 +68,7 @@ func (t hostResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Computed:            true,
 				MarkdownDescription: "Host identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -56,13 +76,29 @@ func (t hostResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (t hostResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *hostResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return hostResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
 }
+
+func (*hostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
 
 type hostResourceData struct {
 	Environment string       `tfsdk:"environment"`
@@ -71,10 +107,6 @@ type hostResourceData struct {
 	HostKey     string       `tfsdk:"hostkey"`
 	Location    string       `tfsdk:"location"`
 	Name        string       `tfsdk:"name"`
-}
-
-type hostResource struct {
-	provider provider
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -111,23 +143,22 @@ func ApiToHost(host api.Host) Host {
 	return h
 }
 
-func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Host
 
 	var plan hostResourceData
 	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	newHost := HostToCreateRequest(plan)
-	host, statusCode, err := r.provider.client.CreateHost(newHost, nil)
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	host, statusCode, err := r.p.dog.CreateHost(newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
-	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
 	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
@@ -149,7 +180,7 @@ func (r hostResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Host
 
 	diags := req.State.Get(ctx, &state)
@@ -158,11 +189,12 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("state: %+v\n", state))
 
 	hostID := state.ID.Value
 
-	host, statusCode, err := r.provider.client.GetHost(hostID, nil)
+	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	host, statusCode, err := r.p.dog.GetHost(hostID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -176,7 +208,16 @@ func (r hostResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+
+func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	//var data hostResourceData
+
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
 	var state Host
 
 	diags := req.State.Get(ctx, &state)
@@ -195,8 +236,9 @@ func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newHost := HostToUpdateRequest(plan)
-	host, statusCode, err := r.provider.client.UpdateHost(hostID, newHost, nil)
+	host, statusCode, err := r.p.dog.UpdateHost(hostID, newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
@@ -222,7 +264,7 @@ func (r hostResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 
 }
 
-func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Host
 
 	diags := req.State.Get(ctx, &state)
@@ -233,7 +275,7 @@ func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 	}
 
 	hostID := state.ID.Value
-	host, statusCode, err := r.provider.client.DeleteHost(hostID, nil)
+	host, statusCode, err := r.p.dog.DeleteHost(hostID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -242,13 +284,9 @@ func (r hostResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
 		return
 	}
-	tflog.Trace(ctx, fmt.Sprintf("Host deleted: %+v\n", host))
+	tflog.Trace(ctx, fmt.Sprintf("host deleted: %+v\n", host))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r hostResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

@@ -8,64 +8,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-//// stringListDefaultModifier is a plan modifier that sets a default value for a
-//// types.StringType attribute when it is not configured. The attribute must be
-//// marked as Optional and Computed. When setting the state during the resource
-//// Create, Read, or Update methods, this default value must also be included or
-//// the Terraform CLI will generate an error.
-//type stringListDefaultModifier struct {
-//	Default string
-//}
-//
-//// Description returns a plain text description of the validator's behavior, suitable for a practitioner to understand its impact.
-//func (m stringListDefaultModifier) Description(ctx context.Context) string {
-//	return fmt.Sprintf("If value is not configured, defaults to %s", m.Default)
-//}
-//
-//// MarkdownDescription returns a markdown formatted description of the validator's behavior, suitable for a practitioner to understand its impact.
-//func (m stringListDefaultModifier) MarkdownDescription(ctx context.Context) string {
-//	return fmt.Sprintf("If value is not configured, defaults to `%s`", m.Default)
-//}
-//
-//// Modify runs the logic of the plan modifier.
-//// Access to the configuration, plan, and state is available in `req`, while
-//// `resp` contains fields for updating the planned value, triggering resource
-//// replacement, and returning diagnostics.
-//func (m stringListDefaultModifier) Modify(ctx context.Context, req tfsdk.ModifyAttributePlanRequest, resp *tfsdk.ModifyAttributePlanResponse) {
-//	// types.String must be the attr.Value produced by the attr.Type in the schema for this attribute
-//	// for generic plan modifiers, use
-//	// https://pkg.go.dev/github.com/hashicorp/terraform-plugin-framework/tfsdk#ConvertValue
-//	// to convert into a known type.
-//	var str types.String
-//	diags := tfsdk.ValueAs(ctx, req.AttributePlan, &str)
-//	resp.Diagnostics.Append(diags...)
-//	if diags.HasError() {
-//		return
-//	}
-//
-//	if !str.Null {
-//		return
-//	}
-//
-//	resp.AttributePlan = types.List{
-//		Elem: []types.String{Value: m.Default},
-//	}
-//}
-//
-//func stringListDefault(defaultValue string) stringListDefaultModifier {
-//	return stringListDefaultModifier{
-//		Default: defaultValue,
-//	}
-//}
 
-type zoneResourceType struct{}
+type (
+	zoneResource struct {
+		p dogProvider
+	}
+)
 
-func (t zoneResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+var (
+	_ resource.Resource                = (*zoneResource)(nil)
+	_ resource.ResourceWithImportState = (*zoneResource)(nil)
+)
+
+func NewZoneResource() resource.Resource {
+	return &zoneResource{}
+}
+
+func (*zoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_zone"
+}
+
+
+func (*zoneResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
@@ -92,7 +62,7 @@ func (t zoneResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Computed:            true,
 				MarkdownDescription: "Zone identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -100,23 +70,56 @@ func (t zoneResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (t zoneResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return zoneResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
 }
+
+
+//func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+//	resp.ResourceData = r
+//	// Prevent panic if the provider has not been configured
+//	if req.ProviderData == nil {
+//		return
+//	}
+//
+//	client, ok := req.ProviderData.(*api.Client)
+//	if !ok {
+//		resp.Diagnostics.AddError(
+//			"Unexpected Resource Configure Type",
+//			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+//		)
+//
+//		return
+//	}
+//
+//	r.dog = client
+//}
+
+func (*zoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
 
 type zoneResourceData struct {
 	ID            types.String `tfsdk:"id"`
 	IPv4Addresses []string     `tfsdk:"ipv4_addresses"`
 	IPv6Addresses []string     `tfsdk:"ipv6_addresses"`
 	Name          string       `tfsdk:"name"`
-}
-
-type zoneResource struct {
-	provider provider
 }
 
 func ZoneToCreateRequest(plan zoneResourceData) api.ZoneCreateRequest {
@@ -171,22 +174,22 @@ func ApiToZone(zone api.Zone) Zone {
 	return h
 }
 
-func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, "Create 1\n")
+func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Zone
 
 	var plan zoneResourceData
 	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newZone := ZoneToCreateRequest(plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewZone: %+v\n", newZone))
-	zone, statusCode, err := r.provider.client.CreateZone(newZone, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ zone: %+v\n", zone))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	zone, statusCode, err := r.p.dog.CreateZone(newZone, nil)
+	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
+	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
 	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
@@ -208,8 +211,7 @@ func (r zoneResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
+func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Zone
 
 	diags := req.State.Get(ctx, &state)
@@ -221,7 +223,9 @@ func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 
 	zoneID := state.ID.Value
 
-	zone, statusCode, err := r.provider.client.GetZone(zoneID, nil)
+	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	zone, statusCode, err := r.p.dog.GetZone(zoneID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -235,8 +239,16 @@ func (r zoneResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r zoneResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	tflog.Debug(ctx, "Update 1\n")
+
+func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	//var data zoneResourceData
+
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
 	var state Zone
 
 	diags := req.State.Get(ctx, &state)
@@ -255,10 +267,12 @@ func (r zoneResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newZone := ZoneToUpdateRequest(plan)
-	zone, statusCode, err := r.provider.client.UpdateZone(zoneID, newZone, nil)
+	zone, statusCode, err := r.p.dog.UpdateZone(zoneID, newZone, nil)
 	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
-	tflog.Debug(ctx, fmt.Sprintf("zone: %+v\n", zone))
+	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
+	//resp.Diagnostics.AddError("zone", fmt.Sprintf("zone: %+v\n", zone))
 	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
@@ -281,8 +295,7 @@ func (r zoneResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 
 }
 
-func (r zoneResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	tflog.Debug(ctx, "Delete 1\n")
+func (r *zoneResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Zone
 
 	diags := req.State.Get(ctx, &state)
@@ -293,7 +306,7 @@ func (r zoneResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 	}
 
 	zoneID := state.ID.Value
-	zone, statusCode, err := r.provider.client.DeleteZone(zoneID, nil)
+	zone, statusCode, err := r.p.dog.DeleteZone(zoneID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -302,13 +315,9 @@ func (r zoneResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zone, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Zone deleted: %+v\n", zone))
+	tflog.Trace(ctx, fmt.Sprintf("zone deleted: %+v\n", zone))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r zoneResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

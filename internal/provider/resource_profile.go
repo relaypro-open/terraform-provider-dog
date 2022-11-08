@@ -9,14 +9,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-type profileResourceType struct{}
 
-func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+type (
+	profileResource struct {
+		p dogProvider
+	}
+)
+
+var (
+	_ resource.Resource                = (*profileResource)(nil)
+	_ resource.ResourceWithImportState = (*profileResource)(nil)
+)
+
+func NewProfileResource() resource.Resource {
+	return &profileResource{}
+}
+
+func (*profileResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_profile"
+}
+
+
+func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
@@ -87,7 +107,7 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 				Computed:            true,
 				MarkdownDescription: "Profile identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -95,13 +115,29 @@ func (t profileResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 	}, nil
 }
 
-func (t profileResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *profileResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return profileResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
 }
+
+func (*profileResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
 
 type profileResourceData struct {
 	ID      types.String          `tfsdk:"id"`
@@ -129,10 +165,6 @@ type profileReseourceRule struct {
 	Service      types.String `tfsdk:"service"`
 	States       []string     `tfsdk:"states"`
 	Type         types.String `tfsdk:"type"`
-}
-
-type profileResource struct {
-	provider provider
 }
 
 func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
@@ -289,25 +321,22 @@ func ApiToProfile(profile api.Profile) Profile {
 	return h
 }
 
-func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
-	tflog.Debug(ctx, "Create 1\n")
+func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Profile
 
 	var plan profileResourceData
 	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Debug(ctx, "Create 2\n")
+
 	newProfile := ProfileToCreateRequest(plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewProfile: %+v\n", newProfile))
-	profile, statusCode, err := r.provider.client.CreateProfile(newProfile, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ profile: %+v\n", profile))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	profile, statusCode, err := r.p.dog.CreateProfile(newProfile, nil)
+	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
 	state = ApiToProfile(profile)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
@@ -329,15 +358,11 @@ func (r profileResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
+func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Profile
 
 	diags := req.State.Get(ctx, &state)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ state: %+v\n", state))
-	tflog.Debug(ctx, "Read 2\n")
 	resp.Diagnostics.Append(diags...)
-	tflog.Debug(ctx, "Read 3\n")
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -345,7 +370,9 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 
 	profileID := state.ID.Value
 
-	profile, statusCode, err := r.provider.client.GetProfile(profileID, nil)
+	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	profile, statusCode, err := r.p.dog.GetProfile(profileID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -359,8 +386,16 @@ func (r profileResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	tflog.Debug(ctx, "Update 1\n")
+
+func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	//var data profileResourceData
+
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
 	var state Profile
 
 	diags := req.State.Get(ctx, &state)
@@ -379,10 +414,12 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newProfile := ProfileToUpdateRequest(plan)
-	profile, statusCode, err := r.provider.client.UpdateProfile(profileID, newProfile, nil)
+	profile, statusCode, err := r.p.dog.UpdateProfile(profileID, newProfile, nil)
 	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
-	tflog.Debug(ctx, fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
+	//resp.Diagnostics.AddError("profile", fmt.Sprintf("profile: %+v\n", profile))
 	state = ApiToProfile(profile)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
@@ -405,8 +442,7 @@ func (r profileResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 
 }
 
-func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	tflog.Debug(ctx, "Delete 1\n")
+func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Profile
 
 	diags := req.State.Get(ctx, &state)
@@ -417,7 +453,7 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 	}
 
 	profileID := state.ID.Value
-	profile, statusCode, err := r.provider.client.DeleteProfile(profileID, nil)
+	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -426,13 +462,9 @@ func (r profileResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Profile deleted: %+v\n", profile))
+	tflog.Trace(ctx, fmt.Sprintf("profile deleted: %+v\n", profile))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r profileResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

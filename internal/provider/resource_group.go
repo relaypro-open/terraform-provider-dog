@@ -8,14 +8,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-type groupResourceType struct{}
 
-func (t groupResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+type (
+	groupResource struct {
+		p dogProvider
+	}
+)
+
+var (
+	_ resource.Resource                = (*groupResource)(nil)
+	_ resource.ResourceWithImportState = (*groupResource)(nil)
+)
+
+func NewGroupResource() resource.Resource {
+	return &groupResource{}
+}
+
+func (*groupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_group"
+}
+
+
+func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
@@ -43,7 +63,7 @@ func (t groupResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				Computed:            true,
 				MarkdownDescription: "group identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -51,12 +71,27 @@ func (t groupResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 	}, nil
 }
 
-func (t groupResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *groupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return groupResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
+}
+
+func (*groupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 type groupResourceData struct {
@@ -66,10 +101,6 @@ type groupResourceData struct {
 	Name           string       `tfsdk:"name"`
 	ProfileName    string       `tfsdk:"profile_name"`
 	ProfileVersion string       `tfsdk:"profile_version"`
-}
-
-type groupResource struct {
-	provider provider
 }
 
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
@@ -103,7 +134,7 @@ func ApiToGroup(group api.Group) Group {
 	return h
 }
 
-func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
+func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Group
 
 	var plan groupResourceData
@@ -115,7 +146,7 @@ func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 	}
 
 	newGroup := GroupToCreateRequest(plan)
-	group, statusCode, err := r.provider.client.CreateGroup(newGroup, nil)
+	group, statusCode, err := r.p.dog.CreateGroup(newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	state = ApiToGroup(group)
@@ -139,7 +170,7 @@ func (r groupResource) Create(ctx context.Context, req tfsdk.CreateResourceReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
+func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Group
 
 	diags := req.State.Get(ctx, &state)
@@ -151,7 +182,7 @@ func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 
 	groupID := state.ID.Value
 
-	group, statusCode, err := r.provider.client.GetGroup(groupID, nil)
+	group, statusCode, err := r.p.dog.GetGroup(groupID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -165,7 +196,8 @@ func (r groupResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, 
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r groupResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
+
+func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	//var data groupResourceData
 
 	//diags := req.Plan.Get(ctx, &data)
@@ -194,7 +226,7 @@ func (r groupResource) Update(ctx context.Context, req tfsdk.UpdateResourceReque
 	}
 
 	newGroup := GroupToUpdateRequest(plan)
-	group, statusCode, err := r.provider.client.UpdateGroup(groupID, newGroup, nil)
+	group, statusCode, err := r.p.dog.UpdateGroup(groupID, newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	//resp.Diagnostics.AddError("group", fmt.Sprintf("group: %+v\n", group))
@@ -220,7 +252,7 @@ func (r groupResource) Update(ctx context.Context, req tfsdk.UpdateResourceReque
 
 }
 
-func (r groupResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
+func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Group
 
 	diags := req.State.Get(ctx, &state)
@@ -231,7 +263,7 @@ func (r groupResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReque
 	}
 
 	groupID := state.ID.Value
-	group, statusCode, err := r.provider.client.DeleteGroup(groupID, nil)
+	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -245,8 +277,4 @@ func (r groupResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReque
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r groupResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

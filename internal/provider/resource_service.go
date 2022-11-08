@@ -8,50 +8,61 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-type serviceResourceType struct{}
 
-func (t serviceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+type (
+	serviceResource struct {
+		p dogProvider
+	}
+)
+
+var (
+	_ resource.Resource                = (*serviceResource)(nil)
+	_ resource.ResourceWithImportState = (*serviceResource)(nil)
+)
+
+func NewServiceResource() resource.Resource {
+	return &serviceResource{}
+}
+
+func (*serviceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_service"
+}
+
+
+func (*serviceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"services": {
-				MarkdownDescription: "List of Services",
+			"ipv4_addresses": {
+				MarkdownDescription: "List of Ipv4 Addresses",
 				Required:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"protocol": {
-						MarkdownDescription: "Service protocol",
-						Required:            true,
-						Type:                types.StringType,
-					},
-					"ports": {
-						MarkdownDescription: "Service ports",
-						Required:            true,
-						Type: types.ListType{
-							ElemType: types.StringType,
-						},
-					},
-				}, tfsdk.ListNestedAttributesOptions{}),
+				Type: types.ListType{
+					ElemType: types.StringType,
+				},
+			},
+			"ipv6_addresses": {
+				MarkdownDescription: "List of Ipv6 Addresses",
+				Required:            true,
+				Type: types.ListType{
+					ElemType: types.StringType,
+				},
 			},
 			"name": {
 				MarkdownDescription: "Service name",
 				Required:            true,
 				Type:                types.StringType,
 			},
-			"version": {
-				MarkdownDescription: "Service version",
-				Optional:            true,
-				Type:                types.Int64Type,
-			},
 			"id": {
 				Computed:            true,
 				MarkdownDescription: "Service identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -59,12 +70,28 @@ func (t serviceResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.
 	}, nil
 }
 
-func (t serviceResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return serviceResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
+}
+
+
+func (*serviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 type serviceResourceData struct {
@@ -77,10 +104,6 @@ type serviceResourceData struct {
 type portProtocolResourceData struct {
 	Ports    []string     `tfsdk:"ports"`
 	Protocol types.String `tfsdk:"protocol"`
-}
-
-type serviceResource struct {
-	provider provider
 }
 
 func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
@@ -137,26 +160,22 @@ func ApiToService(service api.Service) Service {
 	return h
 }
 
-func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ r: %+v\n", r))
-	tflog.Debug(ctx, "Create 1\n")
+func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Service
 
 	var plan serviceResourceData
 	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZ plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
-	//resp.Diagnostics.AddError("Client Error", fmt.Sprintf("plan: %+v\n", plan))
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Debug(ctx, "Create 2\n")
-	newService := ServiceToCreateRequest(plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewService: %+v\n", newService))
-	service, statusCode, err := r.provider.client.CreateService(newService, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ service: %+v\n", service))
 
+	newService := ServiceToCreateRequest(plan)
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	service, statusCode, err := r.p.dog.CreateService(newService, nil)
+	log.Printf(fmt.Sprintf("service: %+v\n", service))
+	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
 	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
@@ -178,8 +197,7 @@ func (r serviceResource) Create(ctx context.Context, req tfsdk.CreateResourceReq
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
+func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -191,7 +209,9 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 
 	serviceID := state.ID.Value
 
-	service, statusCode, err := r.provider.client.GetService(serviceID, nil)
+	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	service, statusCode, err := r.p.dog.GetService(serviceID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -205,8 +225,16 @@ func (r serviceResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	tflog.Debug(ctx, "Update 1\n")
+
+func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	//var data serviceResourceData
+
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -225,10 +253,11 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newService := ServiceToUpdateRequest(plan)
-	service, statusCode, err := r.provider.client.UpdateService(serviceID, newService, nil)
+	service, statusCode, err := r.p.dog.UpdateService(serviceID, newService, nil)
 	log.Printf(fmt.Sprintf("service: %+v\n", service))
-	tflog.Debug(ctx, fmt.Sprintf("service: %+v\n", service))
+	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
 	//resp.Diagnostics.AddError("service", fmt.Sprintf("service: %+v\n", service))
 	state = ApiToService(service)
 	if err != nil {
@@ -252,8 +281,7 @@ func (r serviceResource) Update(ctx context.Context, req tfsdk.UpdateResourceReq
 
 }
 
-func (r serviceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	tflog.Debug(ctx, "Delete 1\n")
+func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -264,7 +292,7 @@ func (r serviceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 	}
 
 	serviceID := state.ID.Value
-	service, statusCode, err := r.provider.client.DeleteService(serviceID, nil)
+	service, statusCode, err := r.p.dog.DeleteService(serviceID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -273,13 +301,9 @@ func (r serviceResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReq
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Service deleted: %+v\n", service))
+	tflog.Trace(ctx, fmt.Sprintf("service deleted: %+v\n", service))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r serviceResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

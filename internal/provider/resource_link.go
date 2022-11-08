@@ -8,14 +8,34 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 )
 
-type linkResourceType struct{}
 
-func (t linkResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+type (
+	linkResource struct {
+		p dogProvider
+	}
+)
+
+var (
+	_ resource.Resource                = (*linkResource)(nil)
+	_ resource.ResourceWithImportState = (*linkResource)(nil)
+)
+
+func NewLinkResource() resource.Resource {
+	return &linkResource{}
+}
+
+func (*linkResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_link"
+}
+
+
+func (*linkResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
@@ -108,7 +128,7 @@ func (t linkResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Computed:            true,
 				MarkdownDescription: "Link identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
-					tfsdk.UseStateForUnknown(),
+					resource.UseStateForUnknown(),
 				},
 				Type: types.StringType,
 			},
@@ -116,23 +136,28 @@ func (t linkResourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (t linkResourceType) NewResource(ctx context.Context, in tfsdk.Provider) (tfsdk.Resource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (r *linkResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured
+	if req.ProviderData == nil {
+		return
+	}
 
-	return linkResource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *api.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	r.p.dog = client
 }
 
-//type linkResourceData struct {
-//	AddressHandling string       `tfsdk:"address_handling"`
-//	Connection      Connection   `tfsdk:"connection"`
-//	ConnectionType  string       `tfsdk:"connection_type"`
-//	Direction       string       `tfsdk:"direction"`
-//	Enabled         bool         `tfsdk:"enabled"`
-//	ID              types.String `tfsdk:"id"`
-//	Name            string       `tfsdk:"name"`
-//}
+func (*linkResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
 
 type linkResourceData struct {
 	AddressHandling types.String            `tfsdk:"address_handling"`
@@ -161,10 +186,6 @@ type sslOptionsResouceData struct {
 	KeyFile              types.String `tfsdk:"keyfile"`
 	ServerNameIndication types.String `tfsdk:"server_name_indication"`
 	Verify               types.String `tfsdk:"verify"`
-}
-
-type linkResource struct {
-	provider provider
 }
 
 func LinkToCreateRequest(plan linkResourceData) api.LinkCreateRequest {
@@ -248,22 +269,22 @@ func ApiToLink(link api.Link) Link {
 	return newLink
 }
 
-func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {
-	tflog.Debug(ctx, "Create 1\n")
+func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Link
 
 	var plan linkResourceData
 	diags := req.Plan.Get(ctx, &plan)
-	tflog.Debug(ctx, fmt.Sprintf("plan: %+v\n", plan))
 	resp.Diagnostics.Append(diags...)
+	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	newLink := LinkToCreateRequest(plan)
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ NewLink: %+v\n", newLink))
-	link, statusCode, err := r.provider.client.CreateLink(newLink, nil)
-	log.Printf(fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
-	tflog.Debug(ctx, fmt.Sprintf("ZZZZZZZZZZZZZZZZZZZZZZZZZ link: %+v\n", link))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	link, statusCode, err := r.p.dog.CreateLink(newLink, nil)
+	log.Printf(fmt.Sprintf("link: %+v\n", link))
+	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
 	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
@@ -285,12 +306,10 @@ func (r linkResource) Create(ctx context.Context, req tfsdk.CreateResourceReques
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r linkResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
+func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state Link
 
 	diags := req.State.Get(ctx, &state)
-	tflog.Debug(ctx, fmt.Sprintf("state: %+v\n", state))
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
@@ -299,7 +318,9 @@ func (r linkResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 
 	linkID := state.ID.Value
 
-	link, statusCode, err := r.provider.client.GetLink(linkID, nil)
+	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
+	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	link, statusCode, err := r.p.dog.GetLink(linkID, nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -313,8 +334,16 @@ func (r linkResource) Read(ctx context.Context, req tfsdk.ReadResourceRequest, r
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r linkResource) Update(ctx context.Context, req tfsdk.UpdateResourceRequest, resp *tfsdk.UpdateResourceResponse) {
-	tflog.Debug(ctx, "Update 1\n")
+
+func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	//var data linkResourceData
+
+	//diags := req.Plan.Get(ctx, &data)
+	//resp.Diagnostics.Append(diags...)
+
+	//if resp.Diagnostics.HasError() {
+	//	return
+	//}
 	var state Link
 
 	diags := req.State.Get(ctx, &state)
@@ -333,11 +362,11 @@ func (r linkResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	newLink := LinkToUpdateRequest(plan)
 
-	link, statusCode, err := r.provider.client.UpdateLink(linkID, newLink, nil)
+	newLink := LinkToUpdateRequest(plan)
+	link, statusCode, err := r.p.dog.UpdateLink(linkID, newLink, nil)
 	log.Printf(fmt.Sprintf("link: %+v\n", link))
-	tflog.Debug(ctx, fmt.Sprintf("link: %+v\n", link))
+	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
 	//resp.Diagnostics.AddError("link", fmt.Sprintf("link: %+v\n", link))
 	state = ApiToLink(link)
 	if err != nil {
@@ -361,8 +390,7 @@ func (r linkResource) Update(ctx context.Context, req tfsdk.UpdateResourceReques
 
 }
 
-func (r linkResource) Delete(ctx context.Context, req tfsdk.DeleteResourceRequest, resp *tfsdk.DeleteResourceResponse) {
-	tflog.Debug(ctx, "Delete 1\n")
+func (r *linkResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state Link
 
 	diags := req.State.Get(ctx, &state)
@@ -373,9 +401,7 @@ func (r linkResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 	}
 
 	linkID := state.ID.Value
-	link, statusCode, err := r.provider.client.DeleteLink(linkID, nil)
-	tflog.Debug(ctx, fmt.Sprintf("type of statusCode is %T\n", statusCode))
-	tflog.Debug(ctx, fmt.Sprintf("statusCode, err: %d, %+v\n", statusCode, err))
+	link, statusCode, err := r.p.dog.DeleteLink(linkID, nil)
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
@@ -384,13 +410,9 @@ func (r linkResource) Delete(ctx context.Context, req tfsdk.DeleteResourceReques
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read link, got error: %s", err))
 		return
 	}
-	tflog.Debug(ctx, fmt.Sprintf("Link deleted: %+v\n", link))
+	tflog.Trace(ctx, fmt.Sprintf("link deleted: %+v\n", link))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
-}
-
-func (r linkResource) ImportState(ctx context.Context, req tfsdk.ImportResourceStateRequest, resp *tfsdk.ImportResourceStateResponse) {
-	tfsdk.ResourceImportStatePassthroughID(ctx, tftypes.NewAttributePath().WithAttributeName("id"), req, resp)
 }

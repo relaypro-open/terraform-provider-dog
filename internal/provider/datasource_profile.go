@@ -3,18 +3,64 @@ package dog
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
-type profileDataSourceType struct{}
+type (
+	profileDataSource struct {
+		p dogProvider
+	}
 
-func (t profileDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	tflog.Debug(ctx, "GetSchema 1\n")
+	ProfileList []Profile
+
+	Profile struct {
+		ID      types.String `tfsdk:"id"`
+		Name    types.String `tfsdk:"name"`
+		Rules   *Rules       `tfsdk:"rules"`
+		Version types.String `tfsdk:"version"`
+	}
+	Rules struct {
+		Inbound  []*Rule `tfsdk:"inbound"`
+		Outbound []*Rule `tfsdk:"outbound"`
+	}
+
+	Rule struct {
+		Action       types.String `tfsdk:"action"`
+		Active       types.Bool   `tfsdk:"active"`
+		Comment      types.String `tfsdk:"comment"`
+		Environments []string     `tfsdk:"environments"`
+		Group        types.String `tfsdk:"group"`
+		GroupType    types.String `tfsdk:"group_type"`
+		Interface    types.String `tfsdk:"interface"`
+		Log          types.Bool   `tfsdk:"log"`
+		LogPrefix    types.String `tfsdk:"log_prefix"`
+		Order        types.Int64  `tfsdk:"order"`
+		Service      types.String `tfsdk:"service"`
+		States       []string     `tfsdk:"states"`
+		Type         types.String `tfsdk:"type"`
+	}
+
+)
+
+var (
+	_ datasource.DataSource = (*profileDataSource)(nil)
+)
+
+func NewProfileDataSource() datasource.DataSource {
+	return &profileDataSource{}
+}
+
+
+func (*profileDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_profile"
+}
+
+func (*profileDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Profile data source",
@@ -30,16 +76,33 @@ func (t profileDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 				Type:                types.StringType,
 				Computed:            true,
 			},
+			"profile_id": {
+				Required:    true,
+				Type:        types.StringType,
+				Description: "The ID of the profile.",
+			},
 		},
 	}, nil
 }
 
-func (t profileDataSourceType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (d *profileDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
 
-	return profileDataSource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.p.dog = client
 }
 
 type profileDataSourceData struct {
@@ -47,48 +110,35 @@ type profileDataSourceData struct {
 	Id     types.String `tfsdk:"id"`
 }
 
-type profileDataSource struct {
-	provider provider
-}
+//type profileDataSource struct {
+//	provider provider
+//}
 
-func (d profileDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
-	tflog.Debug(ctx, "Read 1\n")
-	var data profileDataSourceData
+func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state ProfileList
 
-	var resourceState struct {
-		Profiles ProfileList `tfsdk:"profiles"`
+	res, statusCode, err := d.p.dog.GetProfiles(nil)
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		return
 	}
-
-	diags := req.Config.Get(ctx, &data)
-	resp.Diagnostics.Append(diags...)
-
-	log.Printf("got here")
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profiles, got error: %s", err))
+		return
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	log.Printf("got here")
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	profiles, statusCode, err := d.provider.client.GetProfiles(nil)
-	for _, profile := range profiles {
-		h := ApiToProfile(profile)
-		resourceState.Profiles = append(resourceState.Profiles, h)
+	// Set state
+	for _, api_profile := range res {
+		profile := ApiToProfile(api_profile)
+		state = append(state, profile)
 	}
-	if statusCode < 200 && statusCode > 299 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
-		return
-	}
-
-	// For the purposes of this profile code, hardcoding a response value to
-	// save into the Terraform state.
-	data.Id = types.String{Value: "Profile.ID"}
-	diags = resp.State.Set(ctx, &resourceState)
+	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }

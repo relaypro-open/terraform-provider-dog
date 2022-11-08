@@ -7,13 +7,40 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
-type zoneDataSourceType struct{}
+type (
+	zoneDataSource struct {
+		p dogProvider
+	}
 
-func (t zoneDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	tflog.Debug(ctx, "GetSchema 1\n")
+        ZoneList []Zone
+
+	Zone struct {
+		ID            types.String `tfsdk:"id"`
+		IPv4Addresses []string     `tfsdk:"ipv4_addresses"`
+		IPv6Addresses []string     `tfsdk:"ipv6_addresses"`
+		Name          types.String `tfsdk:"name"`
+	}
+
+)
+
+var (
+	_ datasource.DataSource = (*zoneDataSource)(nil)
+)
+
+func NewZoneDataSource() datasource.DataSource {
+	return &zoneDataSource{}
+}
+
+
+func (*zoneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_zone"
+}
+
+func (*zoneDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Zone data source",
@@ -29,16 +56,33 @@ func (t zoneDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				Type:                types.StringType,
 				Computed:            true,
 			},
+			"zone_id": {
+				Required:    true,
+				Type:        types.StringType,
+				Description: "The ID of the zone.",
+			},
 		},
 	}, nil
 }
 
-func (t zoneDataSourceType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (d *zoneDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
 
-	return zoneDataSource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.p.dog = client
 }
 
 type zoneDataSourceData struct {
@@ -46,14 +90,14 @@ type zoneDataSourceData struct {
 	Id     types.String `tfsdk:"id"`
 }
 
-type zoneDataSource struct {
-	provider provider
-}
+//type zoneDataSource struct {
+//	provider provider
+//}
 
-func (d zoneDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state ZoneList
 
-	res, statusCode, err := d.provider.client.GetZones(nil)
+	res, statusCode, err := d.p.dog.GetZones(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return

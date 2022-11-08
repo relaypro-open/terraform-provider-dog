@@ -7,11 +7,42 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
-type hostDataSourceType struct{}
+type (
+	hostDataSource struct {
+		p dogProvider
+	}
 
-func (t hostDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+
+	HostList []Host
+
+	Host struct {
+		Environment types.String `tfsdk:"environment"`
+		Group       types.String `tfsdk:"group"`
+		ID          types.String `tfsdk:"id"`
+		HostKey     types.String `tfsdk:"hostkey"`
+		Location    types.String `tfsdk:"location"`
+		Name        types.String `tfsdk:"name"`
+	}
+)
+
+var (
+	_ datasource.DataSource = (*hostDataSource)(nil)
+)
+
+func NewHostDataSource() datasource.DataSource {
+	return &hostDataSource{}
+}
+
+
+func (*hostDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_host"
+}
+
+func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Host data source",
@@ -27,16 +58,33 @@ func (t hostDataSourceType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				Type:                types.StringType,
 				Computed:            true,
 			},
+			"host_id": {
+				Required:    true,
+				Type:        types.StringType,
+				Description: "The ID of the host.",
+			},
 		},
 	}, nil
 }
 
-func (t hostDataSourceType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
-	provider, diags := convertProviderType(in)
+func (d *hostDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
 
-	return hostDataSource{
-		provider: provider,
-	}, diags
+	client, ok := req.ProviderData.(*api.Client)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.p.dog = client
 }
 
 type hostDataSourceData struct {
@@ -44,14 +92,10 @@ type hostDataSourceData struct {
 	Id     types.String `tfsdk:"id"`
 }
 
-type hostDataSource struct {
-	provider provider
-}
-
-func (d hostDataSource) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state HostList
 
-	res, statusCode, err := d.provider.client.GetHosts(nil)
+	res, statusCode, err := d.p.dog.GetHosts(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
