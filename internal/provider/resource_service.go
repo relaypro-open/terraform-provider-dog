@@ -34,41 +34,49 @@ func (*serviceResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_service"
 }
 
-
 func (*serviceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			// This description is used by the documentation generator and the language server.
-			"ipv4_addresses": {
-				MarkdownDescription: "List of Ipv4 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-			"ipv6_addresses": {
-				MarkdownDescription: "List of Ipv6 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
-			},
-			"name": {
-				MarkdownDescription: "Service name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Service identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
-			},
+        return tfsdk.Schema{
+                Attributes: map[string]tfsdk.Attribute{
+                        // This description is used by the documentation generator and the language server.
+                       "services": {
+                               MarkdownDescription: "List of Services",
+                               Required:            true,
+                               Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+                                       "protocol": {
+                                               MarkdownDescription: "Service protocol",
+                                               Required:            true,
+                                               Type:                types.StringType,
+                                       },
+                                       "ports": {
+                                               MarkdownDescription: "Service ports",
+                                               Required:            true,
+                                               Type: types.ListType{
+                                                       ElemType: types.StringType,
+                                               },
+                                       },
+                               }),
+                        },
+                        "name": {
+                                MarkdownDescription: "Service name",
+                                Required:            true,
+                                Type:                types.StringType,
+                        },
+                       "version": {
+                               MarkdownDescription: "Service version",
+                               Optional:            true,
+                               Type:                types.Int64Type,
+                       },
+                        "id": {
+                                Computed:            true,
+                                MarkdownDescription: "Service identifier",
+                                PlanModifiers: tfsdk.AttributePlanModifiers{
+                                       resource.UseStateForUnknown(),
+                                },
+                                Type: types.StringType,
+                        },
 		},
-	}, nil
-}
+        }, nil
+ }
 
 func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured

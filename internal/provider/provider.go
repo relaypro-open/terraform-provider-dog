@@ -121,23 +121,23 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 func (*dogProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		//NewHostResource,
+		NewHostResource,
 		NewGroupResource,
-		//NewServiceResource,
+		NewServiceResource,
 		NewZoneResource,
-		//NewLinkResource,
-		//NewProfileResource,
+		NewLinkResource,
+		NewProfileResource,
 	}
 }
 
 func (*dogProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		//NewHostDataSource,
+		NewHostDataSource,
 		NewGroupDataSource,
-		//NewServiceDataSource,
+		NewServiceDataSource,
 		NewZoneDataSource,
-		//NewLinkDataSource,
-		//NewProfileDataSource,
+		NewLinkDataSource,
+		NewProfileDataSource,
 	}
 }
 

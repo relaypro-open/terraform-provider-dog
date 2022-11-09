@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestProvider_DogZoneNameAttribute(t *testing.T) {
+func TestProvider_DogServiceNameAttribute(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogZoneDataSourceConfig("drew_test"),
+				Config: testAccDogServiceDataSourceConfig("drew_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_zone.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("dog_service.drew_test", "name", "drew_test"),
 				),
 			},
 		},
@@ -23,12 +23,17 @@ func TestProvider_DogZoneNameAttribute(t *testing.T) {
 }
 
 
-func testAccDogZoneDataSourceConfig(configurableAttribute string) string {
+func testAccDogServiceDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
-resource "dog_zone" "drew_test" {
+resource "dog_service" %[1]q {
   name = %[1]q
-  ipv4_addresses = ["1.1.1.1"]
-  ipv6_addresses = []
+  version = "1"
+  services = [
+      {
+        protocol = "tcp"
+        ports = ["22"]
+      },
+  ]
 }
 `, configurableAttribute)
 } 

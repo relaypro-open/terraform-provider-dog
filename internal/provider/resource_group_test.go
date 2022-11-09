@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDogZone_Basic(t *testing.T) {
-	name := "dog_zone"
-	randomName := "tf_test_zone_" + acctest.RandString(5)
+func TestAccDogGroup_Basic(t *testing.T) {
+	name := "dog_group"
+	randomName := "tf_test_group_" + acctest.RandString(5)
 	resourceName := name + "." + randomName
 	
 	resource.ParallelTest(t, resource.TestCase{
@@ -18,12 +18,13 @@ func TestAccDogZone_Basic(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogZoneConfig_basic(name, randomName),
+				Config: testAccDogGroupConfig_basic(name, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
-					resource.TestCheckResourceAttr(resourceName, "ipv4_addresses.0", "1.1.1.1"),
-					resource.TestCheckResourceAttr(resourceName, "ipv6_addresses.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "profile_name", "drewtest3"),
+					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
 				),
 			},
 			{
@@ -36,12 +37,13 @@ func TestAccDogZone_Basic(t *testing.T) {
 }
 
 
-func testAccDogZoneConfig_basic(resourceName, name string) string {
+func testAccDogGroupConfig_basic(resourceName, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
+  description = ""
   name = %[2]q
-  ipv4_addresses = ["1.1.1.1"]
-  ipv6_addresses = []
+  profile_name = "drewtest3"
+  profile_version = "latest"
 }
 `, resourceName, name)
 }
