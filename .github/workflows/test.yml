@@ -58,7 +58,5 @@ jobs:
           terraform_wrapper: false
       - uses: actions/checkout@v3
       - run: go mod download
-      - env:
-          TF_ACC: "0"
-        run: go test -v -cover ./internal/provider/
+      - run: go test -v -cover ./internal/provider/
         timeout-minutes: 10
