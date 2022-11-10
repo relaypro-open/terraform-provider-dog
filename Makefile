@@ -43,5 +43,8 @@ test:
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc:
-	TF_ACC_PROVIDER_NAMESPACE="relaypro-open" TF_ACC_PROVIDER_HOST="github.com" TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
-	#TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+
+update_api:
+	go get github.com/relaypro-open/dog_api_golang@main
+	go mod vendor
