@@ -149,7 +149,6 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	group, statusCode, err := r.p.dog.CreateGroup(newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
-	state = ApiToGroup(group)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
@@ -158,6 +157,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	state = ApiToGroup(group)
 
 	plan.ID = state.ID
 

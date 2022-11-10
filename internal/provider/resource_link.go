@@ -285,7 +285,6 @@ func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, r
 	link, statusCode, err := r.p.dog.CreateLink(newLink, nil)
 	log.Printf(fmt.Sprintf("link: %+v\n", link))
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
-	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
@@ -294,6 +293,7 @@ func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	state = ApiToLink(link)
 
 	plan.ID = state.ID
 

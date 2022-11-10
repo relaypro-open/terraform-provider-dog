@@ -190,7 +190,6 @@ func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, r
 	zone, statusCode, err := r.p.dog.CreateZone(newZone, nil)
 	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
-	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
@@ -199,6 +198,7 @@ func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	state = ApiToZone(zone)
 
 	plan.ID = state.ID
 

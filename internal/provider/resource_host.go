@@ -159,7 +159,6 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 	host, statusCode, err := r.p.dog.CreateHost(newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
-	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
@@ -168,6 +167,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	state = ApiToHost(host)
 
 	plan.ID = state.ID
 

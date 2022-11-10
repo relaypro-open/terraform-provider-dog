@@ -19,10 +19,12 @@ type (
 	ProfileList []Profile
 
 	Profile struct {
-		ID      types.String `tfsdk:"id"`
-		Name    types.String `tfsdk:"name"`
-		Rules   *Rules       `tfsdk:"rules"`
-		Version types.String `tfsdk:"version"`
+		Created     types.Int64           `tfsdk:"created"`
+		Description types.String          `tfsdk:"description"`
+		ID          types.String          `tfsdk:"id"`
+		Name        types.String          `tfsdk:"name"`
+		Rules       *Rules                `tfsdk:"rules"`
+		Version     types.String          `tfsdk:"version"`
 	}
 	Rules struct {
 		Inbound  []*Rule `tfsdk:"inbound"`

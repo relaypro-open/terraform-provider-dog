@@ -184,7 +184,6 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 	service, statusCode, err := r.p.dog.CreateService(newService, nil)
 	log.Printf(fmt.Sprintf("service: %+v\n", service))
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
-	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
@@ -193,6 +192,7 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	state = ApiToService(service)
 
 	plan.ID = state.ID
 

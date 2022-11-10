@@ -337,15 +337,15 @@ func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest
 	profile, statusCode, err := r.p.dog.CreateProfile(newProfile, nil)
 	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
-	state = ApiToProfile(profile)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
-		return
-	}
 	if statusCode < 200 || statusCode > 299 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+		return
+	}
+	state = ApiToProfile(profile)
 
 	plan.ID = state.ID
 

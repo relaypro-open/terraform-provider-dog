@@ -1,3 +1,5 @@
+//go:build acceptance || profile
+
 package dog_test
 
 import (

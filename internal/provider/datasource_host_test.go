@@ -13,9 +13,9 @@ func TestProvider_DogHostNameAttribute(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogHostDataSourceConfig("drew_test"),
+				Config: testAccDogHostDataSourceConfig("drew-test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_host.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("dog_host.drew_test", "name", "drew-test"),
 				),
 			},
 		},

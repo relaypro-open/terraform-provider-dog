@@ -10,7 +10,7 @@ import (
 
 func TestAccDogHost_Basic(t *testing.T) {
 	name := "dog_host"
-	randomName := "tf_test_host_" + acctest.RandString(5)
+	randomName := "tf-test-host-" + acctest.RandString(5)
 	resourceName := name + "." + randomName
 	
 	resource.ParallelTest(t, resource.TestCase{
