@@ -163,7 +163,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -195,7 +195,7 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	host, statusCode, err := r.p.dog.GetHost(hostID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -210,14 +210,6 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 
 func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data hostResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Host
 
 	diags := req.State.Get(ctx, &state)
@@ -232,7 +224,6 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var plan hostResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -241,13 +232,12 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	host, statusCode, err := r.p.dog.UpdateHost(hostID, newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
-	//resp.Diagnostics.AddError("host", fmt.Sprintf("host: %+v\n", host))
 	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -276,7 +266,7 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	hostID := state.ID.Value
 	host, statusCode, err := r.p.dog.DeleteHost(hostID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

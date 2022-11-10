@@ -153,7 +153,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -183,7 +183,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	groupID := state.ID.Value
 
 	group, statusCode, err := r.p.dog.GetGroup(groupID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -198,14 +198,6 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 
 func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data groupResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Group
 
 	diags := req.State.Get(ctx, &state)
@@ -220,7 +212,6 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	var plan groupResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -229,13 +220,12 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	group, statusCode, err := r.p.dog.UpdateGroup(groupID, newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
-	//resp.Diagnostics.AddError("group", fmt.Sprintf("group: %+v\n", group))
 	state = ApiToGroup(group)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -264,7 +254,7 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 
 	groupID := state.ID.Value
 	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

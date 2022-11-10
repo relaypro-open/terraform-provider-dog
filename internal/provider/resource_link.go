@@ -289,7 +289,7 @@ func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -321,7 +321,7 @@ func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	link, statusCode, err := r.p.dog.GetLink(linkID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -336,14 +336,6 @@ func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 
 func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data linkResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Link
 
 	diags := req.State.Get(ctx, &state)
@@ -358,7 +350,6 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var plan linkResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -367,13 +358,12 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	link, statusCode, err := r.p.dog.UpdateLink(linkID, newLink, nil)
 	log.Printf(fmt.Sprintf("link: %+v\n", link))
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
-	//resp.Diagnostics.AddError("link", fmt.Sprintf("link: %+v\n", link))
 	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -402,7 +392,7 @@ func (r *linkResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	linkID := state.ID.Value
 	link, statusCode, err := r.p.dog.DeleteLink(linkID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

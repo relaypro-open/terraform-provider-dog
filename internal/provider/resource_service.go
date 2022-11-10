@@ -188,7 +188,7 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -220,7 +220,7 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	service, statusCode, err := r.p.dog.GetService(serviceID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -235,14 +235,6 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 
 func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data serviceResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Service
 
 	diags := req.State.Get(ctx, &state)
@@ -257,7 +249,6 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 	var plan serviceResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -266,13 +257,12 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 	service, statusCode, err := r.p.dog.UpdateService(serviceID, newService, nil)
 	log.Printf(fmt.Sprintf("service: %+v\n", service))
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
-	//resp.Diagnostics.AddError("service", fmt.Sprintf("service: %+v\n", service))
 	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -301,7 +291,7 @@ func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	serviceID := state.ID.Value
 	service, statusCode, err := r.p.dog.DeleteService(serviceID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

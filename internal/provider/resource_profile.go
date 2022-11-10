@@ -337,7 +337,7 @@ func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest
 	profile, statusCode, err := r.p.dog.CreateProfile(newProfile, nil)
 	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -373,7 +373,7 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	profile, statusCode, err := r.p.dog.GetProfile(profileID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -388,14 +388,6 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 
 func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data profileResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Profile
 
 	diags := req.State.Get(ctx, &state)
@@ -410,7 +402,6 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 	var plan profileResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -419,22 +410,18 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 	profile, statusCode, err := r.p.dog.UpdateProfile(profileID, newProfile, nil)
 	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
-	//resp.Diagnostics.AddError("profile", fmt.Sprintf("profile: %+v\n", profile))
 	state = ApiToProfile(profile)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
 
 	plan.ID = state.ID
 
-	// write logs using the tflog package
-	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
-	// for more information
 	tflog.Trace(ctx, "created a resource")
 
 	diags = resp.State.Set(ctx, &state)
@@ -454,7 +441,7 @@ func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	profileID := state.ID.Value
 	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}

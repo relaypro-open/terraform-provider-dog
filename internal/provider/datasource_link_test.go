@@ -13,9 +13,9 @@ func TestProvider_DogLinkNameAttribute(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogLinkDataSourceConfig("drew_test"),
+				Config: testAccDogLinkDataSourceConfig("d1"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_link.drew_test", "name", "d1"),
+					resource.TestCheckResourceAttr("dog_link.d1", "name", "d1"),
 				),
 			},
 		},

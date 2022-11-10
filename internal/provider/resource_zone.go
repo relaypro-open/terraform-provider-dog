@@ -194,7 +194,7 @@ func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -226,7 +226,7 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	zone, statusCode, err := r.p.dog.GetZone(zoneID, nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -241,14 +241,6 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 
 func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	//var data zoneResourceData
-
-	//diags := req.Plan.Get(ctx, &data)
-	//resp.Diagnostics.Append(diags...)
-
-	//if resp.Diagnostics.HasError() {
-	//	return
-	//}
 	var state Zone
 
 	diags := req.State.Get(ctx, &state)
@@ -263,7 +255,6 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	var plan zoneResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
-	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -272,13 +263,12 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	zone, statusCode, err := r.p.dog.UpdateZone(zoneID, newZone, nil)
 	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
-	//resp.Diagnostics.AddError("zone", fmt.Sprintf("zone: %+v\n", zone))
 	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
 		return
 	}
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
@@ -307,7 +297,7 @@ func (r *zoneResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	zoneID := state.ID.Value
 	zone, statusCode, err := r.p.dog.DeleteZone(zoneID, nil)
-	if statusCode < 200 || statusCode > 299 {
+	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 		return
 	}
