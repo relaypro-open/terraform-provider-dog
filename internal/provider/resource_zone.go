@@ -192,10 +192,11 @@ func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, r
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
-		return
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToZone(zone)
@@ -228,10 +229,11 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	zone, statusCode, err := r.p.dog.GetZone(zoneID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zone, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToZone(zone)
@@ -266,10 +268,11 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	state = ApiToZone(zone)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -299,10 +302,11 @@ func (r *zoneResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	zone, statusCode, err := r.p.dog.DeleteZone(zoneID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zone, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("zone deleted: %+v\n", zone))

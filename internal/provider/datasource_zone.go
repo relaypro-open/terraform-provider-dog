@@ -56,11 +56,6 @@ func (*zoneDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				Type:                types.StringType,
 				Computed:            true,
 			},
-			"zone_id": {
-				Required:    true,
-				Type:        types.StringType,
-				Description: "The ID of the zone.",
-			},
 		},
 	}, nil
 }
@@ -100,13 +95,10 @@ func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	res, statusCode, err := d.p.dog.GetZones(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read zones, got error: %s", err))
-		return
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}

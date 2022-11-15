@@ -265,6 +265,7 @@ func ApiToLink(link api.Link) Link {
 		Direction:      types.String{Value: link.Direction},
 		Enabled:        types.Bool{Value: link.Enabled},
 		Name:           types.String{Value: link.Name},
+		ID:             types.String{Value: link.ID},
 	}
 	return newLink
 }
@@ -287,10 +288,11 @@ func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, r
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
-		return
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToLink(link)
@@ -323,10 +325,11 @@ func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	link, statusCode, err := r.p.dog.GetLink(linkID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read link, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToLink(link)
@@ -361,10 +364,11 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	state = ApiToLink(link)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -394,10 +398,11 @@ func (r *linkResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	link, statusCode, err := r.p.dog.DeleteLink(linkID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read link, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("link deleted: %+v\n", link))

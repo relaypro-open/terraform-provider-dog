@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDogGroup_Basic(t *testing.T) {
-	name := "dog_group"
-	randomName := "tf_test_group_" + acctest.RandString(5)
+func TestAccDogHost_Basic(t *testing.T) {
+	name := "dog_host"
+	randomName := "tf-test-host-" + acctest.RandString(5)
 	resourceName := name + "." + randomName
 	
 	resource.ParallelTest(t, resource.TestCase{
@@ -18,13 +18,12 @@ func TestAccDogGroup_Basic(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogGroupConfig_basic(name, randomName),
+				Config: testAccDogHostConfig_basic(name, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
-					resource.TestCheckResourceAttr(resourceName, "description", ""),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
-					resource.TestCheckResourceAttr(resourceName, "profile_name", "drewtest3"),
-					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
+					resource.TestCheckResourceAttr(resourceName, "environment", "*"),
+					resource.TestCheckResourceAttr(resourceName, "hostkey", "1726819861d5245b0afcd25127a7b181a5365620"),
 				),
 			},
 			{
@@ -37,13 +36,14 @@ func TestAccDogGroup_Basic(t *testing.T) {
 }
 
 
-func testAccDogGroupConfig_basic(resourceName, name string) string {
+func testAccDogHostConfig_basic(resourceName, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  description = ""
+  environment = "*"
+  group = "dog_test"
+  hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
+  location = "*"
   name = %[2]q
-  profile_name = "drewtest3"
-  profile_version = "latest"
 }
 `, resourceName, name)
 }

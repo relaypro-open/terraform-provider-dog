@@ -19,8 +19,6 @@ type (
 	ProfileList []Profile
 
 	Profile struct {
-		Created     types.Int64           `tfsdk:"created"`
-		Description types.String          `tfsdk:"description"`
 		ID          types.String          `tfsdk:"id"`
 		Name        types.String          `tfsdk:"name"`
 		Rules       *Rules                `tfsdk:"rules"`
@@ -78,11 +76,6 @@ func (*profileDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Type:                types.StringType,
 				Computed:            true,
 			},
-			"profile_id": {
-				Required:    true,
-				Type:        types.StringType,
-				Description: "The ID of the profile.",
-			},
 		},
 	}, nil
 }
@@ -122,13 +115,10 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	res, statusCode, err := d.p.dog.GetProfiles(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profiles, got error: %s", err))
-		return
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}

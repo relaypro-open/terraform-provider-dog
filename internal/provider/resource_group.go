@@ -59,6 +59,22 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 				Required:            true,
 				Type:                types.StringType,
 			},
+                       "ec2_security_group_ids": {
+                               MarkdownDescription: "List of EC2 Security Groups to control",
+			       Optional:            true,
+                               Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+                                       "region": {
+                                               MarkdownDescription: "EC2 Region",
+                                               Required:            true,
+                                               Type:                types.StringType,
+                                       },
+                                       "sgid": {
+                                               MarkdownDescription: "EC2 Security Group ID",
+                                               Required:            true,
+                                               Type:                types.StringType,
+                                       },
+                               }),
+                        },
 			"id": {
 				Computed:            true,
 				MarkdownDescription: "group identifier",
@@ -101,35 +117,71 @@ type groupResourceData struct {
 	Name           string       `tfsdk:"name"`
 	ProfileName    string       `tfsdk:"profile_name"`
 	ProfileVersion string       `tfsdk:"profile_version"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+}
+
+type ec2SecurityGroupIdsResourceData struct {
+	Region	string `tfsdk:"region"`
+	SgId	string `tfsdk:"sgid"`
 }
 
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
+	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
+	for _, region_sgid := range plan.Ec2SecurityGroupIds {
+		rs := &api.Ec2SecurityGroupIds{
+			Region:    region_sgid.Region,
+			SgId:      region_sgid.SgId,
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+
 	newGroup := api.GroupCreateRequest{
 		Description:    plan.Description,
 		Name:           plan.Name,
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
+		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 	}
 	return newGroup
 }
 
 func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
+	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
+	for _, region_sgid := range plan.Ec2SecurityGroupIds {
+		rs := &api.Ec2SecurityGroupIds{
+			Region:    region_sgid.Region,
+			SgId:      region_sgid.SgId,
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+
 	newGroup := api.GroupUpdateRequest{
 		Description:    plan.Description,
 		Name:           plan.Name,
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
+		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 	}
 	return newGroup
 }
 
 func ApiToGroup(group api.Group) Group {
+	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
+	for _, region_sgid := range group.Ec2SecurityGroupIds {
+		rs := &Ec2SecurityGroupIds{
+			Region:    types.String{Value: region_sgid.Region},
+			SgId:      types.String{Value: region_sgid.SgId},
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+
 	h := Group{
 		Description:    types.String{Value: group.Description},
 		ID:             types.String{Value: group.ID},
 		Name:           types.String{Value: group.Name},
 		ProfileName:    types.String{Value: group.ProfileName},
 		ProfileVersion: types.String{Value: group.ProfileVersion},
+		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 	}
 	return h
 }
@@ -151,10 +203,11 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
-		return
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToGroup(group)
@@ -185,10 +238,11 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	group, statusCode, err := r.p.dog.GetGroup(groupID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToGroup(group)
@@ -223,10 +277,11 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	state = ApiToGroup(group)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -256,10 +311,11 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("group deleted: %+v\n", group))

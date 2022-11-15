@@ -161,10 +161,11 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
-		return
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToHost(host)
@@ -197,10 +198,11 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	host, statusCode, err := r.p.dog.GetHost(hostID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToHost(host)
@@ -235,10 +237,11 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	state = ApiToHost(host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -268,10 +271,11 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	host, statusCode, err := r.p.dog.DeleteHost(hostID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("host deleted: %+v\n", host))

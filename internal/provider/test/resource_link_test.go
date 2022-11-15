@@ -4,13 +4,14 @@ import (
 	"testing"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	//"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccDogLink_Basic(t *testing.T) {
 	name := "dog_link"
-	randomName := "d" + acctest.RandString(1)
+	//randomName := "d" + acctest.RandString(1)
+	randomName := "d1"
 	resourceName := name + "." + randomName
 	
 	resource.ParallelTest(t, resource.TestCase{
@@ -23,9 +24,9 @@ func TestAccDogLink_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "address_handling", "union"),
-					resource.TestCheckResourceAttr(resourceName, "conection.port", "5673"),
-					resource.TestCheckResourceAttr(resourceName, "conection.%", "7"),
-					resource.TestCheckResourceAttr(resourceName, "conection.ssl_options.%", "6"),
+					resource.TestCheckResourceAttr(resourceName, "connection.port", "5673"),
+					resource.TestCheckResourceAttr(resourceName, "connection.%", "7"),
+					resource.TestCheckResourceAttr(resourceName, "connection.ssl_options.%", "6"),
 				),
 			},
 			{
@@ -54,7 +55,7 @@ resource %[1]q %[2]q {
         keyfile = "private/server.key"
         server_name_indication = "disable"
         verify = "verify_peer"
-      },
+      }
     user = "dog_trainer"
     virtual_host = "dog"
   }

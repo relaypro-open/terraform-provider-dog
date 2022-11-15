@@ -58,11 +58,6 @@ func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				Type:                types.StringType,
 				Computed:            true,
 			},
-			"host_id": {
-				Required:    true,
-				Type:        types.StringType,
-				Description: "The ID of the host.",
-			},
 		},
 	}, nil
 }
@@ -96,15 +91,12 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	var state HostList
 
 	res, statusCode, err := d.p.dog.GetHosts(nil)
-	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
-	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read hosts, got error: %s", err))
-		return
 	}
-
+	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
+		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
 	if resp.Diagnostics.HasError() {
 		return
 	}

@@ -186,10 +186,11 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
-		return
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToService(service)
@@ -222,10 +223,11 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 	service, statusCode, err := r.p.dog.GetService(serviceID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToService(service)
@@ -260,10 +262,11 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 	state = ApiToService(service)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -293,10 +296,11 @@ func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest
 	service, statusCode, err := r.p.dog.DeleteService(serviceID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read service, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("service deleted: %+v\n", service))

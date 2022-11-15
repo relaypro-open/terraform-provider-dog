@@ -339,10 +339,11 @@ func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToProfile(profile)
@@ -375,10 +376,11 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 	profile, statusCode, err := r.p.dog.GetProfile(profileID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToProfile(profile)
@@ -413,10 +415,11 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 	state = ApiToProfile(profile)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
-		return
 	}
 	if statusCode != 303 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -443,10 +446,11 @@ func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest
 	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
+	}
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	tflog.Trace(ctx, fmt.Sprintf("profile deleted: %+v\n", profile))

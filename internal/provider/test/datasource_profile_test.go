@@ -31,21 +31,6 @@ resource dog_profile %[1]q {
   rules = {
     inbound = [
       {
-        action = "ACCEPT"
-        active = "true"
-        comment = "test_zone"
-        environments = []
-        group = "dog_test"
-        group_type = "ZONE"
-        interface = ""
-        log = "false"
-        log_prefix = ""
-        order = "1"
-        service = "ssh-tcp-22"
-        states = []
-        type = "BASIC"
-      },
-      {
         action = "DROP"
         active = "true"
         comment = ""

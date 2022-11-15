@@ -115,13 +115,10 @@ func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	res, statusCode, err := d.p.dog.GetLinks(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read links, got error: %s", err))
-		return
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}

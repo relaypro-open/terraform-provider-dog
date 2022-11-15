@@ -52,7 +52,7 @@ resource %[1]q %[2]q {
         comment = "test_zone"
         environments = []
         group = "dog_test"
-        group_type = "ZONE"
+        group_type = "ROLE"
         interface = ""
         log = "false"
         log_prefix = ""
@@ -75,7 +75,7 @@ resource %[1]q %[2]q {
         service = "any"
         states = []
         type = "BASIC"
-      },
+      }
     ]
     outbound = [
       {
@@ -92,7 +92,7 @@ resource %[1]q %[2]q {
         service = "any"
         states = []
         type = "BASIC"
-      },
+      }
     ]
   }
 }

@@ -19,11 +19,17 @@ type (
 	GroupList []Group
 
 	Group struct {
-		Description    types.String `tfsdk:"description"`
-		ID             types.String `tfsdk:"id"`
-		Name           types.String `tfsdk:"name"`
-		ProfileName    types.String `tfsdk:"profile_name"`
-		ProfileVersion types.String `tfsdk:"profile_version"`
+		Description         types.String `tfsdk:"description"`
+		ID                  types.String `tfsdk:"id"`
+		Name                types.String `tfsdk:"name"`
+		ProfileName         types.String `tfsdk:"profile_name"`
+		ProfileVersion      types.String `tfsdk:"profile_version"`
+		Ec2SecurityGroupIds []*Ec2SecurityGroupIds `tfsdk:"ec2_security_group_ids"`
+	}
+	
+	Ec2SecurityGroupIds struct {
+		Region	types.String `tfsdk:"region"`
+		SgId	types.String `tfsdk:"sgid"`
 	}
 
 )
@@ -56,11 +62,6 @@ func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				MarkdownDescription: "Group identifier",
 				Type:                types.StringType,
 				Computed:            true,
-			},
-			"group_id": {
-				Required:    true,
-				Type:        types.StringType,
-				Description: "The ID of the group.",
 			},
 		},
 	}, nil
@@ -101,13 +102,10 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	res, statusCode, err := d.p.dog.GetGroups(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read groups, got error: %s", err))
-		return
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}

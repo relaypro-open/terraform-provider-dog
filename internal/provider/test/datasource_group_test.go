@@ -13,9 +13,9 @@ func TestProvider_DogGroupNameAttribute(t *testing.T) {
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogGroupDataSourceConfig("drew_test"),
+				Config: testAccDogGroupDataSourceConfig("terraform_group_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_group.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("dog_group.terraform_group_test", "name", "terraform_group_test"),
 				),
 			},
 		},
@@ -25,7 +25,7 @@ func TestProvider_DogGroupNameAttribute(t *testing.T) {
 
 func testAccDogGroupDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
-resource "dog_group" "drew_test" {
+resource "dog_group" %[1]q {
   description = ""
   name = %[1]q 
   profile_name = "test_qa"

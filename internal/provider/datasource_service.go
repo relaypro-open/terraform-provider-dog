@@ -64,11 +64,6 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Type:                types.StringType,
 				Computed:            true,
 			},
-			"service_id": {
-				Required:    true,
-				Type:        types.StringType,
-				Description: "The ID of the service.",
-			},
 		},
 	}, nil
 }
@@ -108,13 +103,10 @@ func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	res, statusCode, err := d.p.dog.GetServices(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
-		return
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read services, got error: %s", err))
-		return
 	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
