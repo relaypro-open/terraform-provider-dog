@@ -9,16 +9,16 @@ import (
 )
 
 func TestAccDogHost_Basic(t *testing.T) {
-	name := "dog_host"
+	resourceType := "dog_host"
 	randomName := "tf-test-host-" + acctest.RandString(5)
-	resourceName := name + "." + randomName
+	resourceName := resourceType + "." + randomName
 	
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogHostConfig_basic(name, randomName),
+				Config: testAccDogHostConfig_basic(resourceType, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
@@ -36,7 +36,7 @@ func TestAccDogHost_Basic(t *testing.T) {
 }
 
 
-func testAccDogHostConfig_basic(resourceName, name string) string {
+func testAccDogHostConfig_basic(resourceType, resourceName string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
   environment = "*"
@@ -45,5 +45,5 @@ resource %[1]q %[2]q {
   location = "*"
   name = %[2]q
 }
-`, resourceName, name)
+`, resourceType, resourceName)
 }

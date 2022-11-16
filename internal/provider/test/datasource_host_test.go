@@ -25,10 +25,11 @@ func TestProvider_DogHostNameAttribute(t *testing.T) {
 			//	),
 			//},
 			{
-				Config: testAccDogHostDataSourceConfig("terraform_host_test"),
+				Config: testAccDogHostHostDataSourceConfig("terraform_host_test"),
+				//Config: testAccDogHostDataSourceConfig("terraform_host_test"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_profile.terraform_test_profile", "name", "terraform_test_profile"),
-					resource.TestCheckResourceAttr("dog_group.terraform_test_group", "name", "terraform_test_group"),
+					//resource.TestCheckResourceAttr("dog_profile.terraform_test_profile", "name", "terraform_test_profile"),
+					//resource.TestCheckResourceAttr("dog_group.terraform_test_group", "name", "terraform_test_group"),
 					resource.TestCheckResourceAttr("dog_host.terraform_host_test", "name", "terraform_host_test"),
 				),
 			},
@@ -104,7 +105,7 @@ func testAccDogHostHostDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
 resource "dog_host" %[1]q {
   environment = "*"
-  group = "terraform_test_group"
+  group = "dog_test"
   hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
   location = "*"
   name = %[1]q

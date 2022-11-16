@@ -30,6 +30,12 @@ resource "dog_group" %[1]q {
   name = %[1]q 
   profile_name = "test_qa"
   profile_version = "latest"
+  ec2_security_group_ids = [
+    { 
+      region = "us-test-region"
+      sgid = "sg-test"
+    }
+  ]
 }
 `, configurableAttribute)
 } 
