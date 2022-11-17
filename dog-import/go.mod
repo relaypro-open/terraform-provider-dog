@@ -1,13 +1,13 @@
 module dog-import
 
-go 1.17
+go 1.18
 
 require (
 	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/relaypro-open/dog_api_golang v0.0.0-20220325155831-63d9098d637e // indirect
+	github.com/relaypro-open/dog_api_golang v0.0.0-20221115211357-bc4dd543d69a
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
