@@ -33,7 +33,7 @@ func createDir(output_dir string, table string) {
 }
 
 func terraformOutputFile(output_dir string, table string) *bufio.Writer {
-	tf_f, err := os.Create(fmt.Sprintf("%s/dog_%s.tf", output_dir, table))
+	tf_f, err := os.Create(fmt.Sprintf("%s/%s.tf", output_dir, table))
 	check(err)
 	tf_w := bufio.NewWriter(tf_f)
 

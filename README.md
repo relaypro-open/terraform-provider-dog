@@ -25,33 +25,63 @@ go install
 ## Using the provider
 
 An example provider configuration:
+main.tf
+```
+terraform {
+  required_providers {
+      dog = {
+      source = "relaypro-open/dog"
+      version = "1.0.9"
+  }
+}
+
+module "dog" {
+  source = "./dog"
+}
+```
+
+dog/dog.tf
 ```
 terraform {
   required_providers {
     dog = {
-      source = "github.com/relaypro-open/dog"
+      source = "relaypro-open/dog"
+      version = ">=1.0.9"
     }
   }
 }
-  provider "dog" {
-    api_key = "my-key"
-    api_endpoint = "http://dog-server:7070/api/V2"
-  }
+
+provider "dog" {
+  api_endpoint = "https://qa-dog.$DOMAIN.com:8443/api/V2"
+  api_key_variable_name = "DOG_QA_API_KEY"
+  alias = "qa"
+}
 ```
 
 Example resource records:
 
-group.tf:
+dog/group.tf:
 ```
 resource "dog_group" "test_qa" {
   description = ""
   name = "test_qa"
   profile_name = "test_qa"
   profile_version = "latest"
+  ec2_security_group_ids = [
+      {
+        region = "us-west-2"
+        sgid = "sg-12345678"
+      },
+      {
+        region = "us-east-1"
+        sgid = "sg-23456789"
+      },
+  ]
+  provider = dog.qa
 }
 ```
 
-host.tf:
+dog/host.tf:
 ```
 resource "dog_host" "dog-host" {
   environment = "*"
@@ -59,10 +89,11 @@ resource "dog_host" "dog-host" {
   hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
   location = "*"
   name = "dog-host"
+  provider = dog.qa
 }
 ```
 
-link.tf:
+dog/ink.tf:
 ```
 resource "dog_link" "q1" {
   address_handling = "union"
@@ -86,6 +117,7 @@ resource "dog_link" "q1" {
   direction = "bidirectional"
   enabled = false
   name = "q1"
+  provider = dog.qa
 }
 ```
 
@@ -100,6 +132,7 @@ resource "dog_service" "ssh-tcp-22" {
         ports = ["22"]
       },
   ]
+  provider = dog.qa
 }
 ```
 
@@ -159,6 +192,7 @@ resource "dog_profile" "test_qa" {
       },
     ]
   }
+  provider = dog.qa
 }
 ```
 
@@ -168,6 +202,7 @@ resource "dog_zone" "test_zone" {
   name = "test_zone"
   ipv4_addresses = ["1.1.1.2"]
   ipv6_addresses = []
+  provider = dog.qa
 }
 ```
 
@@ -179,7 +214,7 @@ If you have an existing dog configuration, you can batch import this config:
 ./dog-import/dog-import
 ```
 
-This queries the dog API and exports the full configuration into terraform formatted files in /tmp:
+This queries the dog API and exports the full configuration into terraform formatted files in /tmp/dog-import:
 
 ```
 group.tf
