@@ -8,9 +8,9 @@ This provides the ability to manage the dog firewall management system via Terra
 
 ## Requirements
 
-- [Terraform](https://www.terraform.io/downloads.html) >= 1.0
-- [Go](https://golang.org/doc/install) >= 1.17
-- [dog](https://relaypro-open.github.io/dog/) >= 1.3
+- [Terraform](https://www.terraform.io/downloads.html) >= 1.3.5
+- [Go](https://golang.org/doc/install) >= 1.18
+- [dog](https://relaypro-open.github.io/dog/) >= 1.4
 
 ## Building The Provider
 
@@ -52,7 +52,7 @@ terraform {
 }
 
 provider "dog" {
-  api_endpoint = "https://qa-dog.$DOMAIN.com:8443/api/V2"
+  api_endpoint = "https://qa-dog.DOMAIN.SOMETHING:8443/api/V2"
   api_key_variable_name = "DOG_QA_API_KEY"
   alias = "qa"
 }
@@ -248,7 +248,7 @@ To generate or update documentation, run `go generate`.
 
 In order to run the full suite of Acceptance tests, run `make testacc`.
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
+*Note:* Since there is no public dog instance, Acceptance tests are disabled in Github Actions.
 
 ```shell
 make testacc
