@@ -33,7 +33,7 @@ func createDir(output_dir string, table string) {
 }
 
 func terraformOutputFile(output_dir string, table string) *bufio.Writer {
-	tf_f, err := os.Create(fmt.Sprintf("%s/%s.tf", output_dir, table))
+	tf_f, err := os.Create(fmt.Sprintf("%s/dog_%s.tf", output_dir, table))
 	check(err)
 	tf_w := bufio.NewWriter(tf_f)
 
@@ -49,7 +49,7 @@ func importOutputFile(output_dir string, table string) *bufio.Writer {
 	return import_w
 }
 
-func link_export(output_dir string) {
+func link_export(output_dir string, environment string) {
 	fmt.Printf("link_export\n")
 	table := "link"
 	import_w := importOutputFile(output_dir, table)
@@ -89,7 +89,7 @@ func link_export(output_dir string) {
 		fmt.Fprintf(tf_w, "  direction = \"%s\"\n", row.Direction)
 		fmt.Fprintf(tf_w, "  enabled = %t\n", row.Enabled)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-		fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 		fmt.Fprintf(import_w, "terraform import dog_link.%s %s\n", terraformName, row.ID)
@@ -99,7 +99,7 @@ func link_export(output_dir string) {
 	import_w.Flush()
 }
 
-func host_export(output_dir string) {
+func host_export(output_dir string, environment string) {
 	fmt.Printf("host_export\n")
 	table := "host"
 	import_w := importOutputFile(output_dir, table)
@@ -116,14 +116,15 @@ func host_export(output_dir string) {
 
 	tf_w := terraformOutputFile(output_dir, table)
 	for _, row := range res {
-		terraformName := toTerraformName(row.Name)
+		HostKeyWithoutPlus := strings.ReplaceAll(row.HostKey, "+", "-")
+		terraformName := toTerraformName(row.Name) + "_" + HostKeyWithoutPlus
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
 		fmt.Fprintf(tf_w, "  group = \"%s\"\n", row.Group)
 		fmt.Fprintf(tf_w, "  hostkey = \"%s\"\n", row.HostKey)
 		fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-		fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
@@ -133,7 +134,7 @@ func host_export(output_dir string) {
 	import_w.Flush()
 }
 
-func group_export(output_dir string) {
+func group_export(output_dir string, environment string) {
 	fmt.Printf("group_export\n")
 	table := "group"
 	import_w := importOutputFile(output_dir, table)
@@ -157,8 +158,10 @@ func group_export(output_dir string) {
 			fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 			fmt.Fprintf(tf_w, "  profile_name = \"%s\"\n", row.ProfileName)
 			fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
+			fmt.Fprintf(tf_w, "  ec2_security_group_ids = [\n")
 			regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
-			fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+			fmt.Fprintf(tf_w, "  ]\n")
+			fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 			fmt.Fprintf(tf_w, "}\n")
 			fmt.Fprintf(tf_w, "\n")
 			fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", terraformName, row.ID)
@@ -177,7 +180,7 @@ func regionsgid_output(tf_w *bufio.Writer, ec2SecurityGroupIds []*api.Ec2Securit
 	}
 }
 
-func service_export(output_dir string) {
+func service_export(output_dir string, environment string) {
 	fmt.Printf("service_export\n")
 	table := "service"
 	import_w := importOutputFile(output_dir, table)
@@ -201,7 +204,7 @@ func service_export(output_dir string) {
 		fmt.Fprintf(tf_w, "  services = [\n")
 		portprotocols_output(tf_w, row.Services)
 		fmt.Fprintf(tf_w, "  ]\n")
-		fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
@@ -220,7 +223,7 @@ func portprotocols_output(tf_w *bufio.Writer, portProtocols []*api.PortProtocol)
 	}
 }
 
-func zone_export(output_dir string) {
+func zone_export(output_dir string, environment string) {
 	fmt.Printf("zone_export\n")
 	table := "zone"
 	import_w := importOutputFile(output_dir, table)
@@ -242,7 +245,7 @@ func zone_export(output_dir string) {
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv4_addresses = %q\n", row.IPv4Addresses), "\" \"", "\",\""))
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv6_addresses = %q\n", row.IPv6Addresses), "\" \"", "\",\""))
-		fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
@@ -252,7 +255,7 @@ func zone_export(output_dir string) {
 	import_w.Flush()
 }
 
-func profile_export(output_dir string) {
+func profile_export(output_dir string, environment string) {
 	fmt.Printf("profile_export\n")
 	table := "profile"
 	import_w := importOutputFile(output_dir, table)
@@ -283,7 +286,7 @@ func profile_export(output_dir string) {
 		rules_output(tf_w, outbound)
 		fmt.Fprintf(tf_w, "    ]\n")
 		fmt.Fprintf(tf_w, "  }\n")
-		fmt.Fprintf(tf_w, "  provider = dog.qa\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 
 		fmt.Fprintf(import_w, "terraform import dog_profile.%s %s\n", terraformName, row.ID)
@@ -314,12 +317,13 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 }
 
 func main() {
+	environment := os.Args[1]
 	output_dir := "/tmp/dog-import"
-	group_export(output_dir)
-	host_export(output_dir)
-	link_export(output_dir)
-	profile_export(output_dir)
-	service_export(output_dir)
-	zone_export(output_dir)
+	group_export(output_dir, environment)
+	host_export(output_dir, environment)
+	link_export(output_dir, environment)
+	profile_export(output_dir, environment)
+	service_export(output_dir, environment)
+	zone_export(output_dir, environment)
 	fmt.Printf("check %s/ for output files\n", output_dir)
 }
