@@ -24,8 +24,9 @@ type (
 	}
 
 	dogProviderModel struct {
-		API_Key      types.String `tfsdk:"api_key"`
-		API_Endpoint types.String `tfsdk:"api_endpoint"`
+		API_Key      		types.String `tfsdk:"api_key"`
+		API_Endpoint 		types.String `tfsdk:"api_endpoint"`
+		API_Key_Variable_Name 	types.String `tfsdk:"api_key_variable_name"`
 	}
 )
 
@@ -61,51 +62,107 @@ func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnosti
 				Type:                types.StringType,
 				Sensitive:           true,
 			},
+			"api_key_variable_name": {
+				MarkdownDescription: "Name of ENVIRONMENT variable that contains api_key",
+				Optional:            true,
+				Type:                types.StringType,
+				Sensitive:           true,
+			},
 		},
 	}, nil
 }
 
 func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data dogProviderModel
-	diags := req.Config.Get(ctx, &data)
+	var config dogProviderModel
+	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//resp.Diagnostics.AddError("data", fmt.Sprintf("data: %+v\n", data))
 
-	// Configuration values are now available.
-	// if data.Host.Null { /* ... */ }
+	// If practitioner provided a configuration value for any of the
+	// attributes, it must be a known value.
 
-	// If the upstream provider SDK or HTTP client requires configuration, such
-	// as authentication or logging, this is a great opportunity to do so.
-	if data.API_Key.Unknown {
+	if config.API_Endpoint.Unknown {
 		resp.Diagnostics.AddError(
-			"Unknown Provider Configuration Value",
-			"API_Key not defined. Either define a terraform variable, or set `DOG_API_KEY` environment variable",
+			"Unknown dog API Endpoint",
+			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API endpoint. "+
+			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_Endpoint environment variable.",
 		)
+	}
+
+	if config.API_Key.Unknown && config.API_Key_Variable_Name.Unknown {
+		resp.Diagnostics.AddError(
+			"Unknown Dog API Key and API Key Variable Name",
+			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
+			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_KEY environment variable. "+
+			"Or set 'api_key_variable_name terraform variable and set the API Key as the value of that ENV variable",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
-	if data.API_Endpoint.Unknown {
+
+	// Default values to environment variables, but override
+	// with Terraform configuration value if set.
+
+	api_endpoint := os.Getenv("DOG_API_ENDPOINT")
+	api_key := os.Getenv("DOG_API_KEY")
+	dog_qa_api_key := os.Getenv("DOG_QA_API_KEY")
+	if os.Getenv(config.API_Key_Variable_Name.Value) != "" {
+		api_key = os.Getenv(config.API_Key_Variable_Name.Value)
+	}
+
+	if !config.API_Endpoint.IsNull() {
+		api_endpoint = config.API_Endpoint.ValueString()
+	}
+
+	if !config.API_Key.IsNull() {
+		api_key = config.API_Key.ValueString()
+	}
+
+	if (api_endpoint == "" || api_key == "") {
+	        resp.Diagnostics.AddError(
+	           "config values",
+	    	fmt.Sprintf("config.API_Key: %+v\n", config.API_Key.Value)+
+	    	fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
+	    	fmt.Sprintf("config.API_Key_Variable_Name: %+v\n", config.API_Key_Variable_Name)+
+	    	fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
+	    	fmt.Sprintf("api_key: %+v\n", api_key)+
+	    	fmt.Sprintf("dog_qa_api_key: %+v\n", dog_qa_api_key),
+	        )
+	}
+
+
+	// If any of the expected configurations are missing, return
+	// errors with provider-specific guidance.
+
+	if api_endpoint == "" {
 		resp.Diagnostics.AddError(
-			"Unknown Provider Configuration Value",
-			"API_Endpoint not defined. Either define a terraform variable, or set `DOG_API_ENDPOINT` environment variable",
+			"Missing Dog API Endpoint",
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. "+
+			"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. "+
+			"If either is already set, ensure the value is not empty.",
 		)
+	}
+
+	if api_key == "" {
+		resp.Diagnostics.AddError(
+			"Missing Dog API Key",
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
+			"Set the API Key value in the configuration or use the DOG_API_KEY environment variable. "+
+			"Or set 'api_key_variable_name terraform variable and set the API Key as the value of that ENV variable"+
+			"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if data.API_Key.Null {
-		data.API_Key.Value = os.Getenv("DOG_API_KEY")
-	}
-	if data.API_Endpoint.Null {
-		data.API_Endpoint.Value = os.Getenv("DOG_API_ENDPOINT")
-	}
-	//resp.Diagnostics.AddError("data.API_Key.Value", fmt.Sprintf("data.API_Key.Value: %+v\n", data.API_Key.Value))
-	//resp.Diagnostics.AddError("data.API_Endpoint.Value", fmt.Sprintf("data.API_Endpoint.Value: %+v\n", data.API_Endpoint.Value))
-
-	c := api.NewClient(data.API_Key.Value, data.API_Endpoint.Value)
-	//p.client = *api.NewClient(data.API_Key.Value)
+	c := api.NewClient(api_key, api_endpoint)
 
 	p.configured = true
 	log.Printf(fmt.Sprintf("p.dog: %+v\n", p.dog))
