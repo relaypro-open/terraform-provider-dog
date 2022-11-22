@@ -24,36 +24,63 @@ go install
 
 ## Using the provider
 
-An example provider configuration:
+An example provider configuration (set api key value in ENVIRONMENT variable "TF_VAR_dog_api_key_qa"):
 main.tf
 ```
 terraform {
   required_providers {
       dog = {
       source = "relaypro-open/dog"
-      version = "1.0.9"
+      version = "1.0.10"
   }
 }
 
 module "dog" {
-  source = "./dog"
+  source        = "./dog"
+  api_key       = var.dog_api_key_qa
+  api_endpoint  = var.dog_api_endpoint
 }
 ```
 
-dog/dog.tf
+variables.tf
+```
+variable "dog_api_key_qa" {
+  type = string
+  sensitive = true
+}
+
+variable "dog_api_endpoint" {
+  default = "https://qa-dog.DOMAIN.SOMETHING:8443/api/V2"
+}
+```
+
+dog/variables.tf
+```
+variable "api_key" {
+  type = string  
+  sensitive = true
+}
+
+variable "api_endpoint" {
+  type = string
+  sensitive = true
+}
+```
+
+dog/main.tf
 ```
 terraform {
   required_providers {
     dog = {
       source = "relaypro-open/dog"
-      version = ">=1.0.9"
+      version = ">=1.0.10"
     }
   }
 }
 
 provider "dog" {
-  api_endpoint = "https://qa-dog.DOMAIN.SOMETHING:8443/api/V2"
-  api_key_variable_name = "DOG_QA_API_KEY"
+  api_endpoint = var.api_endpoint
+  api_key = var.api_key
   alias = "qa"
 }
 ```

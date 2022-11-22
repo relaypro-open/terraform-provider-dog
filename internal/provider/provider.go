@@ -26,7 +26,6 @@ type (
 	dogProviderModel struct {
 		API_Key      		types.String `tfsdk:"api_key"`
 		API_Endpoint 		types.String `tfsdk:"api_endpoint"`
-		API_Key_Variable_Name 	types.String `tfsdk:"api_key_variable_name"`
 	}
 )
 
@@ -62,12 +61,6 @@ func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnosti
 				Type:                types.StringType,
 				Sensitive:           true,
 			},
-			"api_key_variable_name": {
-				MarkdownDescription: "Name of ENVIRONMENT variable that contains api_key",
-				Optional:            true,
-				Type:                types.StringType,
-				Sensitive:           true,
-			},
 		},
 	}, nil
 }
@@ -86,18 +79,17 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 	if config.API_Endpoint.Unknown {
 		resp.Diagnostics.AddError(
-			"Unknown dog API Endpoint",
+			"Unknown Dog API Endpoint",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API endpoint. "+
 			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_Endpoint environment variable.",
 		)
 	}
 
-	if config.API_Key.Unknown && config.API_Key_Variable_Name.Unknown {
+	if config.API_Key.Unknown {
 		resp.Diagnostics.AddError(
-			"Unknown Dog API Key and API Key Variable Name",
+			"Unknown Dog API Key",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
-			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_KEY environment variable. "+
-			"Or set 'api_key_variable_name terraform variable and set the API Key as the value of that ENV variable",
+			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_KEY environment variable. ",
 		)
 	}
 
@@ -110,10 +102,6 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 	api_endpoint := os.Getenv("DOG_API_ENDPOINT")
 	api_key := os.Getenv("DOG_API_KEY")
-	dog_qa_api_key := os.Getenv("DOG_QA_API_KEY")
-	if os.Getenv(config.API_Key_Variable_Name.Value) != "" {
-		api_key = os.Getenv(config.API_Key_Variable_Name.Value)
-	}
 
 	if !config.API_Endpoint.IsNull() {
 		api_endpoint = config.API_Endpoint.ValueString()
@@ -128,10 +116,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	           "config values",
 	    	fmt.Sprintf("config.API_Key: %+v\n", config.API_Key.Value)+
 	    	fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
-	    	fmt.Sprintf("config.API_Key_Variable_Name: %+v\n", config.API_Key_Variable_Name)+
 	    	fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
-	    	fmt.Sprintf("api_key: %+v\n", api_key)+
-	    	fmt.Sprintf("dog_qa_api_key: %+v\n", dog_qa_api_key),
+	    	fmt.Sprintf("api_key: %+v\n", api_key),
 	        )
 	}
 
@@ -153,7 +139,6 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 			"Missing Dog API Key",
 			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
 			"Set the API Key value in the configuration or use the DOG_API_KEY environment variable. "+
-			"Or set 'api_key_variable_name terraform variable and set the API Key as the value of that ENV variable"+
 			"If either is already set, ensure the value is not empty.",
 		)
 	}
