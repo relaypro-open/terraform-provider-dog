@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"golang.org/x/exp/slices"
 )
 
 
@@ -365,7 +366,8 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
 	}
-	if statusCode != 303 {
+	ok := []int{303, 200, 201}
+	if slices.Contains(ok, statusCode) != true {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
