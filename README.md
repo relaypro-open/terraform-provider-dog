@@ -120,7 +120,7 @@ resource "dog_host" "dog-host" {
 }
 ```
 
-dog/ink.tf:
+dog/link.tf:
 ```
 resource "dog_link" "q1" {
   address_handling = "union"
@@ -148,7 +148,7 @@ resource "dog_link" "q1" {
 }
 ```
 
-service.tf:
+dog/service.tf:
 ```
 resource "dog_service" "ssh-tcp-22" {
   name = "ssh-tcp-22"
@@ -163,7 +163,7 @@ resource "dog_service" "ssh-tcp-22" {
 }
 ```
 
-profile.tf:
+dog/profile.tf:
 ```
 resource "dog_profile" "test_qa" {
   name = "test_qa"
@@ -223,7 +223,7 @@ resource "dog_profile" "test_qa" {
 }
 ```
 
-zone.tf:
+dog/zone.tf:
 ```
 resource "dog_zone" "test_zone" {
   name = "test_zone"
@@ -238,10 +238,12 @@ resource "dog_zone" "test_zone" {
 If you have an existing dog configuration, you can batch import this config:
 
 ```
-./dog-import/dog-import
+cd dog-import
+go build
+dog-import $ENV $DIRECTORY
 ```
 
-This queries the dog API and exports the full configuration into terraform formatted files in /tmp/dog-import:
+This queries the dog API and exports the full configuration into terraform formatted files in $DIRECTORY:
 
 ```
 group.tf

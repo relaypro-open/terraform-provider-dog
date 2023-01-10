@@ -318,7 +318,7 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 
 func main() {
 	environment := os.Args[1]
-	output_dir := "/tmp/dog-import"
+	output_dir := os.Args[2]
 	group_export(output_dir, environment)
 	host_export(output_dir, environment)
 	link_export(output_dir, environment)
