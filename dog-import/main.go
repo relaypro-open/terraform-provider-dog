@@ -92,7 +92,7 @@ func link_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
-		fmt.Fprintf(import_w, "terraform import dog_link.%s %s\n", terraformName, row.ID)
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_link.%s %s\n", terraformName, row.ID)
 
 	}
 	tf_w.Flush()
@@ -128,7 +128,7 @@ func host_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_host.%s %s\n", terraformName, row.ID)
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_host.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
@@ -164,7 +164,7 @@ func group_export(output_dir string, environment string) {
 			fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 			fmt.Fprintf(tf_w, "}\n")
 			fmt.Fprintf(tf_w, "\n")
-			fmt.Fprintf(import_w, "terraform import dog_group.%s %s\n", terraformName, row.ID)
+			fmt.Fprintf(import_w, "terraform import module.dog.dog_group.%s %s\n", terraformName, row.ID)
 		}
 	}
 	tf_w.Flush()
@@ -208,7 +208,7 @@ func service_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_service.%s %s\n", terraformName, row.ID)
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_service.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
@@ -249,7 +249,7 @@ func zone_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_zone.%s %s\n", terraformName, row.ID)
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_zone.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
@@ -289,7 +289,7 @@ func profile_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 
-		fmt.Fprintf(import_w, "terraform import dog_profile.%s %s\n", terraformName, row.ID)
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_profile.%s %s\n", terraformName, row.ID)
 	}
 	tf_w.Flush()
 	import_w.Flush()
