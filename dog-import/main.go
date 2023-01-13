@@ -117,7 +117,7 @@ func host_export(output_dir string, environment string) {
 	tf_w := terraformOutputFile(output_dir, table)
 	for _, row := range res {
 		HostKeyWithoutPlus := strings.ReplaceAll(row.HostKey, "+", "-")
-		terraformName := "host_" + toTerraformName(row.Name) + "_" + HostKeyWithoutPlus
+		terraformName :=  toTerraformName(row.Name) 
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
 		fmt.Fprintf(tf_w, "  group = \"%s\"\n", row.Group)
