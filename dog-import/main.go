@@ -99,7 +99,7 @@ func link_export(output_dir string, environment string) {
 	import_w.Flush()
 }
 
-func host_export(output_dir string, environment string) {
+func host_export(output_dir string, environment string, host_prefix string) {
 	fmt.Printf("host_export\n")
 	table := "host"
 	import_w := importOutputFile(output_dir, table)
@@ -116,7 +116,7 @@ func host_export(output_dir string, environment string) {
 
 	tf_w := terraformOutputFile(output_dir, table)
 	for _, row := range res {
-		terraformName :=  toTerraformName(row.Name) 
+		terraformName :=  host_prefix + toTerraformName(row.Name) 
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
 		fmt.Fprintf(tf_w, "  group = \"%s\"\n", row.Group)
@@ -318,8 +318,10 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 func main() {
 	environment := os.Args[1]
 	output_dir := os.Args[2]
+	host_prefix := os.Args[3]
+	fmt.Printf("host_prefix: '%s'\n", host_prefix)
 	group_export(output_dir, environment)
-	host_export(output_dir, environment)
+	host_export(output_dir, environment, host_prefix)
 	link_export(output_dir, environment)
 	profile_export(output_dir, environment)
 	service_export(output_dir, environment)
