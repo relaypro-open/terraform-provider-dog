@@ -8,7 +8,8 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.14.1
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
-	github.com/relaypro-open/dog_api_golang v0.0.0-20221115211357-bc4dd543d69a
+	github.com/relaypro-open/dog_api_golang v0.0.0-20230117222050-61bc229ef9d5
+	golang.org/x/exp v0.0.0-20221114191408-850992195362
 )
 
 require (
@@ -63,7 +64,6 @@ require (
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.12.1 // indirect
 	golang.org/x/crypto v0.2.0 // indirect
-	golang.org/x/exp v0.0.0-20221114191408-850992195362 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect

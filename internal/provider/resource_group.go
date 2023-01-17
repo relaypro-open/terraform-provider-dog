@@ -76,6 +76,11 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
                                        },
                                }),
                         },
+			"vars": {
+                               	MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				Type:        types.MapType{ElemType: types.StringType},
+				Optional:    true,
+			},
 			"id": {
 				Computed:            true,
 				MarkdownDescription: "group identifier",
@@ -119,6 +124,7 @@ type groupResourceData struct {
 	ProfileName    string       `tfsdk:"profile_name"`
 	ProfileVersion string       `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+	Vars           map[string]string	`tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
@@ -142,6 +148,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		Vars:		plan.Vars,
 	}
 	return newGroup
 }
@@ -162,6 +169,7 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		Vars:		plan.Vars,
 	}
 	return newGroup
 }
@@ -176,6 +184,11 @@ func ApiToGroup(group api.Group) Group {
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 
+	newVars := map[string]string{}
+	for k, v := range group.Vars {
+		newVars[k] = v
+	}
+
 	h := Group{
 		Description:    types.String{Value: group.Description},
 		ID:             types.String{Value: group.ID},
@@ -183,6 +196,7 @@ func ApiToGroup(group api.Group) Group {
 		ProfileName:    types.String{Value: group.ProfileName},
 		ProfileVersion: types.String{Value: group.ProfileVersion},
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		Vars:		newVars,
 	}
 	return h
 }

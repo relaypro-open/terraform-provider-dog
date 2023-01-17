@@ -65,6 +65,11 @@ func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 				Required:            true,
 				Type:                types.StringType,
 			},
+			"vars": {
+                               	MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				Type:        types.MapType{ElemType: types.StringType},
+				Optional:    true,
+			},
 			"id": {
 				Computed:            true,
 				MarkdownDescription: "Host identifier",
