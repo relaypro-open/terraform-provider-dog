@@ -36,6 +36,9 @@ resource "dog_group" %[1]q {
       sgid = "sg-test"
     }
   ]
+  vars = {
+	  test = "dog_group"
+  }
 }
 `, configurableAttribute)
 } 

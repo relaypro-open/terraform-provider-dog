@@ -26,6 +26,7 @@ type (
 		HostKey     types.String `tfsdk:"hostkey"`
 		Location    types.String `tfsdk:"location"`
 		Name        types.String `tfsdk:"name"`
+		Vars	    map[string]string `tfsdk:"vars"`
 	}
 )
 

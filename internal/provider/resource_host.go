@@ -113,6 +113,7 @@ type hostResourceData struct {
 	HostKey     string       `tfsdk:"hostkey"`
 	Location    string       `tfsdk:"location"`
 	Name        string       `tfsdk:"name"`
+	Vars        map[string]string	`tfsdk:"vars"`
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -122,6 +123,7 @@ func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
+		Vars:        plan.Vars,
 	}
 	return newHost
 }
@@ -133,11 +135,17 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
+		Vars:        plan.Vars,
 	}
 	return newHost
 }
 
 func ApiToHost(host api.Host) Host {
+	newVars := map[string]string{}
+	for k, v := range host.Vars {
+		newVars[k] = v
+	}
+
 	h := Host{
 		Environment: types.String{Value: host.Environment},
 		Group:       types.String{Value: host.Group},
@@ -145,7 +153,9 @@ func ApiToHost(host api.Host) Host {
 		HostKey:     types.String{Value: host.HostKey},
 		Location:    types.String{Value: host.Location},
 		Name:        types.String{Value: host.Name},
+		Vars:		newVars,
 	}
+
 	return h
 }
 
