@@ -124,7 +124,7 @@ func host_export(output_dir string, environment string, host_prefix string) {
 		fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
-		fmt.Fprintf(tf_w, "  vars = {}\n", environment)
+		fmt.Fprintf(tf_w, "  vars = {}\n")
 		fmt.Fprintf(tf_w, "}\n")
 		fmt.Fprintf(tf_w, "\n")
 
@@ -162,7 +162,7 @@ func group_export(output_dir string, environment string) {
 			regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
 			fmt.Fprintf(tf_w, "  ]\n")
 			fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
-			fmt.Fprintf(tf_w, "  vars = {}\n", environment)
+			fmt.Fprintf(tf_w, "  vars = {}\n")
 			fmt.Fprintf(tf_w, "}\n")
 			fmt.Fprintf(tf_w, "\n")
 			fmt.Fprintf(import_w, "terraform import module.dog.dog_group.%s %s\n", terraformName, row.ID)
