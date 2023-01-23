@@ -39,3 +39,4 @@ website/vendor
 .gpg_password
 
 dog-import/dog-import
+terraform-provider-dog
