@@ -58,10 +58,10 @@ func link_export(output_dir string, environment string) {
 
 	res, statusCode, err := c.GetLinks(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
@@ -108,10 +108,10 @@ func host_export(output_dir string, environment string, host_prefix string) {
 
 	res, statusCode, err := c.GetHosts(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
@@ -143,10 +143,10 @@ func group_export(output_dir string, environment string) {
 
 	res, statusCode, err := c.GetGroups(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
@@ -190,10 +190,10 @@ func service_export(output_dir string, environment string) {
 
 	res, statusCode, err := c.GetServices(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
@@ -233,10 +233,10 @@ func zone_export(output_dir string, environment string) {
 
 	res, statusCode, err := c.GetZones(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
@@ -265,10 +265,10 @@ func profile_export(output_dir string, environment string) {
 
 	res, statusCode, err := c.GetProfiles(nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 	if statusCode != 200 {
-		log.Fatalln(err)
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
 	}
 
 	tf_w := terraformOutputFile(output_dir, table)
