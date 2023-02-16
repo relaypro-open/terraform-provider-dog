@@ -22,7 +22,7 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("DOG_API_ENDPOINT must be set to run acceptance tests.")
 	}
 
-	if v := os.Getenv("DOG_API_KEY"); v == "" {
-		t.Fatal("DOG_API_KEY must be set to run acceptance tests.")
+	if v := os.Getenv("DOG_API_TOKEN"); v == "" {
+		t.Fatal("DOG_API_TOKEN must be set to run acceptance tests.")
 	}
 }

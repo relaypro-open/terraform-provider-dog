@@ -24,7 +24,7 @@ type (
 	}
 
 	dogProviderModel struct {
-		API_Key      		types.String `tfsdk:"api_key"`
+		Api_Token      		types.String `tfsdk:"api_token"`
 		API_Endpoint 		types.String `tfsdk:"api_endpoint"`
 	}
 )
@@ -55,7 +55,7 @@ func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnosti
 				Optional:            true,
 				Type:                types.StringType,
 			},
-			"api_key": {
+			"api_token": {
 				MarkdownDescription: "API Key",
 				Optional:            true,
 				Type:                types.StringType,
@@ -85,11 +85,11 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		)
 	}
 
-	if config.API_Key.Unknown {
+	if config.Api_Token.Unknown {
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Key",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
-			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_KEY environment variable. ",
+			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_TOKEN environment variable. ",
 		)
 	}
 
@@ -101,23 +101,23 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	// with Terraform configuration value if set.
 
 	api_endpoint := os.Getenv("DOG_API_ENDPOINT")
-	api_key := os.Getenv("DOG_API_KEY")
+	api_token := os.Getenv("DOG_API_TOKEN")
 
 	if !config.API_Endpoint.IsNull() {
 		api_endpoint = config.API_Endpoint.ValueString()
 	}
 
-	if !config.API_Key.IsNull() {
-		api_key = config.API_Key.ValueString()
+	if !config.Api_Token.IsNull() {
+		api_token = config.Api_Token.ValueString()
 	}
 
-	if (api_endpoint == "" || api_key == "") {
+	if (api_endpoint == "" || api_token == "") {
 	        resp.Diagnostics.AddError(
 	           "config values",
-	    	fmt.Sprintf("config.API_Key: %+v\n", config.API_Key.Value)+
+	    	fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.Value)+
 	    	fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
 	    	fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
-	    	fmt.Sprintf("api_key: %+v\n", api_key),
+	    	fmt.Sprintf("api_token: %+v\n", api_token),
 	        )
 	}
 
@@ -134,11 +134,11 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		)
 	}
 
-	if api_key == "" {
+	if api_token == "" {
 		resp.Diagnostics.AddError(
 			"Missing Dog API Key",
 			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
-			"Set the API Key value in the configuration or use the DOG_API_KEY environment variable. "+
+			"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
 			"If either is already set, ensure the value is not empty.",
 		)
 	}
@@ -147,7 +147,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		return
 	}
 
-	c := api.NewClient(api_key, api_endpoint)
+	c := api.NewClient(api_token, api_endpoint)
 
 	p.configured = true
 	log.Printf(fmt.Sprintf("p.dog: %+v\n", p.dog))

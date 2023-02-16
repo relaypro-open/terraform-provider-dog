@@ -46,7 +46,7 @@ func (*zoneDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 		MarkdownDescription: "Zone data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_key": {
+			"api_token": {
 				MarkdownDescription: "Zone configurable attribute",
 				Optional:            true,
 				Type:                types.StringType,
@@ -81,7 +81,7 @@ func (d *zoneDataSource) Configure(ctx context.Context, req datasource.Configure
 }
 
 type zoneDataSourceData struct {
-	ApiKey types.String `tfsdk:"api_key"`
+	ApiToken types.String `tfsdk:"api_token"`
 	Id     types.String `tfsdk:"id"`
 }
 

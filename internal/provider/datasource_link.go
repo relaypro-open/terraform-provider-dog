@@ -66,7 +66,7 @@ func (*linkDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 		MarkdownDescription: "Link data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_key": {
+			"api_token": {
 				MarkdownDescription: "Link configurable attribute",
 				Optional:            true,
 				Type:                types.StringType,
@@ -101,7 +101,7 @@ func (d *linkDataSource) Configure(ctx context.Context, req datasource.Configure
 }
 
 type linkDataSourceData struct {
-	ApiKey types.String `tfsdk:"api_key"`
+	ApiToken types.String `tfsdk:"api_token"`
 	Id     types.String `tfsdk:"id"`
 }
 
