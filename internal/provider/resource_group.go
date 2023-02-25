@@ -52,12 +52,12 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 			},
 			"profile_name": {
 				MarkdownDescription: "group profile name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"profile_version": {
 				MarkdownDescription: "group profile version",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
                        "ec2_security_group_ids": {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -16,6 +15,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+type profileResourceData struct {
+	ID      types.String          `tfsdk:"id"`
+	Name    string                `tfsdk:"name"`
+	RulesetId  string             `tfsdk:"ruleset_id"`
+	Version string                `tfsdk:"version"`
+}
 
 type (
 	profileResource struct {
@@ -45,59 +50,10 @@ func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				Required:            true,
 				Type:                types.StringType,
 			},
-			"rules": {
-				MarkdownDescription: "Profile rules",
+			"rule_id": {
+				MarkdownDescription: "Rule Id",
 				Required:            true,
-				Type: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"inbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
-								},
-							},
-						},
-						"outbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
-								},
-							},
-						},
-					},
-				},
+				Type:                types.StringType,
 			},
 			"version": {
 				MarkdownDescription: "Profile version",
@@ -140,183 +96,32 @@ func (*profileResource) ImportState(ctx context.Context, req resource.ImportStat
 }
 
 
-type profileResourceData struct {
-	ID      types.String          `tfsdk:"id"`
-	Name    string                `tfsdk:"name"`
-	Rules   *profileResourceRules `tfsdk:"rules"`
-	Version string                `tfsdk:"version"`
-}
-
-type profileResourceRules struct {
-	Inbound  []*profileReseourceRule `tfsdk:"inbound"`
-	Outbound []*profileReseourceRule `tfsdk:"outbound"`
-}
-
-type profileReseourceRule struct {
-	Action       types.String `tfsdk:"action"`
-	Active       types.Bool   `tfsdk:"active"`
-	Comment      types.String `tfsdk:"comment"`
-	Environments []string     `tfsdk:"environments"`
-	Group        types.String `tfsdk:"group"`
-	GroupType    types.String `tfsdk:"group_type"`
-	Interface    types.String `tfsdk:"interface"`
-	Log          types.Bool   `tfsdk:"log"`
-	LogPrefix    types.String `tfsdk:"log_prefix"`
-	Order        types.Int64  `tfsdk:"order"`
-	Service      types.String `tfsdk:"service"`
-	States       []string     `tfsdk:"states"`
-	Type         types.String `tfsdk:"type"`
-}
 
 func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
-	inboundRules := []*api.Rule{}
-	for _, inbound_rule := range plan.Rules.Inbound {
-		rule := &api.Rule{
-			Action:       inbound_rule.Action.Value,
-			Active:       inbound_rule.Active.Value,
-			Comment:      inbound_rule.Comment.Value,
-			Environments: inbound_rule.Environments,
-			Group:        inbound_rule.Group.Value,
-			GroupType:    inbound_rule.GroupType.Value,
-			Interface:    inbound_rule.Interface.Value,
-			Log:          inbound_rule.Log.Value,
-			LogPrefix:    inbound_rule.LogPrefix.Value,
-			Order:        int(inbound_rule.Order.Value),
-			Service:      inbound_rule.Service.Value,
-			States:       inbound_rule.States,
-			Type:         inbound_rule.Type.Value,
-		}
-		inboundRules = append(inboundRules, rule)
-	}
-	outboundRules := []*api.Rule{}
-	for _, outbound_rule := range plan.Rules.Outbound {
-		rule := &api.Rule{
-			Action:       outbound_rule.Action.Value,
-			Active:       outbound_rule.Active.Value,
-			Comment:      outbound_rule.Comment.Value,
-			Environments: outbound_rule.Environments,
-			Group:        outbound_rule.Group.Value,
-			GroupType:    outbound_rule.GroupType.Value,
-			Interface:    outbound_rule.Interface.Value,
-			Log:          outbound_rule.Log.Value,
-			LogPrefix:    outbound_rule.LogPrefix.Value,
-			Order:        int(outbound_rule.Order.Value),
-			Service:      outbound_rule.Service.Value,
-			States:       outbound_rule.States,
-			Type:         outbound_rule.Type.Value,
-		}
-		outboundRules = append(outboundRules, rule)
-	}
 
 	newProfile := api.ProfileCreateRequest{
-		Name: plan.Name,
-		Rules: &api.Rules{
-			Inbound:  inboundRules,
-			Outbound: outboundRules,
-		},
+		Name:    plan.Name,
+		RulesetId:  plan.RulesetId,
 		Version: plan.Version,
 	}
 	return newProfile
 }
 
 func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
-	inboundRules := []*api.Rule{}
-	for _, inbound_rule := range plan.Rules.Inbound {
-		rule := &api.Rule{
-			Action:       inbound_rule.Action.Value,
-			Active:       inbound_rule.Active.Value,
-			Comment:      inbound_rule.Comment.Value,
-			Environments: inbound_rule.Environments,
-			Group:        inbound_rule.Group.Value,
-			GroupType:    inbound_rule.GroupType.Value,
-			Interface:    inbound_rule.Interface.Value,
-			Log:          inbound_rule.Log.Value,
-			LogPrefix:    inbound_rule.LogPrefix.Value,
-			Order:        int(inbound_rule.Order.Value),
-			Service:      inbound_rule.Service.Value,
-			States:       inbound_rule.States,
-			Type:         inbound_rule.Type.Value,
-		}
-		inboundRules = append(inboundRules, rule)
-	}
-	outboundRules := []*api.Rule{}
-	for _, outbound_rule := range plan.Rules.Outbound {
-		rule := &api.Rule{
-			Action:       outbound_rule.Action.Value,
-			Active:       outbound_rule.Active.Value,
-			Comment:      outbound_rule.Comment.Value,
-			Environments: outbound_rule.Environments,
-			Group:        outbound_rule.Group.Value,
-			GroupType:    outbound_rule.GroupType.Value,
-			Interface:    outbound_rule.Interface.Value,
-			Log:          outbound_rule.Log.Value,
-			LogPrefix:    outbound_rule.LogPrefix.Value,
-			Order:        int(outbound_rule.Order.Value),
-			Service:      outbound_rule.Service.Value,
-			States:       outbound_rule.States,
-			Type:         outbound_rule.Type.Value,
-		}
-		outboundRules = append(outboundRules, rule)
-	}
-
 	newProfile := api.ProfileUpdateRequest{
 		Name: plan.Name,
-		Rules: &api.Rules{
-			Inbound:  inboundRules,
-			Outbound: outboundRules,
-		},
+		RulesetId: plan.RulesetId,
 		Version: plan.Version,
 	}
 	return newProfile
 }
 
 func ApiToProfile(profile api.Profile) Profile {
-	newInboundRules := []*Rule{}
-	for _, inbound_rule := range profile.Rules.Inbound {
-		rule := &Rule{
-			Action:       types.String{Value: inbound_rule.Action},
-			Active:       types.Bool{Value: inbound_rule.Active},
-			Comment:      types.String{Value: inbound_rule.Comment},
-			Environments: inbound_rule.Environments,
-			Group:        types.String{Value: inbound_rule.Group},
-			GroupType:    types.String{Value: inbound_rule.GroupType},
-			Interface:    types.String{Value: inbound_rule.Interface},
-			Log:          types.Bool{Value: inbound_rule.Log},
-			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(inbound_rule.Order)},
-			Service:      types.String{Value: inbound_rule.Service},
-			States:       inbound_rule.States,
-			Type:         types.String{Value: inbound_rule.Type},
-		}
-		newInboundRules = append(newInboundRules, rule)
-	}
-	newOutboundRules := []*Rule{}
-	for _, outbound_rule := range profile.Rules.Outbound {
-		rule := &Rule{
-			Action:       types.String{Value: outbound_rule.Action},
-			Active:       types.Bool{Value: outbound_rule.Active},
-			Comment:      types.String{Value: outbound_rule.Comment},
-			Environments: outbound_rule.Environments,
-			Group:        types.String{Value: outbound_rule.Group},
-			GroupType:    types.String{Value: outbound_rule.GroupType},
-			Interface:    types.String{Value: outbound_rule.Interface},
-			Log:          types.Bool{Value: outbound_rule.Log},
-			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(outbound_rule.Order)},
-			Service:      types.String{Value: outbound_rule.Service},
-			States:       outbound_rule.States,
-			Type:         types.String{Value: outbound_rule.Type},
-		}
-		newOutboundRules = append(newOutboundRules, rule)
-	}
 	h := Profile{
 		//Created:     types.Int64{Value: int64(profile.Created)},
 		ID:   types.String{Value: profile.ID},
 		Name: types.String{Value: profile.Name},
-		Rules: &Rules{
-			Inbound:  newInboundRules,
-			Outbound: newOutboundRules,
-		},
+		RuleId: types.String{Value: profile.RulesetId},
 		Version: types.String{Value: profile.Version},
 	}
 	return h

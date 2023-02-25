@@ -24,7 +24,7 @@ go install
 
 ## Using the provider
 
-An example provider configuration (set api key value in ENVIRONMENT variable "TF_VAR_dog_api_key_qa"):
+An example provider configuration (set api token value in ENVIRONMENT variable "TF_VAR_dog_api_token_qa"):
 main.tf
 ```
 terraform {
@@ -37,14 +37,14 @@ terraform {
 
 module "dog" {
   source        = "./dog"
-  api_key       = var.dog_api_key_qa
+  api_token       = var.dog_api_token_qa
   api_endpoint  = var.dog_api_endpoint
 }
 ```
 
 variables.tf
 ```
-variable "dog_api_key_qa" {
+variable "dog_api_token_qa" {
   type = string
   sensitive = true
 }
@@ -56,7 +56,7 @@ variable "dog_api_endpoint" {
 
 dog/variables.tf
 ```
-variable "api_key" {
+variable "api_token" {
   type = string  
   sensitive = true
 }
@@ -80,7 +80,7 @@ terraform {
 
 provider "dog" {
   api_endpoint = var.api_endpoint
-  api_key = var.api_key
+  api_token = var.api_token
   alias = "qa"
 }
 ```

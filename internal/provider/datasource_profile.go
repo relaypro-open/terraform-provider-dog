@@ -21,28 +21,8 @@ type (
 	Profile struct {
 		ID          types.String          `tfsdk:"id"`
 		Name        types.String          `tfsdk:"name"`
-		Rules       *Rules                `tfsdk:"rules"`
+		RuleId      types.String          `tfsdk:"rule_id"`
 		Version     types.String          `tfsdk:"version"`
-	}
-	Rules struct {
-		Inbound  []*Rule `tfsdk:"inbound"`
-		Outbound []*Rule `tfsdk:"outbound"`
-	}
-
-	Rule struct {
-		Action       types.String `tfsdk:"action"`
-		Active       types.Bool   `tfsdk:"active"`
-		Comment      types.String `tfsdk:"comment"`
-		Environments []string     `tfsdk:"environments"`
-		Group        types.String `tfsdk:"group"`
-		GroupType    types.String `tfsdk:"group_type"`
-		Interface    types.String `tfsdk:"interface"`
-		Log          types.Bool   `tfsdk:"log"`
-		LogPrefix    types.String `tfsdk:"log_prefix"`
-		Order        types.Int64  `tfsdk:"order"`
-		Service      types.String `tfsdk:"service"`
-		States       []string     `tfsdk:"states"`
-		Type         types.String `tfsdk:"type"`
 	}
 
 )

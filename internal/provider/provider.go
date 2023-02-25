@@ -169,6 +169,7 @@ func (*dogProvider) Resources(ctx context.Context) []func() resource.Resource {
 		NewZoneResource,
 		NewLinkResource,
 		NewProfileResource,
+		NewRulesetResource,
 	}
 }
 
@@ -180,6 +181,7 @@ func (*dogProvider) DataSources(ctx context.Context) []func() datasource.DataSou
 		NewZoneDataSource,
 		NewLinkDataSource,
 		NewProfileDataSource,
+		NewRulesetDataSource,
 	}
 }
 
