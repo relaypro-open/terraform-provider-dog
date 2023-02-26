@@ -54,7 +54,7 @@ func link_export(output_dir string, environment string) {
 	table := "link"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetLinks(nil)
 	if err != nil {
@@ -104,7 +104,7 @@ func host_export(output_dir string, environment string, host_prefix string) {
 	table := "host"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetHosts(nil)
 	if err != nil {
@@ -139,7 +139,7 @@ func group_export(output_dir string, environment string) {
 	table := "group"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetGroups(nil)
 	if err != nil {
@@ -186,7 +186,7 @@ func service_export(output_dir string, environment string) {
 	table := "service"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetServices(nil)
 	if err != nil {
@@ -229,7 +229,7 @@ func zone_export(output_dir string, environment string) {
 	table := "zone"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetZones(nil)
 	if err != nil {
@@ -256,12 +256,51 @@ func zone_export(output_dir string, environment string) {
 	import_w.Flush()
 }
 
+func ruleset_export(output_dir string, environment string) {
+	fmt.Printf("ruleset_export\n")
+	table := "ruleset"
+	import_w := importOutputFile(output_dir, table)
+
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
+
+	res, statusCode, err := c.GetRulesets(nil)
+	if err != nil {
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
+	}
+	if statusCode != 200 {
+		log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
+	}
+
+	tf_w := terraformOutputFile(output_dir, table)
+	for _, row := range res {
+		terraformName := toTerraformName(row.Name)
+		fmt.Fprintf(tf_w, "resource \"dog_ruleset\" \"%s\" {\n", terraformName)
+		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+		fmt.Fprintf(tf_w, "  rules = {\n")
+		inbound := row.Rules.Inbound
+		fmt.Fprintf(tf_w, "    inbound = [\n")
+		rules_output(tf_w, inbound)
+		fmt.Fprintf(tf_w, "    ]\n")
+		fmt.Fprintf(tf_w, "    outbound = [\n")
+		outbound := row.Rules.Outbound
+		rules_output(tf_w, outbound)
+		fmt.Fprintf(tf_w, "    ]\n")
+		fmt.Fprintf(tf_w, "  }\n")
+		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+		fmt.Fprintf(tf_w, "}\n")
+
+		fmt.Fprintf(import_w, "terraform import module.dog.dog_ruleset.%s %s\n", terraformName, row.ID)
+	}
+	tf_w.Flush()
+	import_w.Flush()
+}
+
 func profile_export(output_dir string, environment string) {
 	fmt.Printf("profile_export\n")
 	table := "profile"
 	import_w := importOutputFile(output_dir, table)
 
-	c := api.NewClient(os.Getenv("DOG_API_KEY"), os.Getenv("DOG_API_ENDPOINT"))
+	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	res, statusCode, err := c.GetProfiles(nil)
 	if err != nil {
@@ -277,16 +316,7 @@ func profile_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
-		fmt.Fprintf(tf_w, "  rules = {\n")
-		inbound := row.Rules.Inbound
-		fmt.Fprintf(tf_w, "    inbound = [\n")
-		rules_output(tf_w, inbound)
-		fmt.Fprintf(tf_w, "    ]\n")
-		fmt.Fprintf(tf_w, "    outbound = [\n")
-		outbound := row.Rules.Outbound
-		rules_output(tf_w, outbound)
-		fmt.Fprintf(tf_w, "    ]\n")
-		fmt.Fprintf(tf_w, "  }\n")
+		fmt.Fprintf(tf_w, "  ruleset_id = dog_ruleset.%s.name\n", row.Name)
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 
@@ -337,6 +367,7 @@ func main() {
 	group_export(output_dir, environment)
 	host_export(output_dir, environment, host_prefix)
 	link_export(output_dir, environment)
+	ruleset_export(output_dir, environment)
 	profile_export(output_dir, environment)
 	service_export(output_dir, environment)
 	zone_export(output_dir, environment)
