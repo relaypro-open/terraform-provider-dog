@@ -22,7 +22,6 @@ type (
 		ID      types.String `tfsdk:"id"`
 		Name    types.String `tfsdk:"name"`
 		Rules   *rulesetResourceRules `tfsdk:"rules"`
-		Version types.String `tfsdk:"version"`
 	}
 
 	Rules struct {

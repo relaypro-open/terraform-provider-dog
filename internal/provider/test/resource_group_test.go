@@ -50,6 +50,9 @@ resource %[1]q %[2]q {
       sgid = "sg-test"
     }
   ]
+  vars = {
+	  test = "dog_group"
+  }
 }
 `, name, randomName)
 }

@@ -50,7 +50,7 @@ func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				Required:            true,
 				Type:                types.StringType,
 			},
-			"rule_id": {
+			"ruleset_id": {
 				MarkdownDescription: "Rule Id",
 				Required:            true,
 				Type:                types.StringType,
@@ -121,7 +121,7 @@ func ApiToProfile(profile api.Profile) Profile {
 		//Created:     types.Int64{Value: int64(profile.Created)},
 		ID:   types.String{Value: profile.ID},
 		Name: types.String{Value: profile.Name},
-		RuleId: types.String{Value: profile.RulesetId},
+		RulesetId: types.String{Value: profile.RulesetId},
 		Version: types.String{Value: profile.Version},
 	}
 	return h

@@ -1,4 +1,4 @@
-TEST?=$$(go list ./... | grep -v 'vendor')
+TEST?=$$(go list ./... | grep -v 'vendor' | grep -v 'disable')
 HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog

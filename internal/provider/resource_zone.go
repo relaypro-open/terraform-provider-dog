@@ -90,27 +90,6 @@ func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequ
 	r.p.dog = client
 }
 
-
-//func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-//	resp.ResourceData = r
-//	// Prevent panic if the provider has not been configured
-//	if req.ProviderData == nil {
-//		return
-//	}
-//
-//	client, ok := req.ProviderData.(*api.Client)
-//	if !ok {
-//		resp.Diagnostics.AddError(
-//			"Unexpected Resource Configure Type",
-//			fmt.Sprintf("Expected *dog.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-//		)
-//
-//		return
-//	}
-//
-//	r.dog = client
-//}
-
 func (*zoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

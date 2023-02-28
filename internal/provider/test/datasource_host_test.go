@@ -50,42 +50,7 @@ func testAccDogHostProfileDataSourceConfig() string {
 resource "dog_profile" "terraform_test_profile" {
   name = "terraform_test_profile"
   version = "1.0"
-  rules = {
-    inbound = [
-      {
-        action = "DROP"
-        active = "true"
-        comment = ""
-        environments = []
-        group = "any"
-        group_type = "ANY"
-        interface = ""
-        log = "false"
-        log_prefix = ""
-        order = "2"
-        service = "any"
-        states = []
-        type = "BASIC"
-      }
-    ]
-    outbound = [
-      {
-        action = "ACCEPT"
-        active = "true"
-        comment = ""
-        environments = []
-        group = "any"
-        group_type = "ANY"
-        interface = ""
-        log = "false"
-        log_prefix = ""
-        order = "1"
-        service = "any"
-        states = []
-        type = "BASIC"
-      }
-    ]
-  }
+  ruleset_id = "123"
 }
 `)
 } 

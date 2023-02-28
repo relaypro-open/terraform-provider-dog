@@ -1,4 +1,3 @@
-
 package dog
 
 import (
@@ -8,46 +7,46 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
 
 
 type (
-	rulesetResource struct {
+	profileResource struct {
 		p dogProvider
 	}
 )
 
 var (
-	_ resource.Resource                = (*rulesetResource)(nil)
-	_ resource.ResourceWithImportState = (*rulesetResource)(nil)
+	_ resource.Resource                = (*profileResource)(nil)
+	_ resource.ResourceWithImportState = (*profileResource)(nil)
 )
 
-func NewRulesetResource() resource.Resource {
-	return &rulesetResource{}
+func NewProfileResource() resource.Resource {
+	return &profileResource{}
 }
 
-func (*rulesetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ruleset"
+func (*profileResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_profile"
 }
 
 
-func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
-				MarkdownDescription: "ruleset name",
+				MarkdownDescription: "Profile name",
 				Required:            true,
 				Type:                types.StringType,
 			},
 			"rules": {
-				MarkdownDescription: "Rule rules",
+				MarkdownDescription: "Profile rules",
 				Required:            true,
 				Type: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
@@ -100,9 +99,14 @@ func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 					},
 				},
 			},
+			"version": {
+				MarkdownDescription: "Profile version",
+				Required:            true,
+				Type:                types.StringType,
+			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Rule identifier",
+				MarkdownDescription: "Profile identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -112,7 +116,7 @@ func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 	}, nil
 }
 
-func (r *rulesetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *profileResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured
 	if req.ProviderData == nil {
 		return
@@ -131,23 +135,24 @@ func (r *rulesetResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.p.dog = client
 }
 
-func (*rulesetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*profileResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 
-type rulesetResourceData struct {
+type profileResourceData struct {
 	ID      types.String          `tfsdk:"id"`
-	Rules   *rulesetResourceRules `tfsdk:"rules"`
 	Name    string                `tfsdk:"name"`
+	Rules   *profileResourceRules `tfsdk:"rules"`
+	Version string                `tfsdk:"version"`
 }
 
-type rulesetResourceRules struct {
-	Inbound  []*rulesetResourceRule `tfsdk:"inbound"`
-	Outbound []*rulesetResourceRule `tfsdk:"outbound"`
+type profileResourceRules struct {
+	Inbound  []*profileReseourceRule `tfsdk:"inbound"`
+	Outbound []*profileReseourceRule `tfsdk:"outbound"`
 }
 
-type rulesetResourceRule struct {
+type profileReseourceRule struct {
 	Action       types.String `tfsdk:"action"`
 	Active       types.Bool   `tfsdk:"active"`
 	Comment      types.String `tfsdk:"comment"`
@@ -163,7 +168,7 @@ type rulesetResourceRule struct {
 	Type         types.String `tfsdk:"type"`
 }
 
-func RulesetToCreateRequest(plan rulesetResourceData) api.RulesetCreateRequest {
+func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
@@ -203,17 +208,18 @@ func RulesetToCreateRequest(plan rulesetResourceData) api.RulesetCreateRequest {
 		outboundRules = append(outboundRules, rule)
 	}
 
-	newRuleset := api.RulesetCreateRequest{
+	newProfile := api.ProfileCreateRequest{
 		Name: plan.Name,
 		Rules: &api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
 		},
+		Version: plan.Version,
 	}
-	return newRuleset
+	return newProfile
 }
 
-func RulesetToUpdateRequest(plan rulesetResourceData) api.RulesetUpdateRequest {
+func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
@@ -253,21 +259,21 @@ func RulesetToUpdateRequest(plan rulesetResourceData) api.RulesetUpdateRequest {
 		outboundRules = append(outboundRules, rule)
 	}
 
-	newRuleset := api.RulesetUpdateRequest{
+	newProfile := api.ProfileUpdateRequest{
 		Name: plan.Name,
 		Rules: &api.Rules{
 			Inbound:  inboundRules,
 			Outbound: outboundRules,
 		},
+		Version: plan.Version,
 	}
-	return newRuleset
+	return newProfile
 }
 
-
-func ApiToRuleset(ruleset api.Ruleset) Ruleset {
-	newInboundRules := []*rulesetResourceRule{}
-	for _, inbound_rule := range ruleset.Rules.Inbound {
-		rule := &rulesetResourceRule{
+func ApiToProfile(profile api.Profile) Profile {
+	newInboundRules := []*Rule{}
+	for _, inbound_rule := range profile.Rules.Inbound {
+		rule := &Rule{
 			Action:       types.String{Value: inbound_rule.Action},
 			Active:       types.Bool{Value: inbound_rule.Active},
 			Comment:      types.String{Value: inbound_rule.Comment},
@@ -284,9 +290,9 @@ func ApiToRuleset(ruleset api.Ruleset) Ruleset {
 		}
 		newInboundRules = append(newInboundRules, rule)
 	}
-	newOutboundRules := []*rulesetResourceRule{}
-	for _, outbound_rule := range ruleset.Rules.Outbound {
-		rule := &rulesetResourceRule{
+	newOutboundRules := []*Rule{}
+	for _, outbound_rule := range profile.Rules.Outbound {
+		rule := &Rule{
 			Action:       types.String{Value: outbound_rule.Action},
 			Active:       types.Bool{Value: outbound_rule.Active},
 			Comment:      types.String{Value: outbound_rule.Comment},
@@ -303,23 +309,23 @@ func ApiToRuleset(ruleset api.Ruleset) Ruleset {
 		}
 		newOutboundRules = append(newOutboundRules, rule)
 	}
-	h := Ruleset{
-		//Created:     types.Int64{Value: int64(rule.Created)},
-		ID: types.String{Value: ruleset.ID},
-		Name: types.String{Value: ruleset.Name},
-		//Rules: &Rules{
-		Rules: &rulesetResourceRules{
+	h := Profile{
+		//Created:     types.Int64{Value: int64(profile.Created)},
+		ID:   types.String{Value: profile.ID},
+		Name: types.String{Value: profile.Name},
+		Rules: &Rules{
 			Inbound:  newInboundRules,
 			Outbound: newOutboundRules,
 		},
+		Version: types.String{Value: profile.Version},
 	}
 	return h
 }
 
-func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var state Ruleset
+func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var state Profile
 
-	var plan rulesetResourceData
+	var plan profileResourceData
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
@@ -327,21 +333,21 @@ func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	newRuleset := RulesetToCreateRequest(plan)
+	newProfile := ProfileToCreateRequest(plan)
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	ruleset, statusCode, err := r.p.dog.CreateRuleset(newRuleset, nil)
-	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
-	tflog.Trace(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
+	profile, statusCode, err := r.p.dog.CreateProfile(newProfile, nil)
+	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ruleset, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToRuleset(ruleset)
+	state = ApiToProfile(profile)
 
 	plan.ID = state.ID
 
@@ -354,8 +360,8 @@ func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *rulesetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state Ruleset
+func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state Profile
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -364,27 +370,28 @@ func (r *rulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	rulesetID := state.ID.Value
+	profileID := state.ID.Value
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	ruleset, statusCode, err := r.p.dog.GetRuleset(rulesetID, nil)
+	profile, statusCode, err := r.p.dog.GetProfile(profileID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ruleset, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToRuleset(ruleset)
+	state = ApiToProfile(profile)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var state Ruleset
+
+func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state Profile
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -393,22 +400,22 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	rulesetID := state.ID.Value
+	profileID := state.ID.Value
 
-	var plan rulesetResourceData
+	var plan profileResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newRuleset := RulesetToUpdateRequest(plan)
-	ruleset, statusCode, err := r.p.dog.UpdateRuleset(rulesetID, newRuleset, nil)
-	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
-	tflog.Trace(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
-	state = ApiToRuleset(ruleset)
+	newProfile := ProfileToUpdateRequest(plan)
+	profile, statusCode, err := r.p.dog.UpdateProfile(profileID, newProfile, nil)
+	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
+	state = ApiToProfile(profile)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ruleset, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -427,8 +434,8 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 
 }
 
-func (r *rulesetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state Ruleset
+func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state Profile
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -437,18 +444,18 @@ func (r *rulesetResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	rulesetID := state.ID.Value
-	ruleset, statusCode, err := r.p.dog.DeleteRuleset(rulesetID, nil)
+	profileID := state.ID.Value
+	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read ruleset, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read profile, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Trace(ctx, fmt.Sprintf("ruleset deleted: %+v\n", ruleset))
+	tflog.Trace(ctx, fmt.Sprintf("profile deleted: %+v\n", profile))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

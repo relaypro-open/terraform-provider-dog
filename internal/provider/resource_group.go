@@ -60,24 +60,24 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 				Optional:            true,
 				Type:                types.StringType,
 			},
-                       "ec2_security_group_ids": {
-                               MarkdownDescription: "List of EC2 Security Groups to control",
-			       Optional:            true,
-                               Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-                                       "region": {
-                                               MarkdownDescription: "EC2 Region",
-                                               Required:            true,
-                                               Type:                types.StringType,
-                                       },
-                                       "sgid": {
-                                               MarkdownDescription: "EC2 Security Group ID",
-                                               Required:            true,
-                                               Type:                types.StringType,
-                                       },
-                               }),
-                        },
+		   "ec2_security_group_ids": {
+				   MarkdownDescription: "List of EC2 Security Groups to control",
+				   Optional:            true,
+				   Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+						   "region": {
+								   MarkdownDescription: "EC2 Region",
+								   Required:            true,
+								   Type:                types.StringType,
+						   },
+						   "sgid": {
+								   MarkdownDescription: "EC2 Security Group ID",
+								   Required:            true,
+								   Type:                types.StringType,
+						   },
+				   }),
+			},
 			"vars": {
-                               	MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				MarkdownDescription: "Arbitrary collection of variables used for inventory",
 				Type:        types.MapType{ElemType: types.StringType},
 				Optional:    true,
 			},
@@ -148,7 +148,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:		plan.Vars,
+		Vars:		    plan.Vars,
 	}
 	return newGroup
 }
@@ -169,7 +169,7 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:		plan.Vars,
+		Vars:		    plan.Vars,
 	}
 	return newGroup
 }

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -19,11 +19,32 @@ type (
 	ProfileList []Profile
 
 	Profile struct {
-		ID        types.String `tfsdk:"id"`
-		Name      types.String `tfsdk:"name"`
-		RulesetId types.String `tfsdk:"ruleset_id"`
-		Version   types.String `tfsdk:"version"`
+		ID          types.String          `tfsdk:"id"`
+		Name        types.String          `tfsdk:"name"`
+		Rules       *Rules                `tfsdk:"rules"`
+		Version     types.String          `tfsdk:"version"`
 	}
+	Rules struct {
+		Inbound  []*Rule `tfsdk:"inbound"`
+		Outbound []*Rule `tfsdk:"outbound"`
+	}
+
+	Rule struct {
+		Action       types.String `tfsdk:"action"`
+		Active       types.Bool   `tfsdk:"active"`
+		Comment      types.String `tfsdk:"comment"`
+		Environments []string     `tfsdk:"environments"`
+		Group        types.String `tfsdk:"group"`
+		GroupType    types.String `tfsdk:"group_type"`
+		Interface    types.String `tfsdk:"interface"`
+		Log          types.Bool   `tfsdk:"log"`
+		LogPrefix    types.String `tfsdk:"log_prefix"`
+		Order        types.Int64  `tfsdk:"order"`
+		Service      types.String `tfsdk:"service"`
+		States       []string     `tfsdk:"states"`
+		Type         types.String `tfsdk:"type"`
+	}
+
 )
 
 var (
@@ -33,6 +54,7 @@ var (
 func NewProfileDataSource() datasource.DataSource {
 	return &profileDataSource{}
 }
+
 
 func (*profileDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_profile"
@@ -44,7 +66,7 @@ func (*profileDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		MarkdownDescription: "Profile data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
+			"api_key": {
 				MarkdownDescription: "Profile configurable attribute",
 				Optional:            true,
 				Type:                types.StringType,
@@ -79,8 +101,8 @@ func (d *profileDataSource) Configure(ctx context.Context, req datasource.Config
 }
 
 type profileDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
+	ApiKey types.String `tfsdk:"api_key"`
+	Id     types.String `tfsdk:"id"`
 }
 
 //type profileDataSource struct {
