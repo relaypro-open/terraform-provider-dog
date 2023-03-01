@@ -23,7 +23,7 @@ func TestAccDogGroup_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "description", ""),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
-					resource.TestCheckResourceAttr(resourceName, "profile_name", "dog_test"),
+					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
 					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
 				),
 			},
@@ -36,14 +36,82 @@ func TestAccDogGroup_Basic(t *testing.T) {
 	})
 }
 
+func testAccDogGroupRulesetResourceConfig() string {
+	return fmt.Sprintf(`
+resource "dog_ruleset" "resource_group" {
+  name = "resource_group"
+  rules = {
+    inbound = [
+      {
+        action = "ACCEPT"
+        active = "true"
+        comment = "test_zone"
+        environments = []
+        group = "dog_test"
+        group_type = "ROLE"
+        interface = ""
+        log = "false"
+        log_prefix = ""
+        order = "1"
+        service = "ssh-tcp-22"
+        states = []
+        type = "BASIC"
+      },
+      {
+        action = "DROP"
+        active = "true"
+        comment = ""
+        environments = []
+        group = "any"
+        group_type = "ANY"
+        interface = ""
+        log = "false"
+        log_prefix = ""
+        order = "2"
+        service = "any"
+        states = []
+        type = "BASIC"
+      }
+    ]
+    outbound = [
+      {
+        action = "ACCEPT"
+        active = "true"
+        comment = ""
+        environments = []
+        group = "any"
+        group_type = "ANY"
+        interface = ""
+        log = "false"
+        log_prefix = ""
+        order = "1"
+        service = "any"
+        states = []
+        type = "BASIC"
+      }
+    ]
+  }
+}
+`)
+}
+
+func testAccDogGroupProfileResourceConfig() string {
+	return fmt.Sprintf(`
+resource "dog_profile" "resource_group" {
+  name = "resource_group"
+  version = "1.0"
+  ruleset_id = dog_ruleset.resource_group.id
+}
+`)
+}
 
 func testAccDogGroupConfig_basic(name, randomName string) string {
-	return fmt.Sprintf(`
+	g := fmt.Sprintf(`
 resource %[1]q %[2]q {
   description = ""
   name = %[2]q
-  profile_id = ""
-  profile_name = "dog_test"
+  profile_id = dog_profile.resource_group.id
+  profile_name = dog_profile.resource_group.name
   profile_version = "latest"
   ec2_security_group_ids = [
     { 
@@ -56,5 +124,10 @@ resource %[1]q %[2]q {
   }
 }
 `, name, randomName)
-}
+	gr := testAccDogGroupRulesetResourceConfig()
+	gp := testAccDogGroupProfileResourceConfig()
 
+	to := gr + gp + g
+	return to
+
+}

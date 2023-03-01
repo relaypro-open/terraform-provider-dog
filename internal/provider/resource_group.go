@@ -151,6 +151,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 	newGroup := api.GroupCreateRequest{
 		Description:    plan.Description,
 		Name:           plan.Name,
+		ProfileId:      plan.ProfileId,
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
@@ -172,6 +173,7 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 	newGroup := api.GroupUpdateRequest{
 		Description:    plan.Description,
 		Name:           plan.Name,
+		ProfileId:      plan.ProfileId,
 		ProfileName:    plan.ProfileName,
 		ProfileVersion: plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
@@ -199,6 +201,7 @@ func ApiToGroup(group api.Group) Group {
 		Description:    types.String{Value: group.Description},
 		ID:             types.String{Value: group.ID},
 		Name:           types.String{Value: group.Name},
+		ProfileId:      types.String{Value: group.ProfileId},
 		ProfileName:    types.String{Value: group.ProfileName},
 		ProfileVersion: types.String{Value: group.ProfileVersion},
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
