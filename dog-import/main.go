@@ -119,7 +119,7 @@ func host_export(output_dir string, environment string, host_prefix string) {
 		terraformName :=  host_prefix + toTerraformName(row.Name) 
 		fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
-		fmt.Fprintf(tf_w, "  group = dog_group.%s.name\n", row.Group)
+		fmt.Fprintf(tf_w, "  group = dog_group.%s.id\n", row.Group)
 		fmt.Fprintf(tf_w, "  hostkey = \"%s\"\n", row.HostKey)
 		fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
@@ -157,6 +157,7 @@ func group_export(output_dir string, environment string) {
 			fmt.Fprintf(tf_w, "  description = \"%s\"\n", row.Description)
 			fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 			fmt.Fprintf(tf_w, "  profile_name = dog_profile.%s.name\n", row.ProfileName)
+			fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.id\n", row.ProfileName)
 			fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
 			fmt.Fprintf(tf_w, "  ec2_security_group_ids = [\n")
 			regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
@@ -316,7 +317,7 @@ func profile_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
-		fmt.Fprintf(tf_w, "  ruleset_id = dog_ruleset.%s.name\n", row.Name)
+		fmt.Fprintf(tf_w, "  ruleset_id = dog_ruleset.%s.id\n", row.Name)
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 
@@ -335,9 +336,9 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        environments = %q\n", rule.Environments), "\" \"", "\",\""))
 		if rule.Group == "ANY" {
 			if rule.GroupType == "zone" {
-				fmt.Fprintf(tf_w, "        group = dog_zone.%s.name\n", rule.Group)
+				fmt.Fprintf(tf_w, "        group = dog_zone.%s.id\n", rule.Group)
 			} else {
-				fmt.Fprintf(tf_w, "        group = dog_group.%s.name\n", rule.Group)
+				fmt.Fprintf(tf_w, "        group = dog_group.%s.id\n", rule.Group)
 			}
 		} else {
 			fmt.Fprintf(tf_w, "        group = \"%s\"\n", rule.Group)
@@ -350,7 +351,7 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 		if rule.Service == "any" {
 			fmt.Fprintf(tf_w, "        service = \"%s\"\n", rule.Service)
 		} else {
-			fmt.Fprintf(tf_w, "        service = dog_service.%s.name\n", rule.Service)
+			fmt.Fprintf(tf_w, "        service = dog_service.%s.id\n", rule.Service)
 		}
 		fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        states = %q\n", rule.States), "\" \"", "\",\""))
 		fmt.Fprintf(tf_w, "        type = \"%s\"\n", rule.Type)
