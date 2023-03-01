@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/relaypro-open/dog_api_golang/api"
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 )
 
 func TestProvider_DogProfileNameAttribute(t *testing.T) {
@@ -43,7 +43,7 @@ func TestProvider_DogProfileNameAttribute(t *testing.T) {
 }
 
 func testAccDogProfileRulesetDataSourceConfig(t *testing.T, rulesetResourceType, rulesetRandomName string, ruleset_id *string) string {
-	t.Log(fmt.Sprintf("ZZZtestAccDogProfileRulesetDataSourceConfig"))
+	//t.Log(fmt.Sprintf("ZZZtestAccDogProfileRulesetDataSourceConfig"))
 	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	newRule := api.RulesetCreateRequest{
@@ -86,12 +86,12 @@ func testAccDogProfileRulesetDataSourceConfig(t *testing.T, rulesetResourceType,
 		Name:    "name",
 	}
 	
-	t.Log(spew.Sprintf("ZZZZZZZZZZZZZZZZZZZnewRule: %v", newRule))
+	//t.Log(spew.Sprintf("ZZZZZZZZZZZZZZZZZZZnewRule: %v", newRule))
 
 	res, _, _ := c.CreateRuleset(newRule, nil)
-	t.Log(fmt.Sprintf("ZZZres: %v", res))
-	str := fmt.Sprintf("%#v", res)
-	t.Log(fmt.Sprintf("ZZZstr: %s", str))
+	//t.Log(fmt.Sprintf("ZZZres: %v", res))
+	//str := fmt.Sprintf("%#v", res)
+	//t.Log(fmt.Sprintf("ZZZstr: %s", str))
 	*ruleset_id = res.ID
 
 	//bogus return .tf - just need to return any valid resource syntax
