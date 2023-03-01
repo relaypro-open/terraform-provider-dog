@@ -42,6 +42,7 @@ func testAccDogGroupConfig_basic(name, randomName string) string {
 resource %[1]q %[2]q {
   description = ""
   name = %[2]q
+  profile_id = ""
   profile_name = "dog_test"
   profile_version = "latest"
   ec2_security_group_ids = [

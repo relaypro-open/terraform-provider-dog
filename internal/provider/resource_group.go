@@ -50,6 +50,11 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 				Required:            true,
 				Type:                types.StringType,
 			},
+			"profile_id": {
+				MarkdownDescription: "group profile id",
+				Optional:            true,
+				Type:                types.StringType,
+			},
 			"profile_name": {
 				MarkdownDescription: "group profile name",
 				Optional:            true,
@@ -121,6 +126,7 @@ type groupResourceData struct {
 	Description    string       `tfsdk:"description"`
 	ID             types.String `tfsdk:"id"`
 	Name           string       `tfsdk:"name"`
+	ProfileId      string       `tfsdk:"profile_id"`
 	ProfileName    string       `tfsdk:"profile_name"`
 	ProfileVersion string       `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`

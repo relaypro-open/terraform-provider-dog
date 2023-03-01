@@ -22,8 +22,9 @@ type (
 		Description         types.String `tfsdk:"description"`
 		ID                  types.String `tfsdk:"id"`
 		Name                types.String `tfsdk:"name"`
+		ProfileId           types.String `tfsdk:"profile_id"`
 		ProfileName         types.String `tfsdk:"profile_name"`
-		ProfileVersion      types.String `tfsdk:"profile_version"`
+		ProfileVersion      types.String `tfsdk:"idprofile_version"`
 		Ec2SecurityGroupIds []*Ec2SecurityGroupIds `tfsdk:"ec2_security_group_ids"`
 		Vars		    map[string]string `tfsdk:"vars"`
 	}

@@ -28,6 +28,7 @@ func testAccDogGroupDataSourceConfig(configurableAttribute string) string {
 resource "dog_group" %[1]q {
   description = ""
   name = %[1]q 
+  profile_id = ""
   profile_name = "test_qa"
   profile_version = "latest"
   ec2_security_group_ids = [
