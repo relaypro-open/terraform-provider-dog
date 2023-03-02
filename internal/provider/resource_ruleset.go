@@ -1,4 +1,3 @@
-
 package dog
 
 import (
@@ -6,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -44,6 +44,11 @@ func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 			"name": {
 				MarkdownDescription: "ruleset name",
 				Required:            true,
+				Type:                types.StringType,
+			},
+			"profile_id": {
+				MarkdownDescription: "profile id",
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"rules": {
@@ -137,9 +142,10 @@ func (*rulesetResource) ImportState(ctx context.Context, req resource.ImportStat
 
 
 type rulesetResourceData struct {
-	ID      types.String          `tfsdk:"id"`
-	Rules   *rulesetResourceRules `tfsdk:"rules"`
-	Name    string                `tfsdk:"name"`
+	ID        types.String          `tfsdk:"id"`
+	Rules     *rulesetResourceRules `tfsdk:"rules"`
+	Name      string                `tfsdk:"name"`
+	ProfileId *string          `tfsdk:"profile_id" force:",omitempty"` 
 }
 
 type rulesetResourceRules struct {
@@ -163,7 +169,7 @@ type rulesetResourceRule struct {
 	Type         types.String `tfsdk:"type"`
 }
 
-func RulesetToCreateRequest(plan rulesetResourceData) api.RulesetCreateRequest {
+func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.RulesetCreateRequest {
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
@@ -203,17 +209,31 @@ func RulesetToCreateRequest(plan rulesetResourceData) api.RulesetCreateRequest {
 		outboundRules = append(outboundRules, rule)
 	}
 
-	newRuleset := api.RulesetCreateRequest{
-		Name: plan.Name,
-		Rules: &api.Rules{
-			Inbound:  inboundRules,
-			Outbound: outboundRules,
-		},
+	tflog.Debug(ctx, spew.Sprint("ZZZplan.ProfileId: %#v", plan.ProfileId))
+	if plan.ProfileId == nil {
+		newRuleset := api.RulesetCreateRequest{
+			Name: plan.Name,
+			Rules: &api.Rules{
+				Inbound:  inboundRules,
+				Outbound: outboundRules,
+			},
+		}
+		tflog.Debug(ctx, spew.Sprint("ZZZnewRuleset: %#v", newRuleset))
+		return newRuleset
+	} else {
+		newRuleset := api.RulesetCreateRequest{
+			Name: plan.Name,
+			Rules: &api.Rules{
+				Inbound:  inboundRules,
+				Outbound: outboundRules,
+			},
+			ProfileId: plan.ProfileId,
+		}
+		return newRuleset
 	}
-	return newRuleset
 }
 
-func RulesetToUpdateRequest(plan rulesetResourceData) api.RulesetUpdateRequest {
+func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.RulesetUpdateRequest {
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
@@ -252,19 +272,37 @@ func RulesetToUpdateRequest(plan rulesetResourceData) api.RulesetUpdateRequest {
 		}
 		outboundRules = append(outboundRules, rule)
 	}
+    
+	newString := "123"
+	newStringPointer := &newString
 
-	newRuleset := api.RulesetUpdateRequest{
-		Name: plan.Name,
-		Rules: &api.Rules{
-			Inbound:  inboundRules,
-			Outbound: outboundRules,
-		},
+	tflog.Debug(ctx, spew.Sprint("ZZZplan.ProfileId: %#v", plan.ProfileId))
+	if plan.ProfileId == nil {
+		newRuleset := api.RulesetUpdateRequest{
+			Name: plan.Name,
+			Rules: &api.Rules{
+				Inbound:  inboundRules,
+				Outbound: outboundRules,
+			},
+			ProfileId: newStringPointer,
+		}
+		tflog.Debug(ctx, spew.Sprint("ZZZnewRuleset: %#v", newRuleset))
+		return newRuleset
+	} else {
+		newRuleset := api.RulesetUpdateRequest{
+			Name: plan.Name,
+			Rules: &api.Rules{
+				Inbound:  inboundRules,
+				Outbound: outboundRules,
+			},
+			ProfileId: plan.ProfileId,
+		}
+		return newRuleset
 	}
-	return newRuleset
 }
 
 
-func ApiToRuleset(ruleset api.Ruleset) Ruleset {
+func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	newInboundRules := []*rulesetResourceRule{}
 	for _, inbound_rule := range ruleset.Rules.Inbound {
 		rule := &rulesetResourceRule{
@@ -303,17 +341,32 @@ func ApiToRuleset(ruleset api.Ruleset) Ruleset {
 		}
 		newOutboundRules = append(newOutboundRules, rule)
 	}
-	h := Ruleset{
-		//Created:     types.Int64{Value: int64(rule.Created)},
-		ID: types.String{Value: ruleset.ID},
-		Name: types.String{Value: ruleset.Name},
-		//Rules: &Rules{
-		Rules: &rulesetResourceRules{
-			Inbound:  newInboundRules,
-			Outbound: newOutboundRules,
-		},
+
+	tflog.Debug(ctx, spew.Sprint("ZZZruleset: %#v", ruleset))
+	if ruleset.ProfileId == nil {
+		h := Ruleset{
+			ID: types.String{Value: ruleset.ID},
+			Name: types.String{Value: ruleset.Name},
+			Rules: &rulesetResourceRules{
+				Inbound:  newInboundRules,
+				Outbound: newOutboundRules,
+			},
+			ProfileId: types.StringNull(),
+		}
+		tflog.Debug(ctx, spew.Sprint("ZZZh: %#v", h))
+		return h
+	} else {
+		h := Ruleset{
+			ID: types.String{Value: ruleset.ID},
+			Name: types.String{Value: ruleset.Name},
+			Rules: &rulesetResourceRules{
+				Inbound:  newInboundRules,
+				Outbound: newOutboundRules,
+			},
+			ProfileId: types.String{Value: *ruleset.ProfileId},
+		}
+		return h
 	}
-	return h
 }
 
 func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -327,11 +380,11 @@ func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	newRuleset := RulesetToCreateRequest(plan)
+	newRuleset := RulesetToCreateRequest(ctx, plan)
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	ruleset, statusCode, err := r.p.dog.CreateRuleset(newRuleset, nil)
 	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
-	tflog.Trace(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
+	tflog.Debug(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -341,14 +394,14 @@ func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToRuleset(ruleset)
+	state = ApiToRuleset(ctx, ruleset)
 
 	plan.ID = state.ID
 
 	// write logs using the tflog package
 	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
 	// for more information
-	tflog.Trace(ctx, "created a resource")
+	tflog.Debug(ctx, "created a resource")
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -378,7 +431,7 @@ func (r *rulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToRuleset(ruleset)
+	state = ApiToRuleset(ctx, ruleset)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -402,11 +455,11 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	newRuleset := RulesetToUpdateRequest(plan)
+	newRuleset := RulesetToUpdateRequest(ctx, plan)
 	ruleset, statusCode, err := r.p.dog.UpdateRuleset(rulesetID, newRuleset, nil)
 	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
-	tflog.Trace(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
-	state = ApiToRuleset(ruleset)
+	tflog.Debug(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
+	state = ApiToRuleset(ctx, ruleset)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ruleset, got error: %s", err))
 	}
@@ -420,7 +473,7 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	plan.ID = state.ID
 
-	tflog.Trace(ctx, "created a resource")
+	tflog.Debug(ctx, "created a resource")
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -448,7 +501,7 @@ func (r *rulesetResource) Delete(ctx context.Context, req resource.DeleteRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Trace(ctx, fmt.Sprintf("ruleset deleted: %+v\n", ruleset))
+	tflog.Debug(ctx, fmt.Sprintf("ruleset deleted: %+v\n", ruleset))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

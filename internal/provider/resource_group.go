@@ -52,7 +52,7 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 			},
 			"profile_id": {
 				MarkdownDescription: "group profile id",
-				Optional:            true,
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"profile_name": {

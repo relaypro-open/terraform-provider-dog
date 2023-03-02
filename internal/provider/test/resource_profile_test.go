@@ -42,7 +42,6 @@ func testAccDogProfileConfig_basic(name, resourceName string) string {
 resource %[1]q %[2]q {
   name = %[2]q
   version = "1.0"
-  ruleset_id = "123"
 }
 `, name, resourceName)
 }

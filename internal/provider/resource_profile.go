@@ -18,7 +18,6 @@ import (
 type profileResourceData struct {
 	ID      types.String          `tfsdk:"id"`
 	Name    string                `tfsdk:"name"`
-	RulesetId  string             `tfsdk:"ruleset_id"`
 	Version string                `tfsdk:"version"`
 }
 
@@ -47,11 +46,6 @@ func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "Profile name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"ruleset_id": {
-				MarkdownDescription: "Rule Id",
 				Required:            true,
 				Type:                types.StringType,
 			},
@@ -101,7 +95,6 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 
 	newProfile := api.ProfileCreateRequest{
 		Name:    plan.Name,
-		RulesetId:  plan.RulesetId,
 		Version: plan.Version,
 	}
 	return newProfile
@@ -110,7 +103,6 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 	newProfile := api.ProfileUpdateRequest{
 		Name: plan.Name,
-		RulesetId: plan.RulesetId,
 		Version: plan.Version,
 	}
 	return newProfile
@@ -121,7 +113,6 @@ func ApiToProfile(profile api.Profile) Profile {
 		//Created:     types.Int64{Value: int64(profile.Created)},
 		ID:   types.String{Value: profile.ID},
 		Name: types.String{Value: profile.Name},
-		RulesetId: types.String{Value: profile.RulesetId},
 		Version: types.String{Value: profile.Version},
 	}
 	return h

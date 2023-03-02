@@ -86,7 +86,6 @@ func testAccDogGroupProfileDataSourceConfig() string {
 resource "dog_profile" "datasource_group" {
   name = "datasource_group"
   version = "1.0"
-  ruleset_id = dog_ruleset.datasource_group.id
 }
 `)
 } 

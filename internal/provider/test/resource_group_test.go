@@ -100,7 +100,6 @@ func testAccDogGroupProfileResourceConfig() string {
 resource "dog_profile" "resource_group" {
   name = "resource_group"
   version = "1.0"
-  ruleset_id = dog_ruleset.resource_group.id
 }
 `)
 }

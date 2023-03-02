@@ -22,6 +22,9 @@ type (
 		ID      types.String `tfsdk:"id"`
 		Name    types.String `tfsdk:"name"`
 		Rules   *rulesetResourceRules `tfsdk:"rules"`
+		//ProfileId types.String `tfsdk:"profile_id" force:",omitempty"` 
+		ProfileId types.String `tfsdk:"profile_id" json:"profile_id,omitempty"` 
+
 	}
 
 	Rules struct {
@@ -123,7 +126,7 @@ func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	// Set state
 	for _, api_ruleset := range res {
-		ruleset := ApiToRuleset(api_ruleset)
+		ruleset := ApiToRuleset(ctx, api_ruleset)
 		state = append(state, ruleset)
 	}
 	diags := resp.State.Set(ctx, &state)

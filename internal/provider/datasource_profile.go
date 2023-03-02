@@ -21,7 +21,6 @@ type (
 	Profile struct {
 		ID        types.String `tfsdk:"id"`
 		Name      types.String `tfsdk:"name"`
-		RulesetId types.String `tfsdk:"ruleset_id"`
 		Version   types.String `tfsdk:"version"`
 	}
 )

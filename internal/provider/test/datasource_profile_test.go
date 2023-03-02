@@ -12,11 +12,9 @@ import (
 )
 
 func TestProvider_DogProfileNameAttribute(t *testing.T) {
-    var ruleset_id string
-
-	rulesetResourceType := "dog_ruleset"
-	rulesetRandomName := "datasource_" + acctest.RandString(5)
-	rulesetResourceName := rulesetResourceType + "." + rulesetRandomName
+	//rulesetResourceType := "dog_ruleset"
+	//rulesetRandomName := "datasource_" + acctest.RandString(5)
+	//rulesetResourceName := rulesetResourceType + "." + rulesetRandomName
 
 	resourceType := "dog_profile"
 	randomName := "datasource_" + acctest.RandString(5)
@@ -26,14 +24,14 @@ func TestProvider_DogProfileNameAttribute(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
+			//{
+			//	Config: testAccDogProfileRulesetDataSourceConfig(t, rulesetResourceType, rulesetRandomName, &ruleset_id),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		resource.TestCheckResourceAttr(rulesetResourceName, "name", rulesetRandomName),
+			//	),
+			//},
 			{
-				Config: testAccDogProfileRulesetDataSourceConfig(t, rulesetResourceType, rulesetRandomName, &ruleset_id),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rulesetResourceName, "name", rulesetRandomName),
-				),
-			},
-			{
-				Config: testAccDogProfileDataSourceConfig(resourceType, randomName, &ruleset_id),
+				Config: testAccDogProfileDataSourceConfig(resourceType, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 				),
@@ -43,7 +41,7 @@ func TestProvider_DogProfileNameAttribute(t *testing.T) {
 }
 
 func testAccDogProfileRulesetDataSourceConfig(t *testing.T, rulesetResourceType, rulesetRandomName string, ruleset_id *string) string {
-	//t.Log(fmt.Sprintf("ZZZtestAccDogProfileRulesetDataSourceConfig"))
+	//t.Log(fmt.Sprintf("ZZZtestAccDogProfileRulesetDataSourceConfig")
 	c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 	newRule := api.RulesetCreateRequest{
@@ -108,12 +106,11 @@ resource %[1]q %[2]q {
 `, rulesetResourceType, rulesetRandomName )
 }
 
-func testAccDogProfileDataSourceConfig(name, randomName string, ruleset_id *string) string {
+func testAccDogProfileDataSourceConfig(name, randomName string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
   name = %[2]q
   version = "1.0"
-  ruleset_id = %[3]q
 }
-`, name, randomName, *ruleset_id)
+`, name, randomName)
 } 
