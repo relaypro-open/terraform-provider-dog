@@ -34,6 +34,8 @@ github.com/relaypro-open/dog_api_golang v0.0.0-20221115211357-bc4dd543d69a h1:4S
 github.com/relaypro-open/dog_api_golang v0.0.0-20221115211357-bc4dd543d69a/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/relaypro-open/dog_api_golang v0.0.0-20230225221129-625f80ac48dd h1:YOrHg0G8ifAS8IVYAn/ulekUgOYPCs3fYApYZTFbe70=
 github.com/relaypro-open/dog_api_golang v0.0.0-20230225221129-625f80ac48dd/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
+github.com/relaypro-open/dog_api_golang v0.0.0-20230302175531-9d6c47df744f h1:hWSrRabbh1uOA3cNlJWDfGDQ3Y+oIg4hs9uwCf3FSAQ=
+github.com/relaypro-open/dog_api_golang v0.0.0-20230302175531-9d6c47df744f/go.mod h1:gVISNtT0C/Ej5ZnCePDyppaDQiPRANiq2A/qhx/tH+8=
 github.com/sirupsen/logrus v1.0.6/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
 github.com/sirupsen/logrus v1.8.1 h1:dJKuHgqk1NNQlqoA6BTlM1Wf9DOH3NBjQyu0h9+AZZE=
 github.com/sirupsen/logrus v1.8.1/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
