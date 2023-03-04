@@ -277,6 +277,7 @@ func ruleset_export(output_dir string, environment string) {
 		terraformName := toTerraformName(row.Name)
 		fmt.Fprintf(tf_w, "resource \"dog_ruleset\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+		fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.name\n", row.Name)
 		fmt.Fprintf(tf_w, "  rules = {\n")
 		inbound := row.Rules.Inbound
 		fmt.Fprintf(tf_w, "    inbound = [\n")
@@ -317,7 +318,6 @@ func profile_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
 		fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
 		fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
-		fmt.Fprintf(tf_w, "  ruleset_id = dog_ruleset.%s.id\n", row.Name)
 		fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
 		fmt.Fprintf(tf_w, "}\n")
 
@@ -347,7 +347,6 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 		fmt.Fprintf(tf_w, "        interface = \"%s\"\n", rule.Interface)
 		fmt.Fprintf(tf_w, "        log = \"%t\"\n", rule.Log)
 		fmt.Fprintf(tf_w, "        log_prefix = \"%s\"\n", rule.LogPrefix)
-		fmt.Fprintf(tf_w, "        order = \"%d\"\n", rule.Order)
 		if rule.Service == "any" {
 			fmt.Fprintf(tf_w, "        service = \"%s\"\n", rule.Service)
 		} else {

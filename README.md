@@ -235,6 +235,15 @@ resource "dog_zone" "test_zone" {
 
 ## Importing dog resources
 
+NOTE: dog-import uses APIv1, NOT APIv2.
+example:
+
+```
+ export DOG_API_ENDPOINT="http://dog:8000/api"
+ NOT
+ export DOG_API_ENDPOINT="http://dog:8000/api/V2"
+```
+
 If you have an existing dog configuration, you can batch import this config:
 
 ```
