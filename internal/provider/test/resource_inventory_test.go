@@ -55,7 +55,10 @@ resource %[1]q %[2]q {
           host2 = {
             key2 = "value2"
           }
-        }
+        },
+	children = [
+		"test"
+	]
      },
      {
        name = "app"
@@ -66,7 +69,10 @@ resource %[1]q %[2]q {
           host1 = {
             key = "value"
           }
-        }
+        },
+	children = [
+		"test2"
+	]
      }
   ]
 }

@@ -42,7 +42,10 @@ resource "dog_inventory" %[1]q {
           host2 = {
             key2 = "value2"
           }
-        }
+        },
+		children = [
+			"test"
+		]
      },
      {
        name = "app"
@@ -53,7 +56,10 @@ resource "dog_inventory" %[1]q {
           host1 = {
             key = "value"
           }
-        }
+        },
+		children = [
+			"test2"
+		]
      }
   ]
 }

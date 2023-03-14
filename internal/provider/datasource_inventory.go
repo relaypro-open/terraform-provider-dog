@@ -28,6 +28,7 @@ type (
 		Name  types.String           `tfsdk:"name"`
 		Vars  map[string]string `tfsdk:"vars"`
 		Hosts map[string]map[string]string `tfsdk:"hosts"`
+		Children []string `tfsdk:"children"`
 	}
 )
 

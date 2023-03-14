@@ -57,6 +57,11 @@ func (*inventoryResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 						Required:            true,
 						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
 					},
+					"children": {
+						MarkdownDescription: "inventory group children",
+						Required:            true,
+						Type:                types.ListType{ElemType: types.StringType},
+					},
 				}),
 			},
 			"name": {
@@ -112,6 +117,7 @@ func InventoryToCreateRequest(plan inventoryResourceData) api.InventoryCreateReq
 			Name:  group.Name.Value,
 			Vars:  group.Vars,
 			Hosts: group.Hosts,
+			Children: group.Children,
 		}
 		newGroups = append(newGroups, g)
 	}
@@ -129,6 +135,7 @@ func InventoryToUpdateRequest(plan inventoryResourceData) api.InventoryUpdateReq
 			Name:  group.Name.Value,
 			Vars:  group.Vars,
 			Hosts: group.Hosts,
+			Children: group.Children,
 		}
 		newGroups = append(newGroups, g)
 	}
@@ -146,6 +153,7 @@ func ApiToInventory(inventory api.Inventory) Inventory {
 			Name:  types.String{Value: group.Name},
 			Vars:  group.Vars,
 			Hosts: group.Hosts,
+			Children: group.Children,
 		}
 		newGroups = append(newGroups, g)
 	}
