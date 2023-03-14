@@ -6,15 +6,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
-
 
 type (
 	groupResource struct {
@@ -34,7 +33,6 @@ func NewGroupResource() resource.Resource {
 func (*groupResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_group"
 }
-
 
 func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
@@ -65,26 +63,26 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 				Optional:            true,
 				Type:                types.StringType,
 			},
-		   "ec2_security_group_ids": {
-				   MarkdownDescription: "List of EC2 Security Groups to control",
-				   Optional:            true,
-				   Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-						   "region": {
-								   MarkdownDescription: "EC2 Region",
-								   Required:            true,
-								   Type:                types.StringType,
-						   },
-						   "sgid": {
-								   MarkdownDescription: "EC2 Security Group ID",
-								   Required:            true,
-								   Type:                types.StringType,
-						   },
-				   }),
+			"ec2_security_group_ids": {
+				MarkdownDescription: "List of EC2 Security Groups to control",
+				Optional:            true,
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"region": {
+						MarkdownDescription: "EC2 Region",
+						Required:            true,
+						Type:                types.StringType,
+					},
+					"sgid": {
+						MarkdownDescription: "EC2 Security Group ID",
+						Required:            true,
+						Type:                types.StringType,
+					},
+				}),
 			},
 			"vars": {
 				MarkdownDescription: "Arbitrary collection of variables used for inventory",
-				Type:        types.MapType{ElemType: types.StringType},
-				Optional:    true,
+				Type:                types.MapType{ElemType: types.StringType},
+				Optional:            true,
 			},
 			"id": {
 				Computed:            true,
@@ -123,39 +121,39 @@ func (*groupResource) ImportState(ctx context.Context, req resource.ImportStateR
 
 type groupResourceData struct {
 	//Created        int    `json:"created,omitempty"` //TODO: created has both int and string entries
-	Description    string       `tfsdk:"description"`
-	ID             types.String `tfsdk:"id"`
-	Name           string       `tfsdk:"name"`
-	ProfileId      string       `tfsdk:"profile_id"`
-	ProfileName    string       `tfsdk:"profile_name"`
-	ProfileVersion string       `tfsdk:"profile_version"`
+	Description         string                             `tfsdk:"description"`
+	ID                  types.String                       `tfsdk:"id"`
+	Name                string                             `tfsdk:"name"`
+	ProfileId           string                             `tfsdk:"profile_id"`
+	ProfileName         string                             `tfsdk:"profile_name"`
+	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars           map[string]string	`tfsdk:"vars"`
+	Vars                map[string]string                  `tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
-	Region	string `tfsdk:"region"`
-	SgId	string `tfsdk:"sgid"`
+	Region string `tfsdk:"region"`
+	SgId   string `tfsdk:"sgid"`
 }
 
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
 	for _, region_sgid := range plan.Ec2SecurityGroupIds {
 		rs := &api.Ec2SecurityGroupIds{
-			Region:    region_sgid.Region,
-			SgId:      region_sgid.SgId,
+			Region: region_sgid.Region,
+			SgId:   region_sgid.SgId,
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 
 	newGroup := api.GroupCreateRequest{
-		Description:    plan.Description,
-		Name:           plan.Name,
-		ProfileId:      plan.ProfileId,
-		ProfileName:    plan.ProfileName,
-		ProfileVersion: plan.ProfileVersion,
+		Description:         plan.Description,
+		Name:                plan.Name,
+		ProfileId:           plan.ProfileId,
+		ProfileName:         plan.ProfileName,
+		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:		    plan.Vars,
+		Vars:                plan.Vars,
 	}
 	return newGroup
 }
@@ -164,20 +162,20 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
 	for _, region_sgid := range plan.Ec2SecurityGroupIds {
 		rs := &api.Ec2SecurityGroupIds{
-			Region:    region_sgid.Region,
-			SgId:      region_sgid.SgId,
+			Region: region_sgid.Region,
+			SgId:   region_sgid.SgId,
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 
 	newGroup := api.GroupUpdateRequest{
-		Description:    plan.Description,
-		Name:           plan.Name,
-		ProfileId:      plan.ProfileId,
-		ProfileName:    plan.ProfileName,
-		ProfileVersion: plan.ProfileVersion,
+		Description:         plan.Description,
+		Name:                plan.Name,
+		ProfileId:           plan.ProfileId,
+		ProfileName:         plan.ProfileName,
+		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:		    plan.Vars,
+		Vars:                plan.Vars,
 	}
 	return newGroup
 }
@@ -186,8 +184,8 @@ func ApiToGroup(group api.Group) Group {
 	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
 	for _, region_sgid := range group.Ec2SecurityGroupIds {
 		rs := &Ec2SecurityGroupIds{
-			Region:    types.String{Value: region_sgid.Region},
-			SgId:      types.String{Value: region_sgid.SgId},
+			Region: types.String{Value: region_sgid.Region},
+			SgId:   types.String{Value: region_sgid.SgId},
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
@@ -198,14 +196,14 @@ func ApiToGroup(group api.Group) Group {
 	}
 
 	h := Group{
-		Description:    types.String{Value: group.Description},
-		ID:             types.String{Value: group.ID},
-		Name:           types.String{Value: group.Name},
-		ProfileId:      types.String{Value: group.ProfileId},
-		ProfileName:    types.String{Value: group.ProfileName},
-		ProfileVersion: types.String{Value: group.ProfileVersion},
+		Description:         types.String{Value: group.Description},
+		ID:                  types.String{Value: group.ID},
+		Name:                types.String{Value: group.Name},
+		ProfileId:           types.String{Value: group.ProfileId},
+		ProfileName:         types.String{Value: group.ProfileName},
+		ProfileVersion:      types.String{Value: group.ProfileVersion},
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:		newVars,
+		Vars:                newVars,
 	}
 	return h
 }
@@ -273,7 +271,6 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
-
 
 func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state Group

@@ -12,52 +12,50 @@ import (
 )
 
 type (
-	serviceDataSource struct {
+	inventoryDataSource struct {
 		p dogProvider
 	}
 
-	ServiceList []Service
+	InventoryList []Inventory
 
-	Service struct {
-		ID       types.String    `tfsdk:"id"`
-		Services []*PortProtocol `tfsdk:"services"`
-		Name     types.String    `tfsdk:"name"`
-		Version  types.Int64     `tfsdk:"version"`
+	Inventory struct {
+		ID     types.String      `tfsdk:"id"`
+		Name   types.String      `tfsdk:"name"`
+		Groups []*InventoryGroup `tfsdk:"groups"`
 	}
 
-	Services []PortProtocol
-
-	PortProtocol struct {
-		Ports    []string     `tfsdk:"ports"`
-		Protocol types.String `tfsdk:"protocol"`
+	InventoryGroup struct {
+		Name  types.String           `tfsdk:"name"`
+		Vars  map[string]string `tfsdk:"vars"`
+		Hosts map[string]map[string]string `tfsdk:"hosts"`
 	}
 )
 
 var (
-	_ datasource.DataSource = (*serviceDataSource)(nil)
+	_ datasource.DataSource = (*inventoryDataSource)(nil)
 )
 
-func NewServiceDataSource() datasource.DataSource {
-	return &serviceDataSource{}
+func NewInventoryDataSource() datasource.DataSource {
+	return &inventoryDataSource{}
 }
 
-func (*serviceDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_service"
+func (*inventoryDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_inventory"
 }
 
-func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (*inventoryDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Service data source",
+		MarkdownDescription: "Inventory data source",
 
 		Attributes: map[string]tfsdk.Attribute{
 			"api_token": {
-				MarkdownDescription: "Service configurable attribute",
+				MarkdownDescription: "Inventory configurable attribute",
 				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
-				MarkdownDescription: "Service identifier",
+				MarkdownDescription: "Inventory identifier",
 				Type:                types.StringType,
 				Computed:            true,
 			},
@@ -65,7 +63,7 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (d *serviceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *inventoryDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -85,33 +83,33 @@ func (d *serviceDataSource) Configure(ctx context.Context, req datasource.Config
 	d.p.dog = client
 }
 
-type serviceDataSourceData struct {
+type inventoryDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
 	Id       types.String `tfsdk:"id"`
 }
 
-//type serviceDataSource struct {
+//type inventoryDataSource struct {
 //	provider provider
 //}
 
-func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state ServiceList
+func (d *inventoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state InventoryList
 
-	res, statusCode, err := d.p.dog.GetServices(nil)
+	res, statusCode, err := d.p.dog.GetInventories(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read services, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read inventories, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Set state
-	for _, api_service := range res {
-		service := ApiToService(api_service)
-		state = append(state, service)
+	for _, api_inventory := range res {
+		inventory := ApiToInventory(api_inventory)
+		state = append(state, inventory)
 	}
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

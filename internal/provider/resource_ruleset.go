@@ -17,7 +17,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-
 type (
 	rulesetResource struct {
 		p dogProvider
@@ -36,7 +35,6 @@ func NewRulesetResource() resource.Resource {
 func (*rulesetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ruleset"
 }
-
 
 func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
@@ -140,12 +138,11 @@ func (*rulesetResource) ImportState(ctx context.Context, req resource.ImportStat
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-
 type rulesetResourceData struct {
 	ID        types.String          `tfsdk:"id"`
 	Rules     *rulesetResourceRules `tfsdk:"rules"`
 	Name      string                `tfsdk:"name"`
-	ProfileId *string          `tfsdk:"profile_id" force:",omitempty"` 
+	ProfileId *string               `tfsdk:"profile_id" force:",omitempty"`
 }
 
 type rulesetResourceRules struct {
@@ -272,7 +269,7 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 		}
 		outboundRules = append(outboundRules, rule)
 	}
-    
+
 	newString := "123"
 	newStringPointer := &newString
 
@@ -300,7 +297,6 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 		return newRuleset
 	}
 }
-
 
 func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	newInboundRules := []*rulesetResourceRule{}
@@ -345,7 +341,7 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	tflog.Debug(ctx, spew.Sprint("ZZZruleset: %#v", ruleset))
 	if ruleset.ProfileId == nil {
 		h := Ruleset{
-			ID: types.String{Value: ruleset.ID},
+			ID:   types.String{Value: ruleset.ID},
 			Name: types.String{Value: ruleset.Name},
 			Rules: &rulesetResourceRules{
 				Inbound:  newInboundRules,
@@ -357,7 +353,7 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 		return h
 	} else {
 		h := Ruleset{
-			ID: types.String{Value: ruleset.ID},
+			ID:   types.String{Value: ruleset.ID},
 			Name: types.String{Value: ruleset.Name},
 			Rules: &rulesetResourceRules{
 				Inbound:  newInboundRules,

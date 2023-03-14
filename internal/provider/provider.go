@@ -2,33 +2,32 @@ package dog
 
 import (
 	"context"
-	"os"
-	"log"
 	"fmt"
+	"log"
+	"os"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
 type (
 	dogProvider struct {
-		dog *api.Client
+		dog        *api.Client
 		configured bool
 
 		version string
 	}
 
 	dogProviderModel struct {
-		Api_Token      		types.String `tfsdk:"api_token"`
-		API_Endpoint 		types.String `tfsdk:"api_endpoint"`
+		Api_Token    types.String `tfsdk:"api_token"`
+		API_Endpoint types.String `tfsdk:"api_endpoint"`
 	}
 )
-
 
 var (
 	_ provider.Provider             = (*dogProvider)(nil)
@@ -81,7 +80,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Endpoint",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API endpoint. "+
-			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_Endpoint environment variable.",
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_Endpoint environment variable.",
 		)
 	}
 
@@ -89,7 +88,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Key",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
-			"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_TOKEN environment variable. ",
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the DOG_API_TOKEN environment variable. ",
 		)
 	}
 
@@ -111,16 +110,15 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		api_token = config.Api_Token.ValueString()
 	}
 
-	if (api_endpoint == "" || api_token == "") {
-	        resp.Diagnostics.AddError(
-	           "config values",
-	    	fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.Value)+
-	    	fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
-	    	fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
-	    	fmt.Sprintf("api_token: %+v\n", api_token),
-	        )
+	if api_endpoint == "" || api_token == "" {
+		resp.Diagnostics.AddError(
+			"config values",
+			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.Value)+
+				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
+				fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
+				fmt.Sprintf("api_token: %+v\n", api_token),
+		)
 	}
-
 
 	// If any of the expected configurations are missing, return
 	// errors with provider-specific guidance.
@@ -129,8 +127,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		resp.Diagnostics.AddError(
 			"Missing Dog API Endpoint",
 			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. "+
-			"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. "+
-			"If either is already set, ensure the value is not empty.",
+				"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. "+
+				"If either is already set, ensure the value is not empty.",
 		)
 	}
 
@@ -138,8 +136,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		resp.Diagnostics.AddError(
 			"Missing Dog API Key",
 			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
-			"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
-			"If either is already set, ensure the value is not empty.",
+				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
+				"If either is already set, ensure the value is not empty.",
 		)
 	}
 
@@ -160,7 +158,6 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	resp.ResourceData = p.dog
 }
 
-
 func (*dogProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewHostResource,
@@ -170,6 +167,7 @@ func (*dogProvider) Resources(ctx context.Context) []func() resource.Resource {
 		NewLinkResource,
 		NewProfileResource,
 		NewRulesetResource,
+		NewInventoryResource,
 	}
 }
 
@@ -182,6 +180,6 @@ func (*dogProvider) DataSources(ctx context.Context) []func() datasource.DataSou
 		NewLinkDataSource,
 		NewProfileDataSource,
 		NewRulesetDataSource,
+		NewInventoryDataSource,
 	}
 }
-

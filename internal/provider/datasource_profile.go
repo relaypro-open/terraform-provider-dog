@@ -19,9 +19,9 @@ type (
 	ProfileList []Profile
 
 	Profile struct {
-		ID        types.String `tfsdk:"id"`
-		Name      types.String `tfsdk:"name"`
-		Version   types.String `tfsdk:"version"`
+		ID      types.String `tfsdk:"id"`
+		Name    types.String `tfsdk:"name"`
+		Version types.String `tfsdk:"version"`
 	}
 )
 

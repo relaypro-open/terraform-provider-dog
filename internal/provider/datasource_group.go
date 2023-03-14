@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -19,21 +19,20 @@ type (
 	GroupList []Group
 
 	Group struct {
-		Description         types.String `tfsdk:"description"`
-		ID                  types.String `tfsdk:"id"`
-		Name                types.String `tfsdk:"name"`
-		ProfileId           types.String `tfsdk:"profile_id"`
-		ProfileName         types.String `tfsdk:"profile_name"`
-		ProfileVersion      types.String `tfsdk:"profile_version"`
+		Description         types.String           `tfsdk:"description"`
+		ID                  types.String           `tfsdk:"id"`
+		Name                types.String           `tfsdk:"name"`
+		ProfileId           types.String           `tfsdk:"profile_id"`
+		ProfileName         types.String           `tfsdk:"profile_name"`
+		ProfileVersion      types.String           `tfsdk:"profile_version"`
 		Ec2SecurityGroupIds []*Ec2SecurityGroupIds `tfsdk:"ec2_security_group_ids"`
-		Vars		    map[string]string `tfsdk:"vars"`
-	}
-	
-	Ec2SecurityGroupIds struct {
-		Region	types.String `tfsdk:"region"`
-		SgId	types.String `tfsdk:"sgid"`
+		Vars                map[string]string      `tfsdk:"vars"`
 	}
 
+	Ec2SecurityGroupIds struct {
+		Region types.String `tfsdk:"region"`
+		SgId   types.String `tfsdk:"sgid"`
+	}
 )
 
 var (
@@ -43,7 +42,6 @@ var (
 func NewGroupDataSource() datasource.DataSource {
 	return &groupDataSource{}
 }
-
 
 func (*groupDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_group"
@@ -91,7 +89,7 @@ func (d *groupDataSource) Configure(ctx context.Context, req datasource.Configur
 
 type groupDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
-	Id     types.String `tfsdk:"id"`
+	Id       types.String `tfsdk:"id"`
 }
 
 //type groupDataSource struct {

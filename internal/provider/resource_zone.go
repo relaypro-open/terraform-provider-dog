@@ -6,15 +6,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
-
 
 type (
 	zoneResource struct {
@@ -34,7 +33,6 @@ func NewZoneResource() resource.Resource {
 func (*zoneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_zone"
 }
-
 
 func (*zoneResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
@@ -93,7 +91,6 @@ func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequ
 func (*zoneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
-
 
 type zoneResourceData struct {
 	ID            types.String `tfsdk:"id"`
@@ -220,7 +217,6 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
-
 
 func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state Zone

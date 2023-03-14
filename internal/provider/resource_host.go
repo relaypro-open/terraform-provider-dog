@@ -6,15 +6,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
-
 
 type (
 	hostResource struct {
@@ -34,7 +33,6 @@ func NewHostResource() resource.Resource {
 func (*hostResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_host"
 }
-
 
 func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
@@ -66,9 +64,9 @@ func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 				Type:                types.StringType,
 			},
 			"vars": {
-                               	MarkdownDescription: "Arbitrary collection of variables used for inventory",
-				Type:        types.MapType{ElemType: types.StringType},
-				Optional:    true,
+				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				Type:                types.MapType{ElemType: types.StringType},
+				Optional:            true,
 			},
 			"id": {
 				Computed:            true,
@@ -105,15 +103,14 @@ func (*hostResource) ImportState(ctx context.Context, req resource.ImportStateRe
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-
 type hostResourceData struct {
-	Environment string       `tfsdk:"environment"`
-	Group       string       `tfsdk:"group"`
-	ID          types.String `tfsdk:"id"`
-	HostKey     string       `tfsdk:"hostkey"`
-	Location    string       `tfsdk:"location"`
-	Name        string       `tfsdk:"name"`
-	Vars        map[string]string	`tfsdk:"vars"`
+	Environment string            `tfsdk:"environment"`
+	Group       string            `tfsdk:"group"`
+	ID          types.String      `tfsdk:"id"`
+	HostKey     string            `tfsdk:"hostkey"`
+	Location    string            `tfsdk:"location"`
+	Name        string            `tfsdk:"name"`
+	Vars        map[string]string `tfsdk:"vars"`
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -153,7 +150,7 @@ func ApiToHost(host api.Host) Host {
 		HostKey:     types.String{Value: host.HostKey},
 		Location:    types.String{Value: host.Location},
 		Name:        types.String{Value: host.Name},
-		Vars:		newVars,
+		Vars:        newVars,
 	}
 
 	return h
@@ -225,7 +222,6 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
-
 
 func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state Host

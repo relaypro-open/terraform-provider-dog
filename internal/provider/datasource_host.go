@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -16,17 +16,16 @@ type (
 		p dogProvider
 	}
 
-
 	HostList []Host
 
 	Host struct {
-		Environment types.String `tfsdk:"environment"`
-		Group       types.String `tfsdk:"group"`
-		ID          types.String `tfsdk:"id"`
-		HostKey     types.String `tfsdk:"hostkey"`
-		Location    types.String `tfsdk:"location"`
-		Name        types.String `tfsdk:"name"`
-		Vars	    map[string]string `tfsdk:"vars"`
+		Environment types.String      `tfsdk:"environment"`
+		Group       types.String      `tfsdk:"group"`
+		ID          types.String      `tfsdk:"id"`
+		HostKey     types.String      `tfsdk:"hostkey"`
+		Location    types.String      `tfsdk:"location"`
+		Name        types.String      `tfsdk:"name"`
+		Vars        map[string]string `tfsdk:"vars"`
 	}
 )
 
@@ -37,7 +36,6 @@ var (
 func NewHostDataSource() datasource.DataSource {
 	return &hostDataSource{}
 }
-
 
 func (*hostDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_host"
@@ -85,7 +83,7 @@ func (d *hostDataSource) Configure(ctx context.Context, req datasource.Configure
 
 type hostDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
-	Id     types.String `tfsdk:"id"`
+	Id       types.String `tfsdk:"id"`
 }
 
 func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {

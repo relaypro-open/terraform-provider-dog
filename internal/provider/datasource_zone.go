@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -16,7 +16,7 @@ type (
 		p dogProvider
 	}
 
-        ZoneList []Zone
+	ZoneList []Zone
 
 	Zone struct {
 		ID            types.String `tfsdk:"id"`
@@ -24,7 +24,6 @@ type (
 		IPv6Addresses []string     `tfsdk:"ipv6_addresses"`
 		Name          types.String `tfsdk:"name"`
 	}
-
 )
 
 var (
@@ -34,7 +33,6 @@ var (
 func NewZoneDataSource() datasource.DataSource {
 	return &zoneDataSource{}
 }
-
 
 func (*zoneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_zone"
@@ -82,7 +80,7 @@ func (d *zoneDataSource) Configure(ctx context.Context, req datasource.Configure
 
 type zoneDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
-	Id     types.String `tfsdk:"id"`
+	Id       types.String `tfsdk:"id"`
 }
 
 //type zoneDataSource struct {

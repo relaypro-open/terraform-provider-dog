@@ -6,19 +6,19 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
 
 type profileResourceData struct {
-	ID      types.String          `tfsdk:"id"`
-	Name    string                `tfsdk:"name"`
-	Version string                `tfsdk:"version"`
+	ID      types.String `tfsdk:"id"`
+	Name    string       `tfsdk:"name"`
+	Version string       `tfsdk:"version"`
 }
 
 type (
@@ -39,7 +39,6 @@ func NewProfileResource() resource.Resource {
 func (*profileResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_profile"
 }
-
 
 func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
@@ -89,8 +88,6 @@ func (*profileResource) ImportState(ctx context.Context, req resource.ImportStat
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-
-
 func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 
 	newProfile := api.ProfileCreateRequest{
@@ -102,7 +99,7 @@ func ProfileToCreateRequest(plan profileResourceData) api.ProfileCreateRequest {
 
 func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 	newProfile := api.ProfileUpdateRequest{
-		Name: plan.Name,
+		Name:    plan.Name,
 		Version: plan.Version,
 	}
 	return newProfile
@@ -111,8 +108,8 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 func ApiToProfile(profile api.Profile) Profile {
 	h := Profile{
 		//Created:     types.Int64{Value: int64(profile.Created)},
-		ID:   types.String{Value: profile.ID},
-		Name: types.String{Value: profile.Name},
+		ID:      types.String{Value: profile.ID},
+		Name:    types.String{Value: profile.Name},
 		Version: types.String{Value: profile.Version},
 	}
 	return h
@@ -184,7 +181,6 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
-
 
 func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state Profile

@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -44,7 +44,6 @@ type (
 		ServerNameIndication types.String `tfsdk:"server_name_indication"`
 		Verify               types.String `tfsdk:"verify"`
 	}
-
 )
 
 var (
@@ -54,7 +53,6 @@ var (
 func NewLinkDataSource() datasource.DataSource {
 	return &linkDataSource{}
 }
-
 
 func (*linkDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_link"
@@ -102,7 +100,7 @@ func (d *linkDataSource) Configure(ctx context.Context, req datasource.Configure
 
 type linkDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
-	Id     types.String `tfsdk:"id"`
+	Id       types.String `tfsdk:"id"`
 }
 
 //type linkDataSource struct {

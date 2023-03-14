@@ -6,15 +6,14 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"golang.org/x/exp/slices"
 )
-
 
 type (
 	serviceResource struct {
@@ -36,48 +35,48 @@ func (*serviceResource) Metadata(ctx context.Context, req resource.MetadataReque
 }
 
 func (*serviceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-        return tfsdk.Schema{
-                Attributes: map[string]tfsdk.Attribute{
-                        // This description is used by the documentation generator and the language server.
-                       "services": {
-                               MarkdownDescription: "List of Services",
-                               Required:            true,
-                               Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-                                       "protocol": {
-                                               MarkdownDescription: "Service protocol",
-                                               Required:            true,
-                                               Type:                types.StringType,
-                                       },
-                                       "ports": {
-                                               MarkdownDescription: "Service ports",
-                                               Required:            true,
-                                               Type: types.ListType{
-                                                       ElemType: types.StringType,
-                                               },
-                                       },
-                               }),
-                        },
-                        "name": {
-                                MarkdownDescription: "Service name",
-                                Required:            true,
-                                Type:                types.StringType,
-                        },
-                       "version": {
-                               MarkdownDescription: "Service version",
-                               Optional:            true,
-                               Type:                types.Int64Type,
-                       },
-                        "id": {
-                                Computed:            true,
-                                MarkdownDescription: "Service identifier",
-                                PlanModifiers: tfsdk.AttributePlanModifiers{
-                                       resource.UseStateForUnknown(),
-                                },
-                                Type: types.StringType,
-                        },
+	return tfsdk.Schema{
+		Attributes: map[string]tfsdk.Attribute{
+			// This description is used by the documentation generator and the language server.
+			"services": {
+				MarkdownDescription: "List of Services",
+				Required:            true,
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"protocol": {
+						MarkdownDescription: "Service protocol",
+						Required:            true,
+						Type:                types.StringType,
+					},
+					"ports": {
+						MarkdownDescription: "Service ports",
+						Required:            true,
+						Type: types.ListType{
+							ElemType: types.StringType,
+						},
+					},
+				}),
+			},
+			"name": {
+				MarkdownDescription: "Service name",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"version": {
+				MarkdownDescription: "Service version",
+				Optional:            true,
+				Type:                types.Int64Type,
+			},
+			"id": {
+				Computed:            true,
+				MarkdownDescription: "Service identifier",
+				PlanModifiers: tfsdk.AttributePlanModifiers{
+					resource.UseStateForUnknown(),
+				},
+				Type: types.StringType,
+			},
 		},
-        }, nil
- }
+	}, nil
+}
 
 func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured
@@ -97,7 +96,6 @@ func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureR
 
 	r.p.dog = client
 }
-
 
 func (*serviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
@@ -235,7 +233,6 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
-
 
 func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state Service
