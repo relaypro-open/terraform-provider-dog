@@ -19,16 +19,15 @@ type (
 	InventoryList []Inventory
 
 	Inventory struct {
-		ID     types.String      `tfsdk:"id"`
-		Name   types.String      `tfsdk:"name"`
-		Groups []*InventoryGroup `tfsdk:"groups"`
+		ID     types.String               `tfsdk:"id"`
+		Name   types.String               `tfsdk:"name"`
+		Groups map[string]*InventoryGroup `tfsdk:"groups"`
 	}
 
 	InventoryGroup struct {
-		Name  types.String           `tfsdk:"name"`
-		Vars  map[string]string `tfsdk:"vars"`
-		Hosts map[string]map[string]string `tfsdk:"hosts"`
-		Children []string `tfsdk:"children"`
+		Vars     map[string]string            `tfsdk:"vars"`
+		Hosts    map[string]map[string]string `tfsdk:"hosts"`
+		Children []string                     `tfsdk:"children"`
 	}
 )
 

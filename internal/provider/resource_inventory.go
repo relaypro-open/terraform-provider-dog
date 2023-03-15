@@ -41,12 +41,7 @@ func (*inventoryResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			"groups": {
 				MarkdownDescription: "List of inventory groups",
 				Required:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"name": {
-						MarkdownDescription: "inventory group name",
-						Required:            true,
-						Type:                types.StringType,
-					},
+				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
 					"vars": {
 						MarkdownDescription: "Arbitrary collection of variables used for inventory",
 						Required:            true,
@@ -105,21 +100,20 @@ func (*inventoryResource) ImportState(ctx context.Context, req resource.ImportSt
 }
 
 type inventoryResourceData struct {
-	ID     types.String      `tfsdk:"id"`
-	Groups []*InventoryGroup `tfsdk:"groups"`
-	Name   string            `tfsdk:"name"`
+	ID     types.String               `tfsdk:"id"`
+	Groups map[string]*InventoryGroup `tfsdk:"groups"`
+	Name   string                     `tfsdk:"name"`
 }
 
 func InventoryToCreateRequest(plan inventoryResourceData) api.InventoryCreateRequest {
-	newGroups := []*api.InventoryGroup{}
-	for _, group := range plan.Groups {
+	newGroups := map[string]*api.InventoryGroup{}
+	for name, group := range plan.Groups {
 		g := &api.InventoryGroup{
-			Name:  group.Name.Value,
-			Vars:  group.Vars,
-			Hosts: group.Hosts,
+			Vars:     group.Vars,
+			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
-		newGroups = append(newGroups, g)
+		newGroups[name] = g
 	}
 	newInventory := api.InventoryCreateRequest{
 		Groups: newGroups,
@@ -129,15 +123,14 @@ func InventoryToCreateRequest(plan inventoryResourceData) api.InventoryCreateReq
 }
 
 func InventoryToUpdateRequest(plan inventoryResourceData) api.InventoryUpdateRequest {
-	newGroups := []*api.InventoryGroup{}
-	for _, group := range plan.Groups {
+	newGroups := map[string]*api.InventoryGroup{}
+	for name, group := range plan.Groups {
 		g := &api.InventoryGroup{
-			Name:  group.Name.Value,
-			Vars:  group.Vars,
-			Hosts: group.Hosts,
+			Vars:     group.Vars,
+			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
-		newGroups = append(newGroups, g)
+		newGroups[name] = g
 	}
 	newInventory := api.InventoryUpdateRequest{
 		Groups: newGroups,
@@ -147,15 +140,14 @@ func InventoryToUpdateRequest(plan inventoryResourceData) api.InventoryUpdateReq
 }
 
 func ApiToInventory(inventory api.Inventory) Inventory {
-	newGroups := []*InventoryGroup{}
-	for _, group := range inventory.Groups {
+	newGroups := map[string]*InventoryGroup{}
+	for name, group := range inventory.Groups {
 		g := &InventoryGroup{
-			Name:  types.String{Value: group.Name},
-			Vars:  group.Vars,
-			Hosts: group.Hosts,
+			Vars:     group.Vars,
+			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
-		newGroups = append(newGroups, g)
+		newGroups[name] = g
 	}
 	h := Inventory{
 		ID:     types.String{Value: inventory.ID},
