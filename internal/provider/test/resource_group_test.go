@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,7 +12,7 @@ func TestAccDogGroup_Basic(t *testing.T) {
 	name := "dog_group"
 	randomName := "tf_test_group_" + acctest.RandString(5)
 	resourceName := name + "." + randomName
-	
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

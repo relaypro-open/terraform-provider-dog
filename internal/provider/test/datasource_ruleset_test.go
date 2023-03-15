@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -26,7 +26,6 @@ func TestProvider_DogRulesetNameAttribute(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccDogRulesetDataSourceConfig(resourceType, randomName string) string {
 	return fmt.Sprintf(`
@@ -84,5 +83,5 @@ resource %[1]q %[2]q {
     ]
   }
 }
-`, resourceType, randomName )
+`, resourceType, randomName)
 }

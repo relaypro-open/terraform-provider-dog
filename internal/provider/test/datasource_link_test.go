@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -21,7 +21,6 @@ func TestProvider_DogLinkNameAttribute(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccDogLinkDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
@@ -49,4 +48,4 @@ resource "dog_link" %[1]q {
   name = %[1]q
 }
 `, configurableAttribute)
-} 
+}

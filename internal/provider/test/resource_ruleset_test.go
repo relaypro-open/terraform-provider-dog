@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,7 +12,7 @@ func TestAccDogRuleset_Basic(t *testing.T) {
 	resourceType := "dog_ruleset"
 	randomName := "tf_test_ruleset_" + acctest.RandString(5)
 	resourceName := resourceType + "." + randomName
-	
+
 	randomName2 := "tf_test_ruleset_" + acctest.RandString(5)
 	resourceName2 := resourceType + "." + randomName2
 

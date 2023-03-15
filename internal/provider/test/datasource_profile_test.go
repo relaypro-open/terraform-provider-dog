@@ -81,9 +81,9 @@ func testAccDogProfileRulesetDataSourceConfig(t *testing.T, rulesetResourceType,
 				},
 			},
 		},
-		Name:    "name",
+		Name: "name",
 	}
-	
+
 	//t.Log(spew.Sprintf("ZZZZZZZZZZZZZZZZZZZnewRule: %v", newRule))
 
 	res, _, _ := c.CreateRuleset(newRule, nil)
@@ -103,7 +103,7 @@ resource %[1]q %[2]q {
     ]
   }
 }
-`, rulesetResourceType, rulesetRandomName )
+`, rulesetResourceType, rulesetRandomName)
 }
 
 func testAccDogProfileDataSourceConfig(name, randomName string) string {
@@ -113,4 +113,4 @@ resource %[1]q %[2]q {
   version = "1.0"
 }
 `, name, randomName)
-} 
+}

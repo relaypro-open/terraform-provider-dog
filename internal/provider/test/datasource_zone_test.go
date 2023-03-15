@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -22,7 +22,6 @@ func TestProvider_DogZoneNameAttribute(t *testing.T) {
 	})
 }
 
-
 func testAccDogZoneDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
 resource "dog_zone" "drew_test" {
@@ -31,4 +30,4 @@ resource "dog_zone" "drew_test" {
   ipv6_addresses = []
 }
 `, configurableAttribute)
-} 
+}

@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -88,7 +88,7 @@ resource "dog_profile" "datasource_group" {
   version = "1.0"
 }
 `)
-} 
+}
 
 func testAccDogGroupDataSourceConfig(t *testing.T, configurableAttribute string) string {
 	g := fmt.Sprintf(`
@@ -108,11 +108,11 @@ resource "dog_group" %[1]q {
 	  test = "dog_group"
   }
 }
-` , configurableAttribute)
-  gr := testAccDogGroupRulesetDataSourceConfig() 
-  gp := testAccDogGroupProfileDataSourceConfig()
+`, configurableAttribute)
+	gr := testAccDogGroupRulesetDataSourceConfig()
+	gp := testAccDogGroupProfileDataSourceConfig()
 
-  to := gr + gp + g
-  //t.Log(fmt.Sprintf("to: %s", to))
-  return to
+	to := gr + gp + g
+	//t.Log(fmt.Sprintf("to: %s", to))
+	return to
 }

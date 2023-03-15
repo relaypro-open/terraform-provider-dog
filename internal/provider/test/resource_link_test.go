@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -11,7 +11,7 @@ func TestAccDogLink_Basic(t *testing.T) {
 	name := "dog_link"
 	randomName := "d9"
 	resourceName := name + "." + randomName
-	
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -35,7 +35,6 @@ func TestAccDogLink_Basic(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccDogLinkConfig_basic(resourceName, name string) string {
 	return fmt.Sprintf(`

@@ -1,8 +1,8 @@
 package dog_test
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -38,12 +38,12 @@ func TestProvider_DogHostNameAttribute(t *testing.T) {
 }
 
 func testAccDogHostDataSourceConfig(configurableAttribute string) string {
-	profile := testAccDogHostProfileDataSourceConfig() 
-	group := testAccDogHostGroupDataSourceConfig() 
-	host := testAccDogHostHostDataSourceConfig(configurableAttribute) 
+	profile := testAccDogHostProfileDataSourceConfig()
+	group := testAccDogHostGroupDataSourceConfig()
+	host := testAccDogHostHostDataSourceConfig(configurableAttribute)
 	all := profile + group + host
 	return all
-}	
+}
 
 func testAccDogHostProfileDataSourceConfig() string {
 	return fmt.Sprintf(`
@@ -53,7 +53,7 @@ resource "dog_profile" "terraform_test_profile" {
   ruleset_id = "123"
 }
 `)
-} 
+}
 
 func testAccDogHostGroupDataSourceConfig() string {
 	return fmt.Sprintf(`
@@ -64,7 +64,7 @@ resource "dog_group" "terraform_test_group" {
   profile_version = "latest"
 }
 `)
-} 
+}
 
 func testAccDogHostHostDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
@@ -79,4 +79,4 @@ resource "dog_host" %[1]q {
   }
 }
 `, configurableAttribute)
-} 
+}
