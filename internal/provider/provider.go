@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/bigkevmcd/go-configparser"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -26,6 +27,7 @@ type (
 	dogProviderModel struct {
 		Api_Token    types.String `tfsdk:"api_token"`
 		API_Endpoint types.String `tfsdk:"api_endpoint"`
+		Dog_Env      types.String `tfsdk:"dog_env"`
 	}
 )
 
@@ -59,6 +61,12 @@ func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnosti
 				Optional:            true,
 				Type:                types.StringType,
 				Sensitive:           true,
+			},
+			"dog_env": {
+				MarkdownDescription: "dog environment",
+				Optional:            true,
+				Type:                types.StringType,
+				Sensitive:           false,
 			},
 		},
 	}, nil
@@ -108,6 +116,15 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 
 	if !config.Api_Token.IsNull() {
 		api_token = config.Api_Token.ValueString()
+	} else {
+		dog_env := config.Dog_Env.ValueString()
+		p, err := configparser.NewConfigParserFromFile("~/.dog/credentials")
+		if err != nil {
+			t, err := p.Get(dog_env, "token")
+			if err != nil {
+				api_token = t
+			}
+		}
 	}
 
 	if api_endpoint == "" || api_token == "" {
@@ -136,7 +153,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		resp.Diagnostics.AddError(
 			"Missing Dog API Key",
 			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
-				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
+				"Set the API Key value in the configuration, set dog_env in the configuration and the token in ~/.dog/credentials, or use the DOG_API_TOKEN environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
