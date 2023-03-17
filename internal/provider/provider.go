@@ -117,22 +117,24 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if !config.Api_Token.IsNull() {
 		api_token = config.Api_Token.ValueString()
 	} else {
-		dog_env := config.Dog_Env.ValueString()
-		p, err := configparser.NewConfigParserFromFile("~/.dog/credentials")
-		if err != nil {
-			t, err := p.Get(dog_env, "token")
-			if err != nil {
-				api_token = t
+		if !config.Dog_Env.IsNull() {
+			dog_env = config.Dog_Env.ValueString()
+			p, p_err := configparser.NewConfigParserFromFile("~/.dog/credentials")
+			if p_err != nil {
+				t, t_err := p.Get(dog_env, "token")
+				if t_err != nil {
+					api_token = t
+				} else {
+					resp.Diagnostics.AddError(
+						"dog_env value",
+						fmt.Sprintf("dog_env config not found: %+v\n", t_err)
+					)
 			} else {
 				resp.Diagnostics.AddError(
-					"dog_env value",
-					fmt.Sprintf("dog_env config not found: %+v\n", err)
+					"configparser",
+					fmt.Sprintf("configparser error: %+v\n", p_err)
 				)
-		} else {
-			resp.Diagnostics.AddError(
-				"configparser",
-				fmt.Sprintf("configparser error: %+v\n", err)
-			)
+			}
 		}
 	}
 
