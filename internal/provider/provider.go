@@ -123,7 +123,16 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 			t, err := p.Get(dog_env, "token")
 			if err != nil {
 				api_token = t
-			}
+			} else {
+				resp.Diagnostics.AddError(
+					"dog_env value",
+					fmt.Sprintf("dog_env config not found: %+v\n", err)
+				)
+		} else {
+			resp.Diagnostics.AddError(
+				"configparser",
+				fmt.Sprintf("configparser error: %+v\n", err)
+			)
 		}
 	}
 
