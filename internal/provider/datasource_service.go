@@ -54,7 +54,7 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			// This description is used by the documentation generator and the language server.
 			"services": {
 				MarkdownDescription: "List of Services",
-				Required:            true,
+				Optional:            true,
 				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"protocol": {
 						MarkdownDescription: "Service protocol",
@@ -72,7 +72,7 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			},
 			"name": {
 				MarkdownDescription: "Service name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"version": {
@@ -81,7 +81,7 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				Type:                types.Int64Type,
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Service identifier",
 				Type: types.StringType,
 			},

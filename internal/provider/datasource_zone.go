@@ -47,25 +47,25 @@ func (*zoneDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 			// This description is used by the documentation generator and the language server.
 			"ipv4_addresses": {
 				MarkdownDescription: "List of Ipv4 Addresses",
-				Required:            true,
+				Optional:            true,
 				Type: types.ListType{
 					ElemType: types.StringType,
 				},
 			},
 			"ipv6_addresses": {
 				MarkdownDescription: "List of Ipv6 Addresses",
-				Required:            true,
+				Optional:            true,
 				Type: types.ListType{
 					ElemType: types.StringType,
 				},
 			},
 			"name": {
 				MarkdownDescription: "Zone name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Zone identifier",
 				Type: types.StringType,
 			},

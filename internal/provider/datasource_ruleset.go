@@ -69,7 +69,7 @@ func (*rulesetDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "ruleset name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"profile_id": {
@@ -79,7 +79,7 @@ func (*rulesetDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 			},
 			"rules": {
 				MarkdownDescription: "Rule rules",
-				Required:            true,
+				Optional:            true,
 				Type: types.ObjectType{
 					AttrTypes: map[string]attr.Type{
 						"inbound": types.ListType{
@@ -132,7 +132,7 @@ func (*rulesetDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 				},
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Rule identifier",
 				Type: types.StringType,
 			},

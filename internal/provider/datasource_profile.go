@@ -45,16 +45,16 @@ func (*profileDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		Attributes: map[string]tfsdk.Attribute{
 			"name": {
 				MarkdownDescription: "Profile name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"version": {
 				MarkdownDescription: "Profile version",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Profile identifier",
 				Type: types.StringType,
 			},

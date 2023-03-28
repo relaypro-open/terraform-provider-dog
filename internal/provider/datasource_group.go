@@ -61,12 +61,12 @@ func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 			},
 			"name": {
 				MarkdownDescription: "group name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"profile_id": {
 				MarkdownDescription: "group profile id",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"profile_name": {
@@ -103,7 +103,7 @@ func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 			"id": {
 				MarkdownDescription: "group identifier",
 				Type: types.StringType,
-				Required: true,
+				Optional:            true,
 			},
 		},
 	}, nil

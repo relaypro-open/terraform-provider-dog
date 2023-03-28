@@ -67,12 +67,12 @@ func (*linkDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 			// This description is used by the documentation generator and the language server.
 			"address_handling": {
 				MarkdownDescription: "Type of address handling",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"connection": {
 				MarkdownDescription: "Connection specification",
-				Required:            true,
+				Optional:            true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"api_port": {
 						Type:     types.Int64Type,
@@ -132,26 +132,26 @@ func (*linkDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 			},
 			"connection_type": {
 				MarkdownDescription: "Connection type",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"direction": {
 				MarkdownDescription: "Connection direction",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"enabled": {
 				MarkdownDescription: "Connection enabled",
-				Required:            true,
+				Optional:            true,
 				Type:                types.BoolType,
 			},
 			"name": {
 				MarkdownDescription: "Link name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Link identifier",
 				Type: types.StringType,
 			},

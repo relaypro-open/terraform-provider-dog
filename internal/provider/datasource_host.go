@@ -50,27 +50,27 @@ func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 			// This description is used by the documentation generator and the language server.
 			"environment": {
 				MarkdownDescription: "Host environment",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"group": {
 				MarkdownDescription: "Host group",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"hostkey": {
 				MarkdownDescription: "Host key",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"location": {
 				MarkdownDescription: "Host location",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"name": {
 				MarkdownDescription: "Host name",
-				Required:            true,
+				Optional:            true,
 				Type:                types.StringType,
 			},
 			"vars": {
@@ -79,7 +79,7 @@ func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 				Optional:            true,
 			},
 			"id": {
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "Host identifier",
 				Type: types.StringType,
 			},
