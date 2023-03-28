@@ -64,15 +64,96 @@ func (*linkDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 		MarkdownDescription: "Link data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Link configurable attribute",
-				Optional:            true,
+			// This description is used by the documentation generator and the language server.
+			"address_handling": {
+				MarkdownDescription: "Type of address handling",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"connection": {
+				MarkdownDescription: "Connection specification",
+				Required:            true,
+				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+					"api_port": {
+						Type:     types.Int64Type,
+						Required: true,
+					},
+					"host": {
+						Type:     types.StringType,
+						Required: true,
+					},
+					"password": {
+						Type:      types.StringType,
+						Required:  true,
+						Sensitive: true,
+					},
+					"port": {
+						Type:     types.Int64Type,
+						Required: true,
+					},
+					"ssl_options": {
+						Required: true,
+						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+							"cacertfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"certfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"fail_if_no_peer_cert": {
+								Type:     types.BoolType,
+								Required: true,
+							},
+							"keyfile": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"server_name_indication": {
+								Type:     types.StringType,
+								Required: true,
+							},
+							"verify": {
+								Type:     types.StringType,
+								Required: true,
+							},
+						}),
+					},
+					"user": {
+						Type:     types.StringType,
+						Required: true,
+					},
+					"virtual_host": {
+						Type:     types.StringType,
+						Required: true,
+					},
+				}),
+			},
+			"connection_type": {
+				MarkdownDescription: "Connection type",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"direction": {
+				MarkdownDescription: "Connection direction",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"enabled": {
+				MarkdownDescription: "Connection enabled",
+				Required:            true,
+				Type:                types.BoolType,
+			},
+			"name": {
+				MarkdownDescription: "Link name",
+				Required:            true,
 				Type:                types.StringType,
 			},
 			"id": {
+				Required:            true,
 				MarkdownDescription: "Link identifier",
-				Type:                types.StringType,
-				Computed:            true,
+				Type: types.StringType,
 			},
 		},
 	}, nil

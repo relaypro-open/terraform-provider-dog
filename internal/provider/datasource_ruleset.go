@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
@@ -66,15 +67,74 @@ func (*rulesetDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		MarkdownDescription: "Ruleset data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Ruleset configurable attribute",
+			"name": {
+				MarkdownDescription: "ruleset name",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"profile_id": {
+				MarkdownDescription: "profile id",
 				Optional:            true,
 				Type:                types.StringType,
 			},
+			"rules": {
+				MarkdownDescription: "Rule rules",
+				Required:            true,
+				Type: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"inbound": types.ListType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"action":  types.StringType,
+									"active":  types.BoolType,
+									"comment": types.StringType,
+									"environments": types.ListType{
+										ElemType: types.StringType,
+									},
+									"group":      types.StringType,
+									"group_type": types.StringType,
+									"interface":  types.StringType,
+									"log":        types.BoolType,
+									"log_prefix": types.StringType,
+									"order":      types.Int64Type,
+									"service":    types.StringType,
+									"states": types.ListType{
+										ElemType: types.StringType,
+									},
+									"type": types.StringType,
+								},
+							},
+						},
+						"outbound": types.ListType{
+							ElemType: types.ObjectType{
+								AttrTypes: map[string]attr.Type{
+									"action":  types.StringType,
+									"active":  types.BoolType,
+									"comment": types.StringType,
+									"environments": types.ListType{
+										ElemType: types.StringType,
+									},
+									"group":      types.StringType,
+									"group_type": types.StringType,
+									"interface":  types.StringType,
+									"log":        types.BoolType,
+									"log_prefix": types.StringType,
+									"order":      types.Int64Type,
+									"service":    types.StringType,
+									"states": types.ListType{
+										ElemType: types.StringType,
+									},
+									"type": types.StringType,
+								},
+							},
+						},
+					},
+				},
+			},
 			"id": {
-				MarkdownDescription: "Ruleset identifier",
-				Type:                types.StringType,
-				Computed:            true,
+				Required:            true,
+				MarkdownDescription: "Rule identifier",
+				Type: types.StringType,
 			},
 		},
 	}, nil

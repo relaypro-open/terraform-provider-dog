@@ -47,15 +47,41 @@ func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagno
 		MarkdownDescription: "Host data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Host configurable attribute",
-				Optional:            true,
+			// This description is used by the documentation generator and the language server.
+			"environment": {
+				MarkdownDescription: "Host environment",
+				Required:            true,
 				Type:                types.StringType,
 			},
-			"id": {
-				MarkdownDescription: "Host identifier",
+			"group": {
+				MarkdownDescription: "Host group",
+				Required:            true,
 				Type:                types.StringType,
-				Computed:            true,
+			},
+			"hostkey": {
+				MarkdownDescription: "Host key",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"location": {
+				MarkdownDescription: "Host location",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"name": {
+				MarkdownDescription: "Host name",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"vars": {
+				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				Type:                types.MapType{ElemType: types.StringType},
+				Optional:            true,
+			},
+			"id": {
+				Required:            true,
+				MarkdownDescription: "Host identifier",
+				Type: types.StringType,
 			},
 		},
 	}, nil

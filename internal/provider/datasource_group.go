@@ -53,15 +53,57 @@ func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 		MarkdownDescription: "Group data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Group configurable attribute",
+			// This description is used by the documentation generator and the language server.
+			"description": {
+				MarkdownDescription: "group description",
 				Optional:            true,
 				Type:                types.StringType,
 			},
-			"id": {
-				MarkdownDescription: "Group identifier",
+			"name": {
+				MarkdownDescription: "group name",
+				Required:            true,
 				Type:                types.StringType,
-				Computed:            true,
+			},
+			"profile_id": {
+				MarkdownDescription: "group profile id",
+				Required:            true,
+				Type:                types.StringType,
+			},
+			"profile_name": {
+				MarkdownDescription: "group profile name",
+				Optional:            true,
+				Type:                types.StringType,
+			},
+			"profile_version": {
+				MarkdownDescription: "group profile version",
+				Optional:            true,
+				Type:                types.StringType,
+			},
+			"ec2_security_group_ids": {
+				MarkdownDescription: "List of EC2 Security Groups to control",
+				Optional:            true,
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"region": {
+						MarkdownDescription: "EC2 Region",
+						Required:            true,
+						Type:                types.StringType,
+					},
+					"sgid": {
+						MarkdownDescription: "EC2 Security Group ID",
+						Required:            true,
+						Type:                types.StringType,
+					},
+				}),
+			},
+			"vars": {
+				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				Type:                types.MapType{ElemType: types.StringType},
+				Optional:            true,
+			},
+			"id": {
+				MarkdownDescription: "group identifier",
+				Type: types.StringType,
+				Required: true,
 			},
 		},
 	}, nil

@@ -51,15 +51,39 @@ func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 		MarkdownDescription: "Service data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Service configurable attribute",
-				Optional:            true,
+			// This description is used by the documentation generator and the language server.
+			"services": {
+				MarkdownDescription: "List of Services",
+				Required:            true,
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"protocol": {
+						MarkdownDescription: "Service protocol",
+						Required:            true,
+						Type:                types.StringType,
+					},
+					"ports": {
+						MarkdownDescription: "Service ports",
+						Required:            true,
+						Type: types.ListType{
+							ElemType: types.StringType,
+						},
+					},
+				}),
+			},
+			"name": {
+				MarkdownDescription: "Service name",
+				Required:            true,
 				Type:                types.StringType,
 			},
+			"version": {
+				MarkdownDescription: "Service version",
+				Optional:            true,
+				Type:                types.Int64Type,
+			},
 			"id": {
+				Required:            true,
 				MarkdownDescription: "Service identifier",
-				Type:                types.StringType,
-				Computed:            true,
+				Type: types.StringType,
 			},
 		},
 	}, nil
