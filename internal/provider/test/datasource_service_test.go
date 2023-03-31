@@ -15,7 +15,7 @@ func TestProvider_DogServiceNameAttribute(t *testing.T) {
 			{
 				Config: testAccDogServiceDataSourceConfig("drew_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_service.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("data.dog_service.drew_test", "name", "drew_test"),
 				),
 			},
 		},
@@ -33,6 +33,16 @@ resource "dog_service" %[1]q {
         ports = ["22"]
       },
   ]
+}
+
+data "dog_service" %[1]q {
+	name = dog_service.%[1]s.name
+	services = [
+	    {
+	      protocol = "tcp"
+	      ports = ["22"]
+	    },
+	]
 }
 `, configurableAttribute)
 }

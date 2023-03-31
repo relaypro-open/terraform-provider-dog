@@ -112,5 +112,10 @@ resource %[1]q %[2]q {
   name = %[2]q
   version = "1.0"
 }
+
+data %[1]q %[2]q {
+  name = dog_profile.%[2]s.name
+}
+
 `, name, randomName)
 }

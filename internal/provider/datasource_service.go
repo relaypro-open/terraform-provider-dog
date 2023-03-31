@@ -3,11 +3,16 @@ package dog
 import (
 	"context"
 	"fmt"
+	"reflect"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -25,7 +30,7 @@ type (
 		Version  types.Int64     `tfsdk:"version"`
 	}
 
-	Services []PortProtocol
+	Services []*PortProtocol
 
 	PortProtocol struct {
 		Ports    []string     `tfsdk:"ports"`
@@ -114,12 +119,14 @@ type serviceDataSourceData struct {
 	Id       types.String `tfsdk:"id"`
 }
 
-//type serviceDataSource struct {
-//	provider provider
-//}
-
 func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state ServiceList
+	var state Service
+	var serviceName string
+	var serviceServices []*PortProtocol
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &serviceName)
+	req.Config.GetAttribute(ctx, path.Root("services"), &serviceServices)
+	tflog.Debug(ctx, spew.Sprint("ZZZ serviceServices: %#v", serviceServices))
 
 	res, statusCode, err := d.p.dog.GetServices(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -131,12 +138,46 @@ func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Set state
-	for _, api_service := range res {
-		service := ApiToService(api_service)
-		state = append(state, service)
+	var filteredServicesName []api.Service
+	if serviceName != "" {
+		filteredServicesName = goterators.Filter(res, func(service api.Service) bool {
+			return service.Name == serviceName
+		})
+	} else {
+		filteredServicesName = res
 	}
+	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServicesName: %#v", filteredServicesName))
+
+	var filteredServicesProtocol []api.Service
+	if serviceServices != nil {
+		filteredServicesProtocol = goterators.Filter(filteredServicesName, func(service api.Service) bool {
+			convertedServices := ApiToService(service)
+			tflog.Debug(ctx, spew.Sprint("ZZZ serviceServices: %#v, convertedServices: %#v", serviceServices, convertedServices.Services))
+			tflog.Debug(ctx, spew.Sprint("ZZZ service DeepEqual: %#v", reflect.DeepEqual(serviceServices, convertedServices.Services)))
+			return reflect.DeepEqual(serviceServices, convertedServices.Services)
+		})
+	} else {
+		filteredServicesProtocol = filteredServicesName
+	}
+	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServicesProtocol: %#v", filteredServicesProtocol))
+
+	filteredServices := filteredServicesProtocol
+
+
+	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServices: %#v", filteredServices))
+	if filteredServices == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_service data source returned no results."))
+	}
+	if len(filteredServices) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_service data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	filteredService := filteredServices[0]
+	// Set state
+	state = ApiToService(filteredService)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

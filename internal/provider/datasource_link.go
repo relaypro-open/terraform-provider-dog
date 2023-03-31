@@ -8,6 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
+	"github.com/davecgh/go-spew/spew"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -189,7 +193,10 @@ type linkDataSourceData struct {
 //}
 
 func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state LinkList
+	var state Link
+	var linkName string
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &linkName)
 
 	res, statusCode, err := d.p.dog.GetLinks(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -202,11 +209,31 @@ func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	// Set state
-	for _, api_link := range res {
-		link := ApiToLink(api_link)
-		state = append(state, link)
+	var filteredLinksName []api.Link
+	if linkName != "" {
+		filteredLinksName = goterators.Filter(res, func(link api.Link) bool {
+			return link.Name == linkName
+		})
+	} else {
+		filteredLinksName = res
 	}
+
+	filteredLinks := filteredLinksName
+
+	tflog.Debug(ctx, spew.Sprint("ZZZfilteredLinks: %#v", filteredLinks))
+	if filteredLinks == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned no results."))
+	} 
+	if len(filteredLinks) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	link := filteredLinks[0] 
+	// Set state
+	state = ApiToLink(link)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

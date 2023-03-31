@@ -6,8 +6,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -113,7 +115,14 @@ type hostDataSourceData struct {
 }
 
 func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state HostList
+	var state Host
+	var hostGroup string
+	var hostHostkey string
+	var hostName string
+
+	req.Config.GetAttribute(ctx, path.Root("group"), &hostGroup)
+	req.Config.GetAttribute(ctx, path.Root("hostkey"), &hostHostkey)
+	req.Config.GetAttribute(ctx, path.Root("name"), &hostName)
 
 	res, statusCode, err := d.p.dog.GetHosts(nil)
 	if err != nil {
@@ -126,11 +135,48 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	// Set state
-	for _, api_host := range res {
-		host := ApiToHost(api_host)
-		state = append(state, host)
+	var filteredHostsName []api.Host
+	if hostName != "" {
+		filteredHostsName = goterators.Filter(res, func(host api.Host) bool {
+			return host.Name == hostName
+		})
+	} else {
+		filteredHostsName = res
 	}
+
+	var filteredHostsHostkey []api.Host
+	if hostHostkey != "" {
+		filteredHostsHostkey = goterators.Filter(filteredHostsName, func(host api.Host) bool {
+			return host.HostKey == hostHostkey
+		})
+	} else {
+		filteredHostsHostkey = filteredHostsName
+	}
+
+	var filteredHostsGroup []api.Host
+	if hostGroup != "" {
+		filteredHostsGroup = goterators.Filter(filteredHostsHostkey, func(host api.Host) bool {
+			return host.Group == hostGroup
+		})
+	} else {
+		filteredHostsGroup = filteredHostsHostkey
+	}
+
+	filteredHosts := filteredHostsGroup
+
+	if filteredHosts == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_host data source returned no results."))
+	}
+	if len(filteredHosts) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_host data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Set state
+	filteredHost := filteredHosts[0]
+	state = ApiToHost(filteredHost)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

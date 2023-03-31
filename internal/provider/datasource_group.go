@@ -8,6 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
+	"github.com/davecgh/go-spew/spew"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -139,7 +143,14 @@ type groupDataSourceData struct {
 //}
 
 func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state GroupList
+	var state Group
+	var groupName string
+	var groupProfileId string
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &groupName)
+	req.Config.GetAttribute(ctx, path.Root("profile_id"), &groupProfileId)
+	//tflog.Debug(ctx, fmt.Sprintf("ZZZgroupName: '%s'", groupName))
+	//tflog.Debug(ctx, fmt.Sprintf("ZZZgroupProfileId: '%s'", groupProfileId))
 
 	res, statusCode, err := d.p.dog.GetGroups(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -151,12 +162,45 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Set state
-	for _, api_group := range res {
-		group := ApiToGroup(api_group)
-		state = append(state, group)
+	//Filter groups
+	var filteredGroupsName []api.Group
+	if groupName != "" {
+		filteredGroupsName = goterators.Filter(res, func(group api.Group) bool {
+			//tflog.Debug(ctx, fmt.Sprintf("ZZZgroup.Name: '%s', groupName: '%s'", group.Name,groupName))
+			return group.Name == groupName
+		})
+	} else {
+		filteredGroupsName = res
 	}
+	//tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroupsName: %#v", filteredGroupsName))
+
+	var filteredGroupsProfileId []api.Group
+	if groupProfileId != "" {
+		filteredGroupsProfileId = goterators.Filter(filteredGroupsName, func(group api.Group) bool {
+			return group.ProfileId == groupProfileId
+		})
+	} else {
+		filteredGroupsProfileId = filteredGroupsName
+	}
+	//tflog.Debug(ctx, spew.Sprint("ZZZfilteredProfileId: %#v", filteredGroupsProfileId))
+
+	filteredGroups := filteredGroupsProfileId
+
+	tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroups: %#v", filteredGroups))
+	if filteredGroups == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned no results."))
+	} 
+	if len(filteredGroups) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	group := filteredGroups[0] 
+	// Set state
+	state = ApiToGroup(group)
+	//tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroup: %#v", state))
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

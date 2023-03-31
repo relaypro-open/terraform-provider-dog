@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -92,7 +94,10 @@ type profileDataSourceData struct {
 //}
 
 func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state ProfileList
+	var state Profile
+	var profileName string
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &profileName)
 
 	res, statusCode, err := d.p.dog.GetProfiles(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -105,11 +110,32 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	// Set state
-	for _, api_profile := range res {
-		profile := ApiToProfile(api_profile)
-		state = append(state, profile)
+	var filteredProfilesName []api.Profile
+	if profileName != "" {
+		filteredProfilesName = goterators.Filter(res, func(profile api.Profile) bool {
+			//tflog.Debug(ctx, fmt.Sprintf("ZZZprofile.Name: '%s', profileName: '%s'", profile.Name,profileName))
+			return profile.Name == profileName
+		})
+	} else {
+		filteredProfilesName = res
 	}
+	
+	filteredProfiles := filteredProfilesName
+
+	if filteredProfiles == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned no results."))
+	} 
+	if len(filteredProfiles) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	profile := filteredProfiles[0] 
+	// Set state
+	state = ApiToProfile(profile)
+	// Set state
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

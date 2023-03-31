@@ -15,7 +15,7 @@ func TestProvider_DogInventoryNameAttribute(t *testing.T) {
 			{
 				Config: testAccDogInventoryDataSourceConfig("drew_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_inventory.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("data.dog_inventory.drew_test", "name", "drew_test"),
 				),
 			},
 		},
@@ -59,6 +59,10 @@ resource "dog_inventory" %[1]q {
 		]
 	 }
   }
+}
+
+data "dog_inventory" %[1]q {
+  name = dog_inventory.%[1]s.name 
 }
 `, name)
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -103,7 +105,10 @@ type zoneDataSourceData struct {
 //}
 
 func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state ZoneList
+	var state Zone
+	var zoneName string
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &zoneName)
 
 	res, statusCode, err := d.p.dog.GetZones(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -116,11 +121,30 @@ func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	// Set state
-	for _, api_zone := range res {
-		zone := ApiToZone(api_zone)
-		state = append(state, zone)
+	var filteredZonesName []api.Zone
+	if zoneName != "" {
+		filteredZonesName = goterators.Filter(res, func(zone api.Zone) bool {
+			return zone.Name == zoneName
+		})
+	} else {
+		filteredZonesName = res
 	}
+
+	filteredZones := filteredZonesName
+
+	if filteredZones == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned no results."))
+	} 
+	if len(filteredZones) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	zone := filteredZones[0] 
+	// Set state
+	state = ApiToZone(zone)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -30,7 +30,7 @@ func TestProvider_DogHostNameAttribute(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					//resource.TestCheckResourceAttr("dog_profile.terraform_test_profile", "name", "terraform_test_profile"),
 					//resource.TestCheckResourceAttr("dog_group.terraform_test_group", "name", "terraform_test_group"),
-					resource.TestCheckResourceAttr("dog_host.terraform_host_test", "name", "terraform_host_test"),
+					resource.TestCheckResourceAttr("data.dog_host.terraform_host_test", "name", "terraform_host_test"),
 				),
 			},
 		},
@@ -77,6 +77,12 @@ resource "dog_host" %[1]q {
   vars = {
 	  test = "dog_host"
   }
+}
+
+data "dog_host" %[1]q {
+  name = dog_host.%[1]s.name
+  group = "dog_test"
+  hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
 }
 `, configurableAttribute)
 }

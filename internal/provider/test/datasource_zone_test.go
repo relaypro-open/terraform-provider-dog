@@ -15,7 +15,7 @@ func TestProvider_DogZoneNameAttribute(t *testing.T) {
 			{
 				Config: testAccDogZoneDataSourceConfig("drew_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_zone.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("data.dog_zone.drew_test", "name", "drew_test"),
 				),
 			},
 		},
@@ -28,6 +28,10 @@ resource "dog_zone" "drew_test" {
   name = %[1]q
   ipv4_addresses = ["1.1.1.1"]
   ipv6_addresses = []
+}
+
+data "dog_zone" "drew_test" {
+  name = dog_zone.%[1]s.name
 }
 `, configurableAttribute)
 }

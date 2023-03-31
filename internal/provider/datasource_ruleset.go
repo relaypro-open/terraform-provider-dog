@@ -9,6 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -170,7 +172,10 @@ type rulesetDataSourceData struct {
 //}
 
 func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state RulesetList
+	var state Ruleset
+	var rulesetName string
+	
+	req.Config.GetAttribute(ctx, path.Root("name"), &rulesetName)
 
 	res, statusCode, err := d.p.dog.GetRulesets(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -183,11 +188,31 @@ func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	// Set state
-	for _, api_ruleset := range res {
-		ruleset := ApiToRuleset(ctx, api_ruleset)
-		state = append(state, ruleset)
+	//Filter rulesets
+	var filteredRulesetsName []api.Ruleset
+	if rulesetName != "" {
+		filteredRulesetsName = goterators.Filter(res, func(ruleset api.Ruleset) bool {
+			return ruleset.Name == rulesetName
+		})
+	} else {
+		filteredRulesetsName = res
 	}
+
+	filteredRulesets := filteredRulesetsName
+
+	if filteredRulesets == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned no results."))
+	} 
+	if len(filteredRulesets) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	ruleset := filteredRulesets[0] 
+	// Set state
+	state = ApiToRuleset(ctx, ruleset)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

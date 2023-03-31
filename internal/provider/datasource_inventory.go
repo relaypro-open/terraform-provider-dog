@@ -8,6 +8,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -49,15 +51,37 @@ func (*inventoryDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 		MarkdownDescription: "Inventory data source",
 
 		Attributes: map[string]tfsdk.Attribute{
-			"api_token": {
-				MarkdownDescription: "Inventory configurable attribute",
+			// This description is used by the documentation generator and the language server.
+			"groups": {
+				MarkdownDescription: "List of inventory groups",
+				Optional:            true,
+				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
+					"vars": {
+						MarkdownDescription: "Arbitrary collection of variables used for inventory",
+						Optional:            true,
+						Type:                types.MapType{ElemType: types.StringType},
+					},
+					"hosts": {
+						MarkdownDescription: "Arbitrary collection of hosts used for inventory",
+						Optional:            true,
+						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
+					},
+					"children": {
+						MarkdownDescription: "inventory group children",
+						Optional:            true,
+						Type:                types.ListType{ElemType: types.StringType},
+					},
+				}),
+			},
+			"name": {
+				MarkdownDescription: "Inventory name",
 				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
-				MarkdownDescription: "Inventory identifier",
-				Type:                types.StringType,
 				Computed:            true,
+				MarkdownDescription: "Inventory identifier",
+				Type: types.StringType,
 			},
 		},
 	}, nil
@@ -93,7 +117,10 @@ type inventoryDataSourceData struct {
 //}
 
 func (d *inventoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state InventoryList
+	var state Inventory
+	var inventoryName string
+
+	req.Config.GetAttribute(ctx, path.Root("name"), &inventoryName)
 
 	res, statusCode, err := d.p.dog.GetInventories(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
@@ -106,11 +133,30 @@ func (d *inventoryDataSource) Read(ctx context.Context, req datasource.ReadReque
 		return
 	}
 
-	// Set state
-	for _, api_inventory := range res {
-		inventory := ApiToInventory(api_inventory)
-		state = append(state, inventory)
+	var filteredInventorysName []api.Inventory
+	if inventoryName != "" {
+		filteredInventorysName = goterators.Filter(res, func(inventory api.Inventory) bool {
+			return inventory.Name == inventoryName
+		})
+	} else {
+		filteredInventorysName = res
 	}
+
+	filteredInventorys := filteredInventorysName
+
+	if filteredInventorys == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_inventory data source returned no results."))
+	} 
+	if len(filteredInventorys) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_inventory data source returned more than one result."))
+	}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	inventory := filteredInventorys[0] 
+	// Set state
+	state = ApiToInventory(inventory)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

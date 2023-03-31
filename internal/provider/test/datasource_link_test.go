@@ -15,7 +15,7 @@ func TestProvider_DogLinkNameAttribute(t *testing.T) {
 			{
 				Config: testAccDogLinkDataSourceConfig("d1"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("dog_link.d1", "name", "d1"),
+					resource.TestCheckResourceAttr("data.dog_link.d1", "name", "d1"),
 				),
 			},
 		},
@@ -46,6 +46,10 @@ resource "dog_link" %[1]q {
   direction = "bidirectional"
   enabled = false
   name = %[1]q
+}
+
+data "dog_link" %[1]q {
+  name = dog_link.%[1]s.name
 }
 `, configurableAttribute)
 }

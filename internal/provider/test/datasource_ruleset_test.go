@@ -20,7 +20,7 @@ func TestProvider_DogRulesetNameAttribute(t *testing.T) {
 			{
 				Config: testAccDogRulesetDataSourceConfig(resourceType, randomName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr("data." + resourceName, "name", randomName),
 				),
 			},
 		},
@@ -82,6 +82,10 @@ resource %[1]q %[2]q {
       }
     ]
   }
+}
+
+data %[1]q %[2]q {
+  name = dog_ruleset.%[2]s.name
 }
 `, resourceType, randomName)
 }
