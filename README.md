@@ -31,7 +31,7 @@ terraform {
   required_providers {
       dog = {
       source = "relaypro-open/dog"
-      version = "1.0.10"
+      version = "1.0.23"
   }
 }
 
@@ -85,7 +85,7 @@ provider "dog" {
 }
 ```
 
-Example resource records:
+Example resource records and matching data records:
 
 dog/group.tf:
 ```
@@ -104,8 +104,13 @@ resource "dog_group" "test_qa" {
         sgid = "sg-23456789"
       },
   ]
+  vars = {
+    group_var = "test"
+  }
   provider = dog.qa
 }
+
+
 ```
 
 dog/host.tf:
@@ -117,6 +122,15 @@ resource "dog_host" "dog-host" {
   location = "*"
   name = "dog-host"
   provider = dog.qa
+  vars = {
+    host_var = "test"
+  }
+}
+
+data "dog_host" "dog-host" {
+  name = "dog-host"
+  group = "dog_test"
+  hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
 }
 ```
 
@@ -146,6 +160,10 @@ resource "dog_link" "q1" {
   name = "q1"
   provider = dog.qa
 }
+
+data "dog_link" "q1" {
+  name = "q1"
+}
 ```
 
 dog/service.tf:
@@ -161,6 +179,16 @@ resource "dog_service" "ssh-tcp-22" {
   ]
   provider = dog.qa
 }
+
+data "dog_service" "ssh-tcp-22" {
+	name = "ssh-tcp-22"
+	services = [
+	    {
+	      protocol = "tcp"
+	      ports = ["22"]
+	    },
+	]
+}
 ```
 
 dog/profile.tf:
@@ -168,6 +196,19 @@ dog/profile.tf:
 resource "dog_profile" "test_qa" {
   name = "test_qa"
   version = "1.0"
+}
+
+data "dog_profile" "test_qa" {
+  name = "test_qa"
+}
+```
+
+dog/ruleset.tf:
+```
+resource "dog_ruleset" "test_qa" {
+  name = "test_qa"
+  version = "1.0"
+  profile_id = "1234"
   rules = {
     inbound = [
       {
@@ -221,6 +262,10 @@ resource "dog_profile" "test_qa" {
   }
   provider = dog.qa
 }
+
+data "dog_ruleset" "test_qa" {
+  name = "test_qa"
+}
 ```
 
 dog/zone.tf:
@@ -230,6 +275,10 @@ resource "dog_zone" "test_zone" {
   ipv4_addresses = ["1.1.1.2"]
   ipv6_addresses = []
   provider = dog.qa
+}
+
+data "dog_zone" "test_zone" {
+  name = "test_zone"
 }
 ```
 
