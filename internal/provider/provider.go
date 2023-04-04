@@ -126,8 +126,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_endpoint == "" {
 		resp.Diagnostics.AddError(
 			"Missing Dog API Endpoint",
-			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. "+
-				"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. "+
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. " +
+				"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. " +
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
@@ -135,8 +135,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_token == "" {
 		resp.Diagnostics.AddError(
 			"Missing Dog API Key",
-			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
-				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. " +
+				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. " +
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
