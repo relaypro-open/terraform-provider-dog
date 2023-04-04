@@ -167,7 +167,7 @@ func (*dogProvider) Resources(ctx context.Context) []func() resource.Resource {
 		NewLinkResource,
 		NewProfileResource,
 		NewRulesetResource,
-		NewInventoryResource,
+		NewFactResource,
 	}
 }
 
@@ -180,6 +180,6 @@ func (*dogProvider) DataSources(ctx context.Context) []func() datasource.DataSou
 		NewLinkDataSource,
 		NewProfileDataSource,
 		NewRulesetDataSource,
-		NewInventoryDataSource,
+		NewFactDataSource,
 	}
 }

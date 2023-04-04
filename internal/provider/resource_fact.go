@@ -16,57 +16,57 @@ import (
 )
 
 type (
-	inventoryResource struct {
+	factResource struct {
 		p dogProvider
 	}
 )
 
 var (
-	_ resource.Resource                = (*inventoryResource)(nil)
-	_ resource.ResourceWithImportState = (*inventoryResource)(nil)
+	_ resource.Resource                = (*factResource)(nil)
+	_ resource.ResourceWithImportState = (*factResource)(nil)
 )
 
-func NewInventoryResource() resource.Resource {
-	return &inventoryResource{}
+func NewFactResource() resource.Resource {
+	return &factResource{}
 }
 
-func (*inventoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_inventory"
+func (*factResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_fact"
 }
 
-func (*inventoryResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (*factResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
 			"groups": {
-				MarkdownDescription: "List of inventory groups",
+				MarkdownDescription: "List of fact groups",
 				Required:            true,
 				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
 					"vars": {
-						MarkdownDescription: "Arbitrary collection of variables used for inventory",
+						MarkdownDescription: "Arbitrary collection of variables used for fact",
 						Required:            true,
 						Type:                types.MapType{ElemType: types.StringType},
 					},
 					"hosts": {
-						MarkdownDescription: "Arbitrary collection of hosts used for inventory",
+						MarkdownDescription: "Arbitrary collection of hosts used for fact",
 						Required:            true,
 						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
 					},
 					"children": {
-						MarkdownDescription: "inventory group children",
+						MarkdownDescription: "fact group children",
 						Required:            true,
 						Type:                types.ListType{ElemType: types.StringType},
 					},
 				}),
 			},
 			"name": {
-				MarkdownDescription: "Inventory name",
+				MarkdownDescription: "Fact name",
 				Required:            true,
 				Type:                types.StringType,
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Inventory identifier",
+				MarkdownDescription: "Fact identifier",
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					resource.UseStateForUnknown(),
 				},
@@ -76,7 +76,7 @@ func (*inventoryResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	}, nil
 }
 
-func (r *inventoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *factResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured
 	if req.ProviderData == nil {
 		return
@@ -95,73 +95,73 @@ func (r *inventoryResource) Configure(ctx context.Context, req resource.Configur
 	r.p.dog = client
 }
 
-func (*inventoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (*factResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-type inventoryResourceData struct {
+type factResourceData struct {
 	ID     types.String               `tfsdk:"id"`
-	Groups map[string]*InventoryGroup `tfsdk:"groups"`
+	Groups map[string]*FactGroup `tfsdk:"groups"`
 	Name   string                     `tfsdk:"name"`
 }
 
-func InventoryToCreateRequest(plan inventoryResourceData) api.InventoryCreateRequest {
-	newGroups := map[string]*api.InventoryGroup{}
+func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
+	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.InventoryGroup{
+		g := &api.FactGroup{
 			Vars:     group.Vars,
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
 		newGroups[name] = g
 	}
-	newInventory := api.InventoryCreateRequest{
+	newFact := api.FactCreateRequest{
 		Groups: newGroups,
 		Name:   plan.Name,
 	}
-	return newInventory
+	return newFact
 }
 
-func InventoryToUpdateRequest(plan inventoryResourceData) api.InventoryUpdateRequest {
-	newGroups := map[string]*api.InventoryGroup{}
+func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
+	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.InventoryGroup{
+		g := &api.FactGroup{
 			Vars:     group.Vars,
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
 		newGroups[name] = g
 	}
-	newInventory := api.InventoryUpdateRequest{
+	newFact := api.FactUpdateRequest{
 		Groups: newGroups,
 		Name:   plan.Name,
 	}
-	return newInventory
+	return newFact
 }
 
-func ApiToInventory(inventory api.Inventory) Inventory {
-	newGroups := map[string]*InventoryGroup{}
-	for name, group := range inventory.Groups {
-		g := &InventoryGroup{
+func ApiToFact(fact api.Fact) Fact {
+	newGroups := map[string]*FactGroup{}
+	for name, group := range fact.Groups {
+		g := &FactGroup{
 			Vars:     group.Vars,
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
 		newGroups[name] = g
 	}
-	h := Inventory{
-		ID:     types.String{Value: inventory.ID},
+	h := Fact{
+		ID:     types.String{Value: fact.ID},
 		Groups: newGroups,
-		Name:   types.String{Value: inventory.Name},
+		Name:   types.String{Value: fact.Name},
 	}
 
 	return h
 }
 
-func (r *inventoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var state Inventory
+func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var state Fact
 
-	var plan inventoryResourceData
+	var plan factResourceData
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
@@ -169,13 +169,13 @@ func (r *inventoryResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	newInventory := InventoryToCreateRequest(plan)
+	newFact := FactToCreateRequest(plan)
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	inventory, statusCode, err := r.p.dog.CreateInventory(newInventory, nil)
-	log.Printf(fmt.Sprintf("inventory: %+v\n", inventory))
-	tflog.Trace(ctx, fmt.Sprintf("inventory: %+v\n", inventory))
+	fact, statusCode, err := r.p.dog.CreateFact(newFact, nil)
+	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
+	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create inventory, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
 	}
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -183,7 +183,7 @@ func (r *inventoryResource) Create(ctx context.Context, req resource.CreateReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToInventory(inventory)
+	state = ApiToFact(fact)
 
 	plan.ID = state.ID
 
@@ -196,8 +196,8 @@ func (r *inventoryResource) Create(ctx context.Context, req resource.CreateReque
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *inventoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state Inventory
+func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state Fact
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -206,27 +206,27 @@ func (r *inventoryResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	inventoryID := state.ID.Value
+	factID := state.ID.Value
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	inventory, statusCode, err := r.p.dog.GetInventory(inventoryID, nil)
+	fact, statusCode, err := r.p.dog.GetFact(factID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read inventory, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read fact, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToInventory(inventory)
+	state = ApiToFact(fact)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *inventoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var state Inventory
+func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state Fact
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -235,22 +235,22 @@ func (r *inventoryResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	inventoryID := state.ID.Value
+	factID := state.ID.Value
 
-	var plan inventoryResourceData
+	var plan factResourceData
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newInventory := InventoryToUpdateRequest(plan)
-	inventory, statusCode, err := r.p.dog.UpdateInventory(inventoryID, newInventory, nil)
-	log.Printf(fmt.Sprintf("inventory: %+v\n", inventory))
-	tflog.Trace(ctx, fmt.Sprintf("inventory: %+v\n", inventory))
-	state = ApiToInventory(inventory)
+	newFact := FactToUpdateRequest(plan)
+	fact, statusCode, err := r.p.dog.UpdateFact(factID, newFact, nil)
+	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
+	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
+	state = ApiToFact(fact)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create inventory, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -272,8 +272,8 @@ func (r *inventoryResource) Update(ctx context.Context, req resource.UpdateReque
 
 }
 
-func (r *inventoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state Inventory
+func (r *factResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var state Fact
 
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -282,18 +282,18 @@ func (r *inventoryResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	inventoryID := state.ID.Value
-	inventory, statusCode, err := r.p.dog.DeleteInventory(inventoryID, nil)
+	factID := state.ID.Value
+	fact, statusCode, err := r.p.dog.DeleteFact(factID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read inventory, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read fact, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	tflog.Trace(ctx, fmt.Sprintf("inventory deleted: %+v\n", inventory))
+	tflog.Trace(ctx, fmt.Sprintf("fact deleted: %+v\n", fact))
 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)

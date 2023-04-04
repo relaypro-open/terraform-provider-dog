@@ -100,7 +100,7 @@ func (*groupDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagn
 				}),
 			},
 			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				MarkdownDescription: "Arbitrary collection of variables used for fact",
 				Type:                types.MapType{ElemType: types.StringType},
 				Optional:            true,
 			},

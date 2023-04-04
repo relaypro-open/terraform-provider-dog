@@ -14,19 +14,19 @@ import (
 )
 
 type (
-	inventoryDataSource struct {
+	factDataSource struct {
 		p dogProvider
 	}
 
-	InventoryList []Inventory
+	FactList []Fact
 
-	Inventory struct {
+	Fact struct {
 		ID     types.String               `tfsdk:"id"`
 		Name   types.String               `tfsdk:"name"`
-		Groups map[string]*InventoryGroup `tfsdk:"groups"`
+		Groups map[string]*FactGroup `tfsdk:"groups"`
 	}
 
-	InventoryGroup struct {
+	FactGroup struct {
 		Vars     map[string]string            `tfsdk:"vars"`
 		Hosts    map[string]map[string]string `tfsdk:"hosts"`
 		Children []string                     `tfsdk:"children"`
@@ -34,60 +34,60 @@ type (
 )
 
 var (
-	_ datasource.DataSource = (*inventoryDataSource)(nil)
+	_ datasource.DataSource = (*factDataSource)(nil)
 )
 
-func NewInventoryDataSource() datasource.DataSource {
-	return &inventoryDataSource{}
+func NewFactDataSource() datasource.DataSource {
+	return &factDataSource{}
 }
 
-func (*inventoryDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_inventory"
+func (*factDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_fact"
 }
 
-func (*inventoryDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+func (*factDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Inventory data source",
+		MarkdownDescription: "Fact data source",
 
 		Attributes: map[string]tfsdk.Attribute{
 			// This description is used by the documentation generator and the language server.
 			"groups": {
-				MarkdownDescription: "List of inventory groups",
+				MarkdownDescription: "List of fact groups",
 				Optional:            true,
 				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
 					"vars": {
-						MarkdownDescription: "Arbitrary collection of variables used for inventory",
+						MarkdownDescription: "Arbitrary collection of variables used for fact",
 						Optional:            true,
 						Type:                types.MapType{ElemType: types.StringType},
 					},
 					"hosts": {
-						MarkdownDescription: "Arbitrary collection of hosts used for inventory",
+						MarkdownDescription: "Arbitrary collection of hosts used for fact",
 						Optional:            true,
 						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
 					},
 					"children": {
-						MarkdownDescription: "inventory group children",
+						MarkdownDescription: "fact group children",
 						Optional:            true,
 						Type:                types.ListType{ElemType: types.StringType},
 					},
 				}),
 			},
 			"name": {
-				MarkdownDescription: "Inventory name",
+				MarkdownDescription: "Fact name",
 				Optional:            true,
 				Type:                types.StringType,
 			},
 			"id": {
 				Computed:            true,
-				MarkdownDescription: "Inventory identifier",
+				MarkdownDescription: "Fact identifier",
 				Type: types.StringType,
 			},
 		},
 	}, nil
 }
 
-func (d *inventoryDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *factDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -107,56 +107,56 @@ func (d *inventoryDataSource) Configure(ctx context.Context, req datasource.Conf
 	d.p.dog = client
 }
 
-type inventoryDataSourceData struct {
+type factDataSourceData struct {
 	ApiToken types.String `tfsdk:"api_token"`
 	Id       types.String `tfsdk:"id"`
 }
 
-//type inventoryDataSource struct {
+//type factDataSource struct {
 //	provider provider
 //}
 
-func (d *inventoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var state Inventory
-	var inventoryName string
+func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var state Fact
+	var factName string
 
-	req.Config.GetAttribute(ctx, path.Root("name"), &inventoryName)
+	req.Config.GetAttribute(ctx, path.Root("name"), &factName)
 
-	res, statusCode, err := d.p.dog.GetInventories(nil)
+	res, statusCode, err := d.p.dog.GetFacts(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read inventories, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read facts, got error: %s", err))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	var filteredInventorysName []api.Inventory
-	if inventoryName != "" {
-		filteredInventorysName = goterators.Filter(res, func(inventory api.Inventory) bool {
-			return inventory.Name == inventoryName
+	var filteredFactsName []api.Fact
+	if factName != "" {
+		filteredFactsName = goterators.Filter(res, func(fact api.Fact) bool {
+			return fact.Name == factName
 		})
 	} else {
-		filteredInventorysName = res
+		filteredFactsName = res
 	}
 
-	filteredInventorys := filteredInventorysName
+	filteredFacts := filteredFactsName
 
-	if filteredInventorys == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_inventory data source returned no results."))
+	if filteredFacts == nil {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned no results."))
 	} 
-	if len(filteredInventorys) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_inventory data source returned more than one result."))
+	if len(filteredFacts) > 1 {
+		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned more than one result."))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	inventory := filteredInventorys[0] 
+	fact := filteredFacts[0] 
 	// Set state
-	state = ApiToInventory(inventory)
+	state = ApiToFact(fact)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

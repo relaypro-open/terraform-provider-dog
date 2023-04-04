@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccDogInventory_Basic(t *testing.T) {
-	resourceType := "dog_inventory"
-	randomName := "tf_test_inventory_" + acctest.RandString(5)
+func TestAccDogFact_Basic(t *testing.T) {
+	resourceType := "dog_fact"
+	randomName := "tf_test_fact_" + acctest.RandString(5)
 	resourceName := resourceType + "." + randomName
 
 	resource.ParallelTest(t, resource.TestCase{
@@ -18,7 +18,7 @@ func TestAccDogInventory_Basic(t *testing.T) {
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogInventoryConfig_basic(resourceType, randomName),
+				Config: testAccDogFactConfig_basic(resourceType, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
@@ -35,7 +35,7 @@ func TestAccDogInventory_Basic(t *testing.T) {
 	})
 }
 
-func testAccDogInventoryConfig_basic(resourceType, name string) string {
+func testAccDogFactConfig_basic(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
   name = %[2]q 

@@ -7,24 +7,24 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestProvider_DogInventoryNameAttribute(t *testing.T) {
+func TestProvider_DogFactNameAttribute(t *testing.T) {
 	resource.UnitTest(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		PreCheck:                 func() { testAccPreCheck(t) },
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDogInventoryDataSourceConfig("drew_test"),
+				Config: testAccDogFactDataSourceConfig("drew_test"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.dog_inventory.drew_test", "name", "drew_test"),
+					resource.TestCheckResourceAttr("data.dog_fact.drew_test", "name", "drew_test"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDogInventoryDataSourceConfig(name string) string {
+func testAccDogFactDataSourceConfig(name string) string {
 	return fmt.Sprintf(`
-resource "dog_inventory" %[1]q {
+resource "dog_fact" %[1]q {
   name = %[1]q 
   groups = {
 	  "all" = {
@@ -61,8 +61,8 @@ resource "dog_inventory" %[1]q {
   }
 }
 
-data "dog_inventory" %[1]q {
-  name = dog_inventory.%[1]s.name 
+data "dog_fact" %[1]q {
+  name = dog_fact.%[1]s.name 
 }
 `, name)
 }
