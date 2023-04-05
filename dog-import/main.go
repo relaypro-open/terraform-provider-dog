@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"flag"
 
 	"github.com/relaypro-open/dog_api_golang/api"
 )
@@ -359,10 +360,29 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
 	}
 }
 
+var environment string
+var output_dir string
+var host_prefix string
+func init() {
+	flag.StringVar(&environment, "environment", "", "dog environment")
+	flag.StringVar(&output_dir, "output_dir", "", "base dir for output")
+	flag.StringVar(&host_prefix, "host_prefix", "", "prefix for host names")
+	flag.Parse()
+	if environment == "" {
+		fmt.Fprintf(os.Stderr, "missing required -environment argument/flag\n")
+		os.Exit(2) 
+	}
+	if output_dir == "" {
+		fmt.Fprintf(os.Stderr, "missing required -output_dir argument/flag\n")
+		os.Exit(2) 
+	}
+	if host_prefix == "" {
+		fmt.Fprintf(os.Stderr, "missing required -host_prefix argument/flag\n")
+		os.Exit(2) 
+	}
+}
+
 func main() {
-	environment := os.Args[1]
-	output_dir := os.Args[2]
-	host_prefix := os.Args[3]
 	fmt.Printf("host_prefix: '%s'\n", host_prefix)
 	group_export(output_dir, environment)
 	host_export(output_dir, environment, host_prefix)
