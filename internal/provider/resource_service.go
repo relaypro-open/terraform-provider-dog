@@ -118,7 +118,7 @@ func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
 	for _, port_protocol := range plan.Services {
 		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: port_protocol.Protocol.Value,
+			Protocol: port_protocol.Protocol.ValueString(),
 		}
 		newServices = append(newServices, pp)
 	}
@@ -136,7 +136,7 @@ func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
 	for _, port_protocol := range plan.Services {
 		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: port_protocol.Protocol.Value,
+			Protocol: port_protocol.Protocol.ValueString(),
 		}
 		newServices = append(newServices, pp)
 	}
@@ -154,15 +154,15 @@ func ApiToService(service api.Service) Service {
 	for _, port_protocol := range service.Services {
 		pp := &PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: types.String{Value: port_protocol.Protocol},
+			Protocol: types.StringValue(port_protocol.Protocol),
 		}
 		newServices = append(newServices, pp)
 	}
 	h := Service{
-		ID:       types.String{Value: service.ID},
+		ID:       types.StringValue(service.ID),
 		Services: newServices,
-		Name:     types.String{Value: service.Name},
-		Version:  types.Int64{Value: int64(service.Version)},
+		Name:     types.StringValue(service.Name),
+		Version:  types.Int64Value(int64(service.Version)),
 	}
 	return h
 }
@@ -215,7 +215,7 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -244,7 +244,7 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 
 	var plan serviceResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -291,7 +291,7 @@ func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 	service, statusCode, err := r.p.dog.DeleteService(serviceID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

@@ -170,38 +170,38 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
-			Action:       inbound_rule.Action.Value,
-			Active:       inbound_rule.Active.Value,
-			Comment:      inbound_rule.Comment.Value,
+			Action:       inbound_rule.Action.ValueString(),
+			Active:       inbound_rule.Active.ValueBool(),
+			Comment:      inbound_rule.Comment.ValueString(),
 			Environments: inbound_rule.Environments,
-			Group:        inbound_rule.Group.Value,
-			GroupType:    inbound_rule.GroupType.Value,
-			Interface:    inbound_rule.Interface.Value,
-			Log:          inbound_rule.Log.Value,
-			LogPrefix:    inbound_rule.LogPrefix.Value,
-			Order:        int(inbound_rule.Order.Value),
-			Service:      inbound_rule.Service.Value,
+			Group:        inbound_rule.Group.ValueString(),
+			GroupType:    inbound_rule.GroupType.ValueString(),
+			Interface:    inbound_rule.Interface.ValueString(),
+			Log:          inbound_rule.Log.ValueBool(),
+			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
+			Order:        int(inbound_rule.Order.ValueInt64()),
+			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
-			Type:         inbound_rule.Type.Value,
+			Type:         inbound_rule.Type.ValueString(),
 		}
 		inboundRules = append(inboundRules, rule)
 	}
 	outboundRules := []*api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
 		rule := &api.Rule{
-			Action:       outbound_rule.Action.Value,
-			Active:       outbound_rule.Active.Value,
-			Comment:      outbound_rule.Comment.Value,
+			Action:       outbound_rule.Action.ValueString(),
+			Active:       outbound_rule.Active.ValueBool(),
+			Comment:      outbound_rule.Comment.ValueString(),
 			Environments: outbound_rule.Environments,
-			Group:        outbound_rule.Group.Value,
-			GroupType:    outbound_rule.GroupType.Value,
-			Interface:    outbound_rule.Interface.Value,
-			Log:          outbound_rule.Log.Value,
-			LogPrefix:    outbound_rule.LogPrefix.Value,
-			Order:        int(outbound_rule.Order.Value),
-			Service:      outbound_rule.Service.Value,
+			Group:        outbound_rule.Group.ValueString(),
+			GroupType:    outbound_rule.GroupType.ValueString(),
+			Interface:    outbound_rule.Interface.ValueString(),
+			Log:          outbound_rule.Log.ValueBool(),
+			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
+			Order:        int(outbound_rule.Order.ValueInt64()),
+			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
-			Type:         outbound_rule.Type.Value,
+			Type:         outbound_rule.Type.ValueString(),
 		}
 		outboundRules = append(outboundRules, rule)
 	}
@@ -234,38 +234,38 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 	inboundRules := []*api.Rule{}
 	for _, inbound_rule := range plan.Rules.Inbound {
 		rule := &api.Rule{
-			Action:       inbound_rule.Action.Value,
-			Active:       inbound_rule.Active.Value,
-			Comment:      inbound_rule.Comment.Value,
+			Action:       inbound_rule.Action.ValueString(),
+			Active:       inbound_rule.Active.ValueBool(),
+			Comment:      inbound_rule.Comment.ValueString(),
 			Environments: inbound_rule.Environments,
-			Group:        inbound_rule.Group.Value,
-			GroupType:    inbound_rule.GroupType.Value,
-			Interface:    inbound_rule.Interface.Value,
-			Log:          inbound_rule.Log.Value,
-			LogPrefix:    inbound_rule.LogPrefix.Value,
-			Order:        int(inbound_rule.Order.Value),
-			Service:      inbound_rule.Service.Value,
+			Group:        inbound_rule.Group.ValueString(),
+			GroupType:    inbound_rule.GroupType.ValueString(),
+			Interface:    inbound_rule.Interface.ValueString(),
+			Log:          inbound_rule.Log.ValueBool(),
+			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
+			Order:        int(inbound_rule.Order.ValueInt64()),
+			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
-			Type:         inbound_rule.Type.Value,
+			Type:         inbound_rule.Type.ValueString(),
 		}
 		inboundRules = append(inboundRules, rule)
 	}
 	outboundRules := []*api.Rule{}
 	for _, outbound_rule := range plan.Rules.Outbound {
 		rule := &api.Rule{
-			Action:       outbound_rule.Action.Value,
-			Active:       outbound_rule.Active.Value,
-			Comment:      outbound_rule.Comment.Value,
+			Action:       outbound_rule.Action.ValueString(),
+			Active:       outbound_rule.Active.ValueBool(),
+			Comment:      outbound_rule.Comment.ValueString(),
 			Environments: outbound_rule.Environments,
-			Group:        outbound_rule.Group.Value,
-			GroupType:    outbound_rule.GroupType.Value,
-			Interface:    outbound_rule.Interface.Value,
-			Log:          outbound_rule.Log.Value,
-			LogPrefix:    outbound_rule.LogPrefix.Value,
-			Order:        int(outbound_rule.Order.Value),
-			Service:      outbound_rule.Service.Value,
+			Group:        outbound_rule.Group.ValueString(),
+			GroupType:    outbound_rule.GroupType.ValueString(),
+			Interface:    outbound_rule.Interface.ValueString(),
+			Log:          outbound_rule.Log.ValueBool(),
+			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
+			Order:        int(outbound_rule.Order.ValueInt64()),
+			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
-			Type:         outbound_rule.Type.Value,
+			Type:         outbound_rule.Type.ValueString(),
 		}
 		outboundRules = append(outboundRules, rule)
 	}
@@ -302,38 +302,38 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	newInboundRules := []*rulesetResourceRule{}
 	for _, inbound_rule := range ruleset.Rules.Inbound {
 		rule := &rulesetResourceRule{
-			Action:       types.String{Value: inbound_rule.Action},
-			Active:       types.Bool{Value: inbound_rule.Active},
-			Comment:      types.String{Value: inbound_rule.Comment},
+			Action:       types.StringValue(inbound_rule.Action),
+			Active:       types.BoolValue(inbound_rule.Active),
+			Comment:      types.StringValue(inbound_rule.Comment),
 			Environments: inbound_rule.Environments,
-			Group:        types.String{Value: inbound_rule.Group},
-			GroupType:    types.String{Value: inbound_rule.GroupType},
-			Interface:    types.String{Value: inbound_rule.Interface},
-			Log:          types.Bool{Value: inbound_rule.Log},
-			LogPrefix:    types.String{Value: inbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(inbound_rule.Order)},
-			Service:      types.String{Value: inbound_rule.Service},
+			Group:        types.StringValue(inbound_rule.Group),
+			GroupType:    types.StringValue(inbound_rule.GroupType),
+			Interface:    types.StringValue(inbound_rule.Interface),
+			Log:          types.BoolValue(inbound_rule.Log),
+			LogPrefix:    types.StringValue(inbound_rule.LogPrefix),
+			Order:        types.Int64Value(int64(inbound_rule.Order)),
+			Service:      types.StringValue(inbound_rule.Service),
 			States:       inbound_rule.States,
-			Type:         types.String{Value: inbound_rule.Type},
+			Type:         types.StringValue(inbound_rule.Type),
 		}
 		newInboundRules = append(newInboundRules, rule)
 	}
 	newOutboundRules := []*rulesetResourceRule{}
 	for _, outbound_rule := range ruleset.Rules.Outbound {
 		rule := &rulesetResourceRule{
-			Action:       types.String{Value: outbound_rule.Action},
-			Active:       types.Bool{Value: outbound_rule.Active},
-			Comment:      types.String{Value: outbound_rule.Comment},
+			Action:       types.StringValue(outbound_rule.Action),
+			Active:       types.BoolValue(outbound_rule.Active),
+			Comment:      types.StringValue(outbound_rule.Comment),
 			Environments: outbound_rule.Environments,
-			Group:        types.String{Value: outbound_rule.Group},
-			GroupType:    types.String{Value: outbound_rule.GroupType},
-			Interface:    types.String{Value: outbound_rule.Interface},
-			Log:          types.Bool{Value: outbound_rule.Log},
-			LogPrefix:    types.String{Value: outbound_rule.LogPrefix},
-			Order:        types.Int64{Value: int64(outbound_rule.Order)},
-			Service:      types.String{Value: outbound_rule.Service},
+			Group:        types.StringValue(outbound_rule.Group),
+			GroupType:    types.StringValue(outbound_rule.GroupType),
+			Interface:    types.StringValue(outbound_rule.Interface),
+			Log:          types.BoolValue(outbound_rule.Log),
+			LogPrefix:    types.StringValue(outbound_rule.LogPrefix),
+			Order:        types.Int64Value(int64(outbound_rule.Order)),
+			Service:      types.StringValue(outbound_rule.Service),
 			States:       outbound_rule.States,
-			Type:         types.String{Value: outbound_rule.Type},
+			Type:         types.StringValue(outbound_rule.Type),
 		}
 		newOutboundRules = append(newOutboundRules, rule)
 	}
@@ -341,8 +341,8 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	tflog.Debug(ctx, spew.Sprint("ZZZruleset: %#v", ruleset))
 	if ruleset.ProfileId == nil {
 		h := Ruleset{
-			ID:   types.String{Value: ruleset.ID},
-			Name: types.String{Value: ruleset.Name},
+			ID:   types.StringValue(ruleset.ID),
+			Name: types.StringValue(ruleset.Name),
 			Rules: &rulesetResourceRules{
 				Inbound:  newInboundRules,
 				Outbound: newOutboundRules,
@@ -353,13 +353,13 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 		return h
 	} else {
 		h := Ruleset{
-			ID:   types.String{Value: ruleset.ID},
-			Name: types.String{Value: ruleset.Name},
+			ID:   types.StringValue(ruleset.ID),
+			Name: types.StringValue(ruleset.Name),
 			Rules: &rulesetResourceRules{
 				Inbound:  newInboundRules,
 				Outbound: newOutboundRules,
 			},
-			ProfileId: types.String{Value: *ruleset.ProfileId},
+			ProfileId: types.StringValue(*ruleset.ProfileId),
 		}
 		return h
 	}
@@ -413,7 +413,7 @@ func (r *rulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	rulesetID := state.ID.Value
+	rulesetID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -442,7 +442,7 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	rulesetID := state.ID.Value
+	rulesetID := state.ID.ValueString()
 
 	var plan rulesetResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -486,7 +486,7 @@ func (r *rulesetResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	rulesetID := state.ID.Value
+	rulesetID := state.ID.ValueString()
 	ruleset, statusCode, err := r.p.dog.DeleteRuleset(rulesetID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

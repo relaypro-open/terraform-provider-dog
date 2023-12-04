@@ -143,10 +143,10 @@ func ApiToZone(zone api.Zone) Zone {
 		newIpv6Addresses = append(newIpv6Addresses, ipv6)
 	}
 	h := Zone{
-		ID:            types.String{Value: zone.ID},
+		ID:            types.StringValue(zone.ID),
 		IPv4Addresses: newIpv4Addresses,
 		IPv6Addresses: newIpv6Addresses,
-		Name:          types.String{Value: zone.Name},
+		Name:          types.StringValue(zone.Name),
 	}
 	return h
 }
@@ -199,7 +199,7 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -228,7 +228,7 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 
 	var plan zoneResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -275,7 +275,7 @@ func (r *zoneResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 	zone, statusCode, err := r.p.dog.DeleteZone(zoneID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

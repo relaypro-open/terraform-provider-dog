@@ -108,9 +108,9 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 func ApiToProfile(profile api.Profile) Profile {
 	h := Profile{
 		//Created:     types.Int64{Value: int64(profile.Created)},
-		ID:      types.String{Value: profile.ID},
-		Name:    types.String{Value: profile.Name},
-		Version: types.String{Value: profile.Version},
+		ID:      types.StringValue(profile.ID),
+		Name:    types.StringValue(profile.Name),
+		Version: types.StringValue(profile.Version),
 	}
 	return h
 }
@@ -163,7 +163,7 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -192,7 +192,7 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 
 	var plan profileResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -236,7 +236,7 @@ func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

@@ -64,7 +64,7 @@ func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnost
 				Type:                types.StringType,
 			},
 			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				MarkdownDescription: "Arbitrary collection of variables used for fact",
 				Type:                types.MapType{ElemType: types.StringType},
 				Optional:            true,
 			},
@@ -144,12 +144,12 @@ func ApiToHost(host api.Host) Host {
 	}
 
 	h := Host{
-		Environment: types.String{Value: host.Environment},
-		Group:       types.String{Value: host.Group},
-		ID:          types.String{Value: host.ID},
-		HostKey:     types.String{Value: host.HostKey},
-		Location:    types.String{Value: host.Location},
-		Name:        types.String{Value: host.Name},
+		Environment: types.StringValue(host.Environment),
+		Group:       types.StringValue(host.Group),
+		ID:          types.StringValue(host.ID),
+		HostKey:     types.StringValue(host.HostKey),
+		Location:    types.StringValue(host.Location),
+		Name:        types.StringValue(host.Name),
 		Vars:        newVars,
 	}
 
@@ -204,7 +204,7 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	hostID := state.ID.Value
+	hostID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -233,7 +233,7 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	hostID := state.ID.Value
+	hostID := state.ID.ValueString()
 
 	var plan hostResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -280,7 +280,7 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	hostID := state.ID.Value
+	hostID := state.ID.ValueString()
 	host, statusCode, err := r.p.dog.DeleteHost(hostID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

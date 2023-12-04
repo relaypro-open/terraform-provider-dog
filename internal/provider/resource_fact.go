@@ -150,9 +150,9 @@ func ApiToFact(fact api.Fact) Fact {
 		newGroups[name] = g
 	}
 	h := Fact{
-		ID:     types.String{Value: fact.ID},
+		ID:     types.StringValue(fact.ID),
 		Groups: newGroups,
-		Name:   types.String{Value: fact.Name},
+		Name:   types.StringValue(fact.Name),
 	}
 
 	return h
@@ -206,7 +206,7 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -235,7 +235,7 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 
 	var plan factResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -282,7 +282,7 @@ func (r *factResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 	fact, statusCode, err := r.p.dog.DeleteFact(factID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

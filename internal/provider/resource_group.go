@@ -80,7 +80,7 @@ func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnos
 				}),
 			},
 			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for inventory",
+				MarkdownDescription: "Arbitrary collection of variables used for fact",
 				Type:                types.MapType{ElemType: types.StringType},
 				Optional:            true,
 			},
@@ -184,8 +184,8 @@ func ApiToGroup(group api.Group) Group {
 	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
 	for _, region_sgid := range group.Ec2SecurityGroupIds {
 		rs := &Ec2SecurityGroupIds{
-			Region: types.String{Value: region_sgid.Region},
-			SgId:   types.String{Value: region_sgid.SgId},
+			Region: types.StringValue(region_sgid.Region),
+			SgId:   types.StringValue(region_sgid.SgId),
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
@@ -196,12 +196,12 @@ func ApiToGroup(group api.Group) Group {
 	}
 
 	h := Group{
-		Description:         types.String{Value: group.Description},
-		ID:                  types.String{Value: group.ID},
-		Name:                types.String{Value: group.Name},
-		ProfileId:           types.String{Value: group.ProfileId},
-		ProfileName:         types.String{Value: group.ProfileName},
-		ProfileVersion:      types.String{Value: group.ProfileVersion},
+		Description:         types.StringValue(group.Description),
+		ID:                  types.StringValue(group.ID),
+		Name:                types.StringValue(group.Name),
+		ProfileId:           types.StringValue(group.ProfileId),
+		ProfileName:         types.StringValue(group.ProfileName),
+		ProfileVersion:      types.StringValue(group.ProfileVersion),
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 		Vars:                newVars,
 	}
@@ -255,7 +255,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 
 	group, statusCode, err := r.p.dog.GetGroup(groupID, nil)
 	if statusCode != 200 {
@@ -282,7 +282,7 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 
 	var plan groupResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -329,7 +329,7 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

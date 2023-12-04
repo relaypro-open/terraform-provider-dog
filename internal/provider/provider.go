@@ -76,7 +76,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	// If practitioner provided a configuration value for any of the
 	// attributes, it must be a known value.
 
-	if config.API_Endpoint.Unknown {
+	if config.API_Endpoint.IsUnknown() {
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Endpoint",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API endpoint. "+
@@ -84,7 +84,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		)
 	}
 
-	if config.Api_Token.Unknown {
+	if config.Api_Token.IsUnknown() {
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Key",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
@@ -113,8 +113,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_endpoint == "" || api_token == "" {
 		resp.Diagnostics.AddError(
 			"config values",
-			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.Value)+
-				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
+			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.ValueString() )+
+				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.ValueString() )+
 				fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
 				fmt.Sprintf("api_token: %+v\n", api_token),
 		)

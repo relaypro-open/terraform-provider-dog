@@ -189,82 +189,82 @@ type sslOptionsResouceData struct {
 
 func LinkToCreateRequest(plan linkResourceData) api.LinkCreateRequest {
 	newLink := api.LinkCreateRequest{
-		AddressHandling: plan.AddressHandling.Value,
+		AddressHandling: plan.AddressHandling.ValueString(),
 		Connection: &api.Connection{
-			ApiPort:  int(plan.Connection.ApiPort.Value),
-			Host:     plan.Connection.Host.Value,
-			Password: plan.Connection.Password.Value,
-			Port:     int(plan.Connection.Port.Value),
+			ApiPort:  int(plan.Connection.ApiPort.ValueInt64()),
+			Host:     plan.Connection.Host.ValueString(),
+			Password: plan.Connection.Password.ValueString(),
+			Port:     int(plan.Connection.Port.ValueInt64()),
 			SSLOptions: &api.SSLOptions{
-				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
-				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
-				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
-				KeyFile:              plan.Connection.SSLOptions.KeyFile.Value,
-				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.Value,
-				Verify:               plan.Connection.SSLOptions.Verify.Value,
+				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.ValueString(),
+				CertFile:             plan.Connection.SSLOptions.CertFile.ValueString(),
+				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.ValueBool(),
+				KeyFile:              plan.Connection.SSLOptions.KeyFile.ValueString(),
+				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.ValueString(),
+				Verify:               plan.Connection.SSLOptions.Verify.ValueString(),
 			},
-			User:        plan.Connection.User.Value,
-			VirtualHost: plan.Connection.VirtualHost.Value,
+			User:        plan.Connection.User.ValueString(),
+			VirtualHost: plan.Connection.VirtualHost.ValueString(),
 		},
-		ConnectionType: plan.ConnectionType.Value,
-		Direction:      plan.Direction.Value,
-		Enabled:        plan.Enabled.Value,
-		Name:           plan.Name.Value,
+		ConnectionType: plan.ConnectionType.ValueString(),
+		Direction:      plan.Direction.ValueString(),
+		Enabled:        plan.Enabled.ValueBool(),
+		Name:           plan.Name.ValueString(),
 	}
 	return newLink
 }
 
 func LinkToUpdateRequest(plan linkResourceData) api.LinkUpdateRequest {
 	newLink := api.LinkUpdateRequest{
-		AddressHandling: plan.AddressHandling.Value,
+		AddressHandling: plan.AddressHandling.ValueString(),
 		Connection: &api.Connection{
-			ApiPort:  int(plan.Connection.ApiPort.Value),
-			Host:     plan.Connection.Host.Value,
-			Password: plan.Connection.Password.Value,
-			Port:     int(plan.Connection.Port.Value),
+			ApiPort:  int(plan.Connection.ApiPort.ValueInt64()),
+			Host:     plan.Connection.Host.ValueString(),
+			Password: plan.Connection.Password.ValueString(),
+			Port:     int(plan.Connection.Port.ValueInt64()),
 			SSLOptions: &api.SSLOptions{
-				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.Value,
-				CertFile:             plan.Connection.SSLOptions.CertFile.Value,
-				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.Value,
-				KeyFile:              plan.Connection.SSLOptions.KeyFile.Value,
-				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.Value,
-				Verify:               plan.Connection.SSLOptions.Verify.Value,
+				CaCertFile:           plan.Connection.SSLOptions.CaCertFile.ValueString(),
+				CertFile:             plan.Connection.SSLOptions.CertFile.ValueString(),
+				FailIfNoPeerCert:     plan.Connection.SSLOptions.FailIfNoPeerCert.ValueBool(),
+				KeyFile:              plan.Connection.SSLOptions.KeyFile.ValueString(),
+				ServerNameIndication: plan.Connection.SSLOptions.ServerNameIndication.ValueString(),
+				Verify:               plan.Connection.SSLOptions.Verify.ValueString(),
 			},
-			User:        plan.Connection.User.Value,
-			VirtualHost: plan.Connection.VirtualHost.Value,
+			User:        plan.Connection.User.ValueString(),
+			VirtualHost: plan.Connection.VirtualHost.ValueString(),
 		},
-		ConnectionType: plan.ConnectionType.Value,
-		Direction:      plan.Direction.Value,
-		Enabled:        plan.Enabled.Value,
-		Name:           plan.Name.Value,
+		ConnectionType: plan.ConnectionType.ValueString(),
+		Direction:      plan.Direction.ValueString(),
+		Enabled:        plan.Enabled.ValueBool(),
+		Name:           plan.Name.ValueString(),
 	}
 	return newLink
 }
 
 func ApiToLink(link api.Link) Link {
 	newLink := Link{
-		AddressHandling: types.String{Value: link.AddressHandling},
+		AddressHandling: types.StringValue(link.AddressHandling),
 		Connection: &Connection{
-			ApiPort:  types.Int64{Value: int64(link.Connection.ApiPort)},
-			Host:     types.String{Value: link.Connection.Host},
-			Password: types.String{Value: link.Connection.Password},
-			Port:     types.Int64{Value: int64(link.Connection.Port)},
+			ApiPort:  types.Int64Value(int64(link.Connection.ApiPort)),
+			Host:     types.StringValue(link.Connection.Host),
+			Password: types.StringValue(link.Connection.Password),
+			Port:     types.Int64Value(int64(link.Connection.Port)),
 			SSLOptions: &SSLOptions{
-				CaCertFile:           types.String{Value: link.Connection.SSLOptions.CaCertFile},
-				CertFile:             types.String{Value: link.Connection.SSLOptions.CertFile},
-				FailIfNoPeerCert:     types.Bool{Value: link.Connection.SSLOptions.FailIfNoPeerCert},
-				KeyFile:              types.String{Value: link.Connection.SSLOptions.KeyFile},
-				ServerNameIndication: types.String{Value: link.Connection.SSLOptions.ServerNameIndication},
-				Verify:               types.String{Value: link.Connection.SSLOptions.Verify},
+				CaCertFile:           types.StringValue(link.Connection.SSLOptions.CaCertFile),
+				CertFile:             types.StringValue(link.Connection.SSLOptions.CertFile),
+				FailIfNoPeerCert:     types.BoolValue(link.Connection.SSLOptions.FailIfNoPeerCert),
+				KeyFile:              types.StringValue(link.Connection.SSLOptions.KeyFile),
+				ServerNameIndication: types.StringValue(link.Connection.SSLOptions.ServerNameIndication),
+				Verify:               types.StringValue(link.Connection.SSLOptions.Verify),
 			},
-			User:        types.String{Value: link.Connection.User},
-			VirtualHost: types.String{Value: link.Connection.VirtualHost},
+			User:        types.StringValue(link.Connection.User),
+			VirtualHost: types.StringValue(link.Connection.VirtualHost),
 		},
-		ConnectionType: types.String{Value: link.ConnectionType},
-		Direction:      types.String{Value: link.Direction},
-		Enabled:        types.Bool{Value: link.Enabled},
-		Name:           types.String{Value: link.Name},
-		ID:             types.String{Value: link.ID},
+		ConnectionType: types.StringValue(link.ConnectionType),
+		Direction:      types.StringValue(link.Direction),
+		Enabled:        types.BoolValue(link.Enabled),
+		Name:           types.StringValue(link.Name),
+		ID:             types.StringValue(link.ID),
 	}
 	return newLink
 }
@@ -317,7 +317,7 @@ func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	linkID := state.ID.Value
+	linkID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -346,7 +346,7 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	linkID := state.ID.Value
+	linkID := state.ID.ValueString()
 
 	var plan linkResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -393,7 +393,7 @@ func (r *linkResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	linkID := state.ID.Value
+	linkID := state.ID.ValueString()
 	link, statusCode, err := r.p.dog.DeleteLink(linkID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
