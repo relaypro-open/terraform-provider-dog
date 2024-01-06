@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -34,66 +33,60 @@ func (*groupResource) Metadata(ctx context.Context, req resource.MetadataRequest
 	resp.TypeName = req.ProviderTypeName + "_group"
 }
 
-func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"description": {
+			"description": schema.StringAttribute{
 				MarkdownDescription: "group description",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "group name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"profile_id": {
+			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "group profile id",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"profile_name": {
+			"profile_name": schema.StringAttribute{
 				MarkdownDescription: "group profile name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"profile_version": {
+			"profile_version": schema.StringAttribute{
 				MarkdownDescription: "group profile version",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"ec2_security_group_ids": {
+			"ec2_security_group_ids": schema.ListNestedAttribute{
 				MarkdownDescription: "List of EC2 Security Groups to control",
 				Optional:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"region": {
-						MarkdownDescription: "EC2 Region",
-						Required:            true,
-						Type:                types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"region": schema.StringAttribute{
+							MarkdownDescription: "EC2 Region",
+							Required:            true,
+						},
+						"sgid": schema.StringAttribute{
+							MarkdownDescription: "EC2 Security Group ID",
+							Required:            true,
+						},
 					},
-					"sgid": {
-						MarkdownDescription: "EC2 Security Group ID",
-						Required:            true,
-						Type:                types.StringType,
-					},
-				}),
+				},
 			},
-			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for fact",
-				Type:                types.MapType{ElemType: types.StringType},
+			"vars": schema.MapAttribute{
+				//NestedObject: schema.NestedAttributeObject{},
+				//MarkdownDescription: "Arbitrary collection of variables used for fact",
+				ElementType:            types.StringType,
 				Optional:            true,
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
 				MarkdownDescription: "group identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Optional:            true,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *groupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

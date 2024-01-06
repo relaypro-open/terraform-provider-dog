@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
@@ -40,39 +39,34 @@ func (*zoneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequ
 	resp.TypeName = req.ProviderTypeName + "_zone"
 }
 
-func (*zoneDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*zoneDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Zone data source",
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"ipv4_addresses": {
+			"ipv4_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv4 Addresses",
 				Optional:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
+				ElementType: types.StringType,
 			},
-			"ipv6_addresses": {
+			"ipv6_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv6 Addresses",
 				Optional:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
+				ElementType: types.StringType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Zone name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Zone identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *zoneDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

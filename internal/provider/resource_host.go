@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -34,50 +33,44 @@ func (*hostResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_host"
 }
 
-func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Host data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"environment": {
+			"environment": schema.StringAttribute{
 				MarkdownDescription: "Host environment",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"group": {
-				MarkdownDescription: "Host group",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"hostkey": {
-				MarkdownDescription: "Host key",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"location": {
-				MarkdownDescription: "Host location",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"name": {
-				MarkdownDescription: "Host name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for fact",
-				Type:                types.MapType{ElemType: types.StringType},
 				Optional:            true,
 			},
-			"id": {
-				Computed:            true,
+			"group": schema.StringAttribute{
+				MarkdownDescription: "Host group",
+				Optional:            true,
+			},
+			"hostkey": schema.StringAttribute{
+				MarkdownDescription: "Host key",
+				Optional:            true,
+			},
+			"location": schema.StringAttribute{
+				MarkdownDescription: "Host location",
+				Optional:            true,
+			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "Host name",
+				Optional:            true,
+			},
+			"vars": schema.MapAttribute{
+				ElementType:         types.StringType,
+				Optional:            true,
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Host identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *hostResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

@@ -7,10 +7,9 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -36,83 +35,81 @@ func (*rulesetResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_ruleset"
 }
 
-func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Ruleset data source",
+
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "ruleset name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"profile_id": {
+			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "profile id",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"rules": {
+			"rules": schema.SingleNestedAttribute{
 				MarkdownDescription: "Rule rules",
-				Required:            true,
-				Type: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"inbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"inbound": schema.ListAttribute{
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"action":  types.StringType,
+								"active":  types.BoolType,
+								"comment": types.StringType,
+								"environments": types.ListType{
+									ElemType: types.StringType,
 								},
+								"group":      types.StringType,
+								"group_type": types.StringType,
+								"interface":  types.StringType,
+								"log":        types.BoolType,
+								"log_prefix": types.StringType,
+								"order":      types.Int64Type,
+								"service":    types.StringType,
+								"states": types.ListType{
+									ElemType: types.StringType,
+								},
+								"type": types.StringType,
 							},
 						},
-						"outbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
+						Required: true,
+					},
+					"outbound": schema.ListAttribute{
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"action":  types.StringType,
+								"active":  types.BoolType,
+								"comment": types.StringType,
+								"environments": types.ListType{
+									ElemType: types.StringType,
 								},
+								"group":      types.StringType,
+								"group_type": types.StringType,
+								"interface":  types.StringType,
+								"log":        types.BoolType,
+								"log_prefix": types.StringType,
+								"order":      types.Int64Type,
+								"service":    types.StringType,
+								"states": types.ListType{
+									ElemType: types.StringType,
+								},
+								"type": types.StringType,
 							},
 						},
+						Required: true,
 					},
 				},
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Rule identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *rulesetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

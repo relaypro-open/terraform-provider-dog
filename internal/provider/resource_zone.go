@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -34,39 +33,34 @@ func (*zoneResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_zone"
 }
 
-func (*zoneResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*zoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Zone data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"ipv4_addresses": {
+			"ipv4_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv4 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
+				Optional:            true,
+				ElementType: types.StringType,
 			},
-			"ipv6_addresses": {
+			"ipv6_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv6 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
+				Optional:            true,
+				ElementType: types.StringType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Zone name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Zone identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

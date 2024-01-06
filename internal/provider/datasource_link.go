@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -24,7 +23,7 @@ type (
 	Link struct {
 		ID              types.String `tfsdk:"id"`
 		AddressHandling types.String `tfsdk:"address_handling"`
-		Connection      *Connection  `tfsdk:"connection"`
+		Connection      *Connection  `tfsdk:"dog_connection"`
 		ConnectionType  types.String `tfsdk:"connection_type"`
 		Direction       types.String `tfsdk:"direction"`
 		Enabled         types.Bool   `tfsdk:"enabled"`
@@ -62,105 +61,88 @@ func (*linkDataSource) Metadata(ctx context.Context, req datasource.MetadataRequ
 	resp.TypeName = req.ProviderTypeName + "_link"
 }
 
-func (*linkDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*linkDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Link data source",
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"address_handling": {
+			"address_handling": schema.StringAttribute{
 				MarkdownDescription: "Type of address handling",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"connection": {
+			"dog_connection": schema.SingleNestedAttribute{
 				MarkdownDescription: "Connection specification",
 				Optional:            true,
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"api_port": {
-						Type:     types.Int64Type,
+				Attributes: map[string]schema.Attribute{
+					"api_port": schema.Int64Attribute{
 						Required: true,
 					},
-					"host": {
-						Type:     types.StringType,
+					"host": schema.StringAttribute{
 						Required: true,
 					},
-					"password": {
-						Type:      types.StringType,
+					"password": schema.StringAttribute{
 						Required:  true,
 						Sensitive: true,
 					},
-					"port": {
-						Type:     types.Int64Type,
+					"port": schema.Int64Attribute{
 						Required: true,
 					},
-					"ssl_options": {
+					"ssl_options": schema.SingleNestedAttribute{
 						Required: true,
-						Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-							"cacertfile": {
-								Type:     types.StringType,
+						Attributes: map[string]schema.Attribute{
+							"cacertfile": schema.StringAttribute{
 								Required: true,
 							},
-							"certfile": {
-								Type:     types.StringType,
+							"certfile": schema.StringAttribute{
 								Required: true,
 							},
-							"fail_if_no_peer_cert": {
-								Type:     types.BoolType,
+							"fail_if_no_peer_cert": schema.BoolAttribute{
 								Required: true,
 							},
-							"keyfile": {
-								Type:     types.StringType,
+							"keyfile": schema.StringAttribute{
 								Required: true,
 							},
-							"server_name_indication": {
-								Type:     types.StringType,
+							"server_name_indication": schema.StringAttribute{
 								Required: true,
 							},
-							"verify": {
-								Type:     types.StringType,
+							"verify": schema.StringAttribute{
 								Required: true,
 							},
-						}),
+						},
 					},
-					"user": {
-						Type:     types.StringType,
+					"user": schema.StringAttribute{
 						Required: true,
 					},
-					"virtual_host": {
-						Type:     types.StringType,
+					"virtual_host": schema.StringAttribute{
 						Required: true,
 					},
-				}),
+				},
 			},
-			"connection_type": {
+			"connection_type": schema.StringAttribute{
 				MarkdownDescription: "Connection type",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"direction": {
+			"direction": schema.StringAttribute{
 				MarkdownDescription: "Connection direction",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"enabled": {
+			"enabled": schema.BoolAttribute{
 				MarkdownDescription: "Connection enabled",
 				Optional:            true,
-				Type:                types.BoolType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Link name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Link identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *linkDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

@@ -40,7 +40,7 @@ func testAccDogFactConfig_basic(resourceType, name string) string {
 resource %[1]q %[2]q {
   name = %[2]q 
   groups = {
-     "all" = {
+     all = {
        vars = {
 		key = "value"
 		key2 = "value2"
@@ -58,7 +58,7 @@ resource %[1]q %[2]q {
 		"test"
 	]
      },
-     "app" = {
+     app = {
 	vars = {
 		key = "value"
 	}

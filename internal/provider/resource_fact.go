@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -34,47 +33,85 @@ func (*factResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_fact"
 }
 
-func (*factResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"groups": {
-				MarkdownDescription: "List of fact groups",
-				Required:            true,
-				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
-					"vars": {
-						MarkdownDescription: "Arbitrary collection of variables used for fact",
-						Required:            true,
-						Type:                types.MapType{ElemType: types.StringType},
+			//"groups": schema.MapAttribute{
+			//ElementType: types.StringType,
+			//"groups": schema.ListNestedAttribute{
+			//NestedObject: schema.NestedAttributeObject{
+			//Attributes: map[string]schema.Attribute{
+			"groups": schema.MapNestedAttribute{
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"vars": schema.MapAttribute{
+							Optional:            true,
+							ElementType:         types.StringType,
+						},
+						"hosts": schema.MapAttribute{
+							Optional:            true,
+							ElementType:         types.MapType{ElemType: types.StringType},
+						},
+						"children": schema.ListAttribute{
+							Optional:            true,
+							ElementType:         types.StringType,
+						},
 					},
-					"hosts": {
-						MarkdownDescription: "Arbitrary collection of hosts used for fact",
-						Required:            true,
-						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
-					},
-					"children": {
-						MarkdownDescription: "fact group children",
-						Required:            true,
-						Type:                types.ListType{ElemType: types.StringType},
-					},
-				}),
-			},
-			"name": {
-				MarkdownDescription: "Fact name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Fact identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
 				},
-				Type: types.StringType,
+				Optional: true,
+			},
+			"name": schema.StringAttribute{
+				Optional:            true,
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
+//func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+//	resp.Schema = schema.Schema{
+//		Attributes: map[string]schema.Attribute{
+//			// This description is used by the documentation generator and the language server.
+//			"groups": schema.MapNestedAttribute{
+//				MarkdownDescription: "List of fact groups",
+//				Required:            true,
+//				Attributes: map[string]schema.Attribute{
+//					"vars": schema.MapAttribute{
+//						MarkdownDescription: "Arbitrary collection of variables used for fact",
+//						Required:            true,
+//						ElementType: types.StringType,
+//					},
+//					"hosts": schema.MapAttribute{
+//						MarkdownDescription: "Arbitrary collection of hosts used for fact",
+//						Required:            true,
+//						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
+//					},
+//					"children": schema.ListAttribute{
+//						MarkdownDescription: "fact group children",
+//						Required:            true,
+//						ElementType: 	     types.StringType,
+//					},
+//				},
+//			},
+//			"name": schema.StringAttribute{
+//				MarkdownDescription: "Fact name",
+//				Required:            true,
+//			},
+//			"id": schema.StringAttribute{
+//				Computed:            true,
+//				MarkdownDescription: "Fact identifier",
+//				PlanModifiers: schema.AttributePlanModifiers{
+//					resource.UseStateForUnknown(),
+//				},
+//			},
+//		},
+//	}
+//}
 
 func (r *factResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured
