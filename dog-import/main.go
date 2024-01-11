@@ -364,6 +364,7 @@ var environment string
 var output_dir string
 var host_prefix string
 func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	flag.StringVar(&environment, "environment", "", "dog environment")
 	flag.StringVar(&output_dir, "output_dir", "", "base dir for output")
 	flag.StringVar(&host_prefix, "host_prefix", "", "prefix for host names")

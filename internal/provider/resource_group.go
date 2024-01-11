@@ -74,10 +74,8 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 					},
 				},
 			},
-			"vars": schema.MapAttribute{
-				//NestedObject: schema.NestedAttributeObject{},
-				//MarkdownDescription: "Arbitrary collection of variables used for fact",
-				ElementType:            types.StringType,
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
@@ -121,7 +119,7 @@ type groupResourceData struct {
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars                map[string]string                  `tfsdk:"vars"`
+	Vars                string                       `tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
@@ -183,10 +181,10 @@ func ApiToGroup(group api.Group) Group {
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 
-	newVars := map[string]string{}
-	for k, v := range group.Vars {
-		newVars[k] = v
-	}
+	//newVars := map[string]string{}
+	//for k, v := range group.Vars {
+	//	newVars[k] = v
+	//}
 
 	h := Group{
 		Description:         types.StringValue(group.Description),
@@ -196,7 +194,7 @@ func ApiToGroup(group api.Group) Group {
 		ProfileName:         types.StringValue(group.ProfileName),
 		ProfileVersion:      types.StringValue(group.ProfileVersion),
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                newVars,
+		Vars:                types.StringValue(group.Vars),
 	}
 	return h
 }

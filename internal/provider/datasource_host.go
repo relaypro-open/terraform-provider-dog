@@ -26,7 +26,7 @@ type (
 		HostKey     types.String      `tfsdk:"hostkey"`
 		Location    types.String      `tfsdk:"location"`
 		Name        types.String      `tfsdk:"name"`
-		Vars        map[string]string `tfsdk:"vars"`
+		Vars        types.String      `tfsdk:"vars"`
 	}
 )
 
@@ -69,8 +69,8 @@ func (*hostDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 				MarkdownDescription: "Host name",
 				Optional:            true,
 			},
-			"vars": schema.MapAttribute{
-				ElementType:         types.StringType,
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

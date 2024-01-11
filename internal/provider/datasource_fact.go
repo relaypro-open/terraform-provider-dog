@@ -26,7 +26,7 @@ type (
 	}
 
 	FactGroup struct {
-		Vars     map[string]string            `tfsdk:"vars"`
+		Vars     types.String                 `tfsdk:"vars"`
 		Hosts    map[string]map[string]string `tfsdk:"hosts"`
 		Children []string                     `tfsdk:"children"`
 	}
@@ -52,9 +52,9 @@ func (*factDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 			"groups": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"vars": schema.MapAttribute{
+						"vars": schema.StringAttribute{
+							MarkdownDescription: "json string of vars",
 							Optional:            true,
-							ElementType:         types.StringType,
 						},
 						"hosts": schema.MapAttribute{
 							Optional:            true,

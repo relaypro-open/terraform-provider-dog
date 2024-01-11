@@ -29,7 +29,7 @@ type (
 		ProfileName         types.String           `tfsdk:"profile_name"`
 		ProfileVersion      types.String           `tfsdk:"profile_version"`
 		Ec2SecurityGroupIds []*Ec2SecurityGroupIds `tfsdk:"ec2_security_group_ids"`
-		Vars                map[string]string      `tfsdk:"vars"`
+		Vars                types.String           `tfsdk:"vars"`
 	}
 
 	Ec2SecurityGroupIds struct {
@@ -91,9 +91,8 @@ func (*groupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest
 					},
 				},
 			},
-			"vars": schema.MapAttribute{
-				MarkdownDescription: "Arbitrary collection of variables used for fact",
-				ElementType:         types.StringType,
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

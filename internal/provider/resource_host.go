@@ -60,8 +60,8 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				MarkdownDescription: "Host name",
 				Optional:            true,
 			},
-			"vars": schema.MapAttribute{
-				ElementType:         types.StringType,
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{
@@ -103,7 +103,7 @@ type hostResourceData struct {
 	HostKey     string            `tfsdk:"hostkey"`
 	Location    string            `tfsdk:"location"`
 	Name        string            `tfsdk:"name"`
-	Vars        map[string]string `tfsdk:"vars"`
+	Vars        string            `tfsdk:"vars"`
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -131,10 +131,10 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 }
 
 func ApiToHost(host api.Host) Host {
-	newVars := map[string]string{}
-	for k, v := range host.Vars {
-		newVars[k] = v
-	}
+	//newVars := map[string]string{}
+	//for k, v := range host.Vars {
+	//	newVars[k] = v
+	//}
 
 	h := Host{
 		Environment: types.StringValue(host.Environment),
@@ -143,7 +143,7 @@ func ApiToHost(host api.Host) Host {
 		HostKey:     types.StringValue(host.HostKey),
 		Location:    types.StringValue(host.Location),
 		Name:        types.StringValue(host.Name),
-		Vars:        newVars,
+		Vars:        types.StringValue(host.Vars),
 	}
 
 	return h

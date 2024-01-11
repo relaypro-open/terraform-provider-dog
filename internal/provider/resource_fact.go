@@ -47,9 +47,9 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			"groups": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
-						"vars": schema.MapAttribute{
+						"vars": schema.StringAttribute{
+							MarkdownDescription: "json string of vars",
 							Optional:            true,
-							ElementType:         types.StringType,
 						},
 						"hosts": schema.MapAttribute{
 							Optional:            true,
@@ -73,45 +73,6 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 		},
 	}
 }
-//func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-//	resp.Schema = schema.Schema{
-//		Attributes: map[string]schema.Attribute{
-//			// This description is used by the documentation generator and the language server.
-//			"groups": schema.MapNestedAttribute{
-//				MarkdownDescription: "List of fact groups",
-//				Required:            true,
-//				Attributes: map[string]schema.Attribute{
-//					"vars": schema.MapAttribute{
-//						MarkdownDescription: "Arbitrary collection of variables used for fact",
-//						Required:            true,
-//						ElementType: types.StringType,
-//					},
-//					"hosts": schema.MapAttribute{
-//						MarkdownDescription: "Arbitrary collection of hosts used for fact",
-//						Required:            true,
-//						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
-//					},
-//					"children": schema.ListAttribute{
-//						MarkdownDescription: "fact group children",
-//						Required:            true,
-//						ElementType: 	     types.StringType,
-//					},
-//				},
-//			},
-//			"name": schema.StringAttribute{
-//				MarkdownDescription: "Fact name",
-//				Required:            true,
-//			},
-//			"id": schema.StringAttribute{
-//				Computed:            true,
-//				MarkdownDescription: "Fact identifier",
-//				PlanModifiers: schema.AttributePlanModifiers{
-//					resource.UseStateForUnknown(),
-//				},
-//			},
-//		},
-//	}
-//}
 
 func (r *factResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured
@@ -146,7 +107,7 @@ func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
 		g := &api.FactGroup{
-			Vars:     group.Vars,
+			Vars:     group.Vars.ValueString(),
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
@@ -163,7 +124,7 @@ func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
 		g := &api.FactGroup{
-			Vars:     group.Vars,
+			Vars:     group.Vars.ValueString(),
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
@@ -180,7 +141,7 @@ func ApiToFact(fact api.Fact) Fact {
 	newGroups := map[string]*FactGroup{}
 	for name, group := range fact.Groups {
 		g := &FactGroup{
-			Vars:     group.Vars,
+			Vars:     types.StringValue(group.Vars),
 			Hosts:    group.Hosts,
 			Children: group.Children,
 		}
