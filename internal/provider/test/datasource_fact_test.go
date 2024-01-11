@@ -28,10 +28,10 @@ resource "dog_fact" %[1]q {
   name = %[1]q 
   groups = {
 		all= {
-			vars = {
+			vars = jsonencode({
 				key = "value",
 				key2 = "value2"
-			},
+			}),
 			hosts = {
 				host1 = {
 					key = "value",
@@ -46,9 +46,9 @@ resource "dog_fact" %[1]q {
 			]
 		},
 		app = {
-			vars = {
+			vars = jsonencode({
 				key = "value"
-			},
+			}),
 			hosts = {
 				host1 = {
 					key = "value"

@@ -43,9 +43,9 @@ resource %[1]q %[2]q {
   group = "dog_test"
   hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
   location = "*"
-  vars = {
+  vars = jsonencode({
 	  test = "dog_host"
-  }
+  })
 }
 `, resourceType, resourceName)
 }

@@ -74,9 +74,9 @@ resource "dog_host" %[1]q {
   hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
   location = "*"
   name = %[1]q
-  vars = {
+  vars = jsonencode({
 	  test = "dog_host"
-  }
+  })
 }
 
 data "dog_host" %[1]q {

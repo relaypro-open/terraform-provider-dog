@@ -36,9 +36,9 @@ resource "dog_group" %[1]q {
       sgid = "sg-test"
     }
   ]
-  vars = {
+  vars = jsonencode({
 	  test = "dog_group"
-  }
+  })
 }
 
 data "dog_group" %[1]q {

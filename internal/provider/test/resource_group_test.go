@@ -118,9 +118,9 @@ resource %[1]q %[2]q {
       sgid = "sg-test"
     }
   ]
-  vars = {
+  vars = jsonencode({
 	  test = "dog_group"
-  }
+  })
 }
 `, name, randomName)
 	gr := testAccDogGroupRulesetResourceConfig()
