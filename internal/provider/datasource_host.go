@@ -117,7 +117,7 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	req.Config.GetAttribute(ctx, path.Root("hostkey"), &hostHostkey)
 	req.Config.GetAttribute(ctx, path.Root("name"), &hostName)
 
-	res, statusCode, err := d.p.dog.GetHosts(nil)
+	res, statusCode, err := d.p.dog.GetHostsEncode(nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read hosts, got error: %s", err))
 	}

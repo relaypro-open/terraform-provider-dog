@@ -143,7 +143,7 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	//tflog.Debug(ctx, fmt.Sprintf("ZZZgroupName: '%s'", groupName))
 	//tflog.Debug(ctx, fmt.Sprintf("ZZZgroupProfileId: '%s'", groupProfileId))
 
-	res, statusCode, err := d.p.dog.GetGroups(nil)
+	res, statusCode, err := d.p.dog.GetGroupsEncode(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -180,7 +180,7 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroups: %#v", filteredGroups))
 	if filteredGroups == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned no results."))
-	} 
+	}
 	if len(filteredGroups) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned more than one result."))
 	}
@@ -188,7 +188,7 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 		return
 	}
 
-	group := filteredGroups[0] 
+	group := filteredGroups[0]
 	// Set state
 	state = ApiToGroup(group)
 	//tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroup: %#v", state))

@@ -1,52 +1,37 @@
 package dog_test
 
 import (
-	"fmt"
-	"testing"
+        "fmt"
+        "testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+        "github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestProvider_DogHostNameAttribute(t *testing.T) {
-	resource.UnitTest(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		PreCheck:                 func() { testAccPreCheck(t) },
-		Steps: []resource.TestStep{
-			//{
-			//	Config: testAccDogHostProfileDataSourceConfig(),
-			//	Check: resource.ComposeAggregateTestCheckFunc(
-			//		resource.TestCheckResourceAttr("dog_profile.terraform_test_profile", "name", "terraform_test_profile"),
-			//	),
-			//},
-			//{
-			//	Config: testAccDogHostGroupDataSourceConfig(),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		resource.TestCheckResourceAttr("dog_group.terraform_test_group", "name", "terraform_test_group"),
-			//	),
-			//},
-			{
-				Config: testAccDogHostHostDataSourceConfig("terraform_host_test"),
-				//Config: testAccDogHostDataSourceConfig("terraform_host_test"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					//resource.TestCheckResourceAttr("dog_profile.terraform_test_profile", "name", "terraform_test_profile"),
-					//resource.TestCheckResourceAttr("dog_group.terraform_test_group", "name", "terraform_test_group"),
-					resource.TestCheckResourceAttr("data.dog_host.terraform_host_test", "name", "terraform_host_test"),
-				),
-			},
-		},
-	})
+        resource.UnitTest(t, resource.TestCase{
+                ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+                PreCheck:                 func() { testAccPreCheck(t) },
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccDogHostHostDataSourceConfig("terraform_host_test"),
+                                Check: resource.ComposeAggregateTestCheckFunc(
+                                        resource.TestCheckResourceAttr("data.dog_host.terraform_host_test", "name", "terraform_host_test"),
+                                ),
+                        },
+                },
+        })
 }
 
 func testAccDogHostDataSourceConfig(configurableAttribute string) string {
-	profile := testAccDogHostProfileDataSourceConfig()
-	group := testAccDogHostGroupDataSourceConfig()
-	host := testAccDogHostHostDataSourceConfig(configurableAttribute)
-	all := profile + group + host
-	return all
+        profile := testAccDogHostProfileDataSourceConfig()
+        group := testAccDogHostGroupDataSourceConfig()
+        host := testAccDogHostHostDataSourceConfig(configurableAttribute)
+        all := profile + group + host
+        return all
 }
 
 func testAccDogHostProfileDataSourceConfig() string {
-	return fmt.Sprintf(`
+        return fmt.Sprintf(`
 resource "dog_profile" "terraform_test_profile" {
   name = "terraform_test_profile"
   version = "1.0"
@@ -56,7 +41,7 @@ resource "dog_profile" "terraform_test_profile" {
 }
 
 func testAccDogHostGroupDataSourceConfig() string {
-	return fmt.Sprintf(`
+        return fmt.Sprintf(`
 resource "dog_group" "terraform_test_group" {
   description = ""
   name = "terraform_test_group"
@@ -67,7 +52,7 @@ resource "dog_group" "terraform_test_group" {
 }
 
 func testAccDogHostHostDataSourceConfig(configurableAttribute string) string {
-	return fmt.Sprintf(`
+        return fmt.Sprintf(`
 resource "dog_host" %[1]q {
   environment = "*"
   group = "dog_test"
@@ -75,7 +60,7 @@ resource "dog_host" %[1]q {
   location = "*"
   name = %[1]q
   vars = jsonencode({
-	  test = "dog_host"
+      test = "dog_host"
   })
 }
 

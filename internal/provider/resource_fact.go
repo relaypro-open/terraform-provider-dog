@@ -120,6 +120,23 @@ func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
 	return newFact
 }
 
+func FactToApiFact(plan Fact) api.Fact {
+	newGroups := map[string]*api.FactGroup{}
+	for name, group := range plan.Groups {
+		g := &api.FactGroup{
+			Vars:     group.Vars.ValueString(),
+			Hosts:    group.Hosts,
+			Children: group.Children,
+		}
+		newGroups[name] = g
+	}
+	newFact := api.Fact{
+		Groups: newGroups,
+		Name:   plan.Name.ValueString(),
+	}
+	return newFact
+}
+
 func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
@@ -159,7 +176,7 @@ func ApiToFact(fact api.Fact) Fact {
 func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Fact
 
-	var plan factResourceData
+	var plan Fact
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
@@ -167,9 +184,9 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	newFact := FactToCreateRequest(plan)
+	newFact := FactToApiFact(plan)
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	fact, statusCode, err := r.p.dog.CreateFact(newFact, nil)
+	fact, statusCode, err := r.p.dog.CreateFactEncode(newFact, nil)
 	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	if err != nil {
@@ -208,7 +225,7 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	fact, statusCode, err := r.p.dog.GetFact(factID, nil)
+	fact, statusCode, err := r.p.dog.GetFactEncode(factID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -235,15 +252,15 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	factID := state.ID.ValueString()
 
-	var plan factResourceData
+	var plan Fact
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newFact := FactToUpdateRequest(plan)
-	fact, statusCode, err := r.p.dog.UpdateFact(factID, newFact, nil)
+	newFact := FactToApiFact(plan)
+	fact, statusCode, err := r.p.dog.UpdateFactEncode(factID, newFact, nil)
 	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	state = ApiToFact(fact)

@@ -114,7 +114,7 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	req.Config.GetAttribute(ctx, path.Root("name"), &factName)
 
-	res, statusCode, err := d.p.dog.GetFacts(nil)
+	res, statusCode, err := d.p.dog.GetFactsEncode(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
