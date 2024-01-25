@@ -43,7 +43,6 @@ type (
 		Interface    string   `json:"interface"`
 		Log          bool     `json:"log"`
 		LogPrefix    string   `json:"log_prefix"`
-		Order        int      `json:"order"`
 		Service      string   `json:"service"`
 		States       []string `json:"states"`
 		Type         string   `json:"type"`
@@ -95,7 +94,6 @@ func (*rulesetDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 								"interface":  types.StringType,
 								"log":        types.BoolType,
 								"log_prefix": types.StringType,
-								"order":      types.Int64Type,
 								"service":    types.StringType,
 								"states": types.ListType{
 									ElemType: types.StringType,
@@ -119,7 +117,6 @@ func (*rulesetDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 								"interface":  types.StringType,
 								"log":        types.BoolType,
 								"log_prefix": types.StringType,
-								"order":      types.Int64Type,
 								"service":    types.StringType,
 								"states": types.ListType{
 									ElemType: types.StringType,

@@ -52,7 +52,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "ssh-tcp-22"
         states = []
         type = "BASIC"
@@ -67,7 +66,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "2"
         service = "any"
         states = []
         type = "BASIC"
@@ -84,7 +82,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "any"
         states = []
         type = "BASIC"

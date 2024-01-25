@@ -67,7 +67,6 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								"interface":  types.StringType,
 								"log":        types.BoolType,
 								"log_prefix": types.StringType,
-								"order":      types.Int64Type,
 								"service":    types.StringType,
 								"states": types.ListType{
 									ElemType: types.StringType,
@@ -91,7 +90,6 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								"interface":  types.StringType,
 								"log":        types.BoolType,
 								"log_prefix": types.StringType,
-								"order":      types.Int64Type,
 								"service":    types.StringType,
 								"states": types.ListType{
 									ElemType: types.StringType,
@@ -157,7 +155,6 @@ type rulesetResourceRule struct {
 	Interface    types.String `tfsdk:"interface"`
 	Log          types.Bool   `tfsdk:"log"`
 	LogPrefix    types.String `tfsdk:"log_prefix"`
-	Order        types.Int64  `tfsdk:"order"`
 	Service      types.String `tfsdk:"service"`
 	States       []string     `tfsdk:"states"`
 	Type         types.String `tfsdk:"type"`
@@ -176,7 +173,6 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    inbound_rule.Interface.ValueString(),
 			Log:          inbound_rule.Log.ValueBool(),
 			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
-			Order:        int(inbound_rule.Order.ValueInt64()),
 			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
 			Type:         inbound_rule.Type.ValueString(),
@@ -195,7 +191,6 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    outbound_rule.Interface.ValueString(),
 			Log:          outbound_rule.Log.ValueBool(),
 			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
-			Order:        int(outbound_rule.Order.ValueInt64()),
 			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
 			Type:         outbound_rule.Type.ValueString(),
@@ -240,7 +235,6 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    inbound_rule.Interface.ValueString(),
 			Log:          inbound_rule.Log.ValueBool(),
 			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
-			Order:        int(inbound_rule.Order.ValueInt64()),
 			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
 			Type:         inbound_rule.Type.ValueString(),
@@ -259,7 +253,6 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    outbound_rule.Interface.ValueString(),
 			Log:          outbound_rule.Log.ValueBool(),
 			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
-			Order:        int(outbound_rule.Order.ValueInt64()),
 			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
 			Type:         outbound_rule.Type.ValueString(),
@@ -308,7 +301,6 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 			Interface:    types.StringValue(inbound_rule.Interface),
 			Log:          types.BoolValue(inbound_rule.Log),
 			LogPrefix:    types.StringValue(inbound_rule.LogPrefix),
-			Order:        types.Int64Value(int64(inbound_rule.Order)),
 			Service:      types.StringValue(inbound_rule.Service),
 			States:       inbound_rule.States,
 			Type:         types.StringValue(inbound_rule.Type),
@@ -327,7 +319,6 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 			Interface:    types.StringValue(outbound_rule.Interface),
 			Log:          types.BoolValue(outbound_rule.Log),
 			LogPrefix:    types.StringValue(outbound_rule.LogPrefix),
-			Order:        types.Int64Value(int64(outbound_rule.Order)),
 			Service:      types.StringValue(outbound_rule.Service),
 			States:       outbound_rule.States,
 			Type:         types.StringValue(outbound_rule.Type),
