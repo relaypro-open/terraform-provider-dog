@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.29.0
 	github.com/ledongthuc/goterators v1.0.2
-	github.com/relaypro-open/dog_api_golang v0.0.0-20240125200739-21fec9276918
+	github.com/relaypro-open/dog_api_golang v0.0.0-20240129021701-6a3cad8e1f2e
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
