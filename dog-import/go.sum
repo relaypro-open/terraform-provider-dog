@@ -30,6 +30,8 @@ github.com/relaypro-open/dog_api_golang v0.0.0-20240123185858-9761f747c05a h1:Qy
 github.com/relaypro-open/dog_api_golang v0.0.0-20240123185858-9761f747c05a/go.mod h1:Adjvqlvq9RdyruC6WjKM5A8Uayn7kSh/bRF9feQvaL8=
 github.com/relaypro-open/dog_api_golang v0.0.0-20240125200739-21fec9276918 h1:jK5MBgJbdkKRiY63wbRKzVlnBeeRU2rD9mPNRC6kCkQ=
 github.com/relaypro-open/dog_api_golang v0.0.0-20240125200739-21fec9276918/go.mod h1:Adjvqlvq9RdyruC6WjKM5A8Uayn7kSh/bRF9feQvaL8=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240129024531-5a9f157ccd5f h1:SrtxkACIvw8NWa+i/dlW9q0ZF1dDEGZWgYJ9vqk0Wcg=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240129024531-5a9f157ccd5f/go.mod h1:Adjvqlvq9RdyruC6WjKM5A8Uayn7kSh/bRF9feQvaL8=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
