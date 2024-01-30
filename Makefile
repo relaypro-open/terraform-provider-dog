@@ -36,6 +36,11 @@ github_release:
 	git push --tags --force
 	goreleaser release --rm-dist
 
+
+delete_release:
+	git tag -d ${VERSION}
+	 git push --delete origin ${VERSION}
+
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 	mv bin/${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
