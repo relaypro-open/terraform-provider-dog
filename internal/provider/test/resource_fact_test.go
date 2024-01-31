@@ -13,7 +13,7 @@ func TestAccDogFact_Basic(t *testing.T) {
 	randomName := "tf_test_fact_" + acctest.RandString(5)
 	resourceName := resourceType + "." + randomName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -22,7 +22,25 @@ func TestAccDogFact_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
-					//resource.TestCheckResourceAttr(resourceName, "groups.all.vars.key", "value"),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"key\":\"value\",\"key2\":\"value2\"}"),
+					resource.TestCheckResourceAttr(resourceName, "groups.app.hosts.host1.key", "value"),
+				),
+			},
+			{
+				Config: testAccDogFactConfig_add_vars(resourceType, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"key\":\"value\",\"key2\":\"value2\",\"key3\":\"value3\"}"),
+					resource.TestCheckResourceAttr(resourceName, "groups.app.hosts.host1.key", "value"),
+				),
+			},
+			{
+				Config: testAccDogFactConfig_remove_vars(resourceType, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"key2\":\"value2\",\"key3\":\"value3\"}"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "groups.app.hosts.host1.key", "value"),
 				),
 			},
@@ -44,6 +62,89 @@ resource %[1]q %[2]q {
        vars = jsonencode({
 		key = "value"
 		key2 = "value2"
+	})
+	hosts = {
+	  host1 = {
+	    key = "value",
+	    key2 = "value2"
+	  }
+	  host2 = {
+	    key2 = "value2"
+	  }
+	},
+	children = [
+		"test"
+	]
+     },
+     app = {
+	vars = jsonencode({
+		key = "value"
+	})
+	hosts = {
+	  host1 = {
+	    key = "value"
+	  }
+	},
+	children = [
+		"test2"
+	]
+     }
+  }
+}
+`, resourceType, name)
+}
+
+func testAccDogFactConfig_add_vars(resourceType, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q 
+  groups = {
+     all = {
+       vars = jsonencode({
+		key = "value"
+		key2 = "value2"
+		key3 = "value3"
+	})
+	hosts = {
+	  host1 = {
+	    key = "value",
+	    key2 = "value2"
+	  }
+	  host2 = {
+	    key2 = "value2"
+	  }
+	},
+	children = [
+		"test"
+	]
+     },
+     app = {
+	vars = jsonencode({
+		key = "value"
+	})
+	hosts = {
+	  host1 = {
+	    key = "value"
+	  }
+	},
+	children = [
+		"test2"
+	]
+     }
+  }
+}
+`, resourceType, name)
+}
+
+func testAccDogFactConfig_remove_vars(resourceType, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q 
+  groups = {
+     all = {
+       vars = jsonencode({
+		key2 = "value2"
+		key3 = "value3"
 	})
 	hosts = {
 	  host1 = {
