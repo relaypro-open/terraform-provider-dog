@@ -34,8 +34,6 @@ release:
 github_release:
 	git tag ${VERSION}
 	git push --tags --force
-	goreleaser release --rm-dist
-
 
 delete_release:
 	git tag -d ${VERSION}
