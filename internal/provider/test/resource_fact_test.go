@@ -31,7 +31,7 @@ func TestAccDogFact_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
-					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"key\":\"value\",\"key2\":\"value2\",\"key3\":\"value3\"}"),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"key\":\"value\",\"key2\":\"value2\",\"key3\":\"value3 + 3\"}"),
 					resource.TestCheckResourceAttr(resourceName, "groups.app.hosts.host1.key", "value"),
 				),
 			},
@@ -103,7 +103,7 @@ resource %[1]q %[2]q {
        vars = jsonencode({
 		key = "value"
 		key2 = "value2"
-		key3 = "value3"
+		key3 = "value3 + 3"
 	})
 	hosts = {
 	  host1 = {
