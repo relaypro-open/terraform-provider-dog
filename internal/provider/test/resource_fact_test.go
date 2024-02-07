@@ -201,6 +201,16 @@ func TestAccDogFact_Big(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "groups.all.hosts.host1.key", "value"),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"ansible_python_interpreter\":\"python\",\"cert_name\":\"star-republicdev-info\",\"cluster\":\"mob\",\"cluster_env\":\"mob_qa\",\"cluster_separator\":\"_\",\"common_build_root_dir\":\"/home/{{ ansible_user }}\",\"consul_cluster\":\"{{ region }}\",\"credstash_table\":\"{{'credential-store_' + cluster + cluster_separator + env}}\",\"dog_env\":\"qa\",\"dog_env_group\":\"www-data\",\"domain\":\"phoneboothdev.info\",\"ec2_dns_suffix\":\"compute-1\",\"elasticsearch_domain\":\"vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com\",\"email_alert_distro\":[],\"env\":\"qa\",\"filebeat_version\":\"oss-2.2.0\",\"foo_dash_company_id\":\"{{ foo_iris_account }}\",\"foo_iris_account\":9900004,\"foogo_domain\":\"foogo.info\",\"foopro_domain\":\"foogo.info\",\"igw_id\":\"igw-1ad5e97f\",\"image\":\"ami-09150b5c79250e26c\",\"keypair\":\"bandwidithaws\",\"logger_elb\":\"qa.logger.foo.io\",\"metrics_agent\":\"collectd\",\"monit_environment\":\"qa\",\"nginx_config\":\"republicwireless-com\",\"peering_id\":\"pcx-52b2c651\",\"product\":\"foo\",\"provider\":\"ec2\",\"region\":\"us-east-1\",\"riak_http_port\":2067,\"scout_environment\":\"QA\",\"service_domain\":\"foo.io\",\"ssh_ca_fingerprint\":\"69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920\",\"ssh_ca_provisioner\":\"site-reliability-engineering@foopro.com\",\"ssh_ca_url\":\"https://api-qa.ca.phoneboothdev.info/\",\"subnet_qa_public_us_east_1a\":\"subnet-50f9cc09\",\"subnet_qa_public_us_east_1c\":\"subnet-2ded22b0\",\"subnet_qa_public_us_east_1d\":\"subnet-6fc0d512\",\"subnet_qa_public_us_east_1e\":\"subnet-c5f2a9ee\",\"subnet_qa_public_us_east_2a\":\"subnet-67fc020e\",\"subnet_qa_public_us_east_2b\":\"subnet-12151b60\",\"subnet_qa_public_us_east_2c\":\"subnet-f25c12b2\",\"subnet_qa_public_us_west_2a\":\"subnet-44b2ca55\",\"subnet_qa_public_us_west_2b\":\"subnet-1dabf772\",\"subnet_qa_public_us_west_2c\":\"subnet-d255c121\",\"telegraf_interval\":500,\"test\":\"best\",\"vm_mms_numbers\":[\"9199255565\"],\"vpc_id\":\"vpc-2f0fd9eb\"}"),
+				),
+			},
+			{
+				Config: testAccDogFactConfig_big_update_remove(resourceType, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.hosts.host1.key", "value"),
+					resource.TestCheckResourceAttr(resourceName, "groups.all.vars", "{\"ansible_python_interpreter\":\"python\",\"cert_name\":\"star-republicdev-info\",\"cluster\":\"mob\",\"cluster_env\":\"mob_qa\",\"cluster_separator\":\"_\",\"common_build_root_dir\":\"/home/{{ ansible_user }}\",\"consul_cluster\":\"{{ region }}\",\"credstash_table\":\"{{'credential-store_' + cluster + cluster_separator + env}}\",\"dog_env\":\"qa\",\"dog_env_group\":\"www-data\",\"domain\":\"phoneboothdev.info\",\"ec2_dns_suffix\":\"compute-1\",\"elasticsearch_domain\":\"vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com\",\"email_alert_distro\":[],\"env\":\"qa\",\"filebeat_version\":\"oss-2.2.0\",\"foo_dash_company_id\":\"{{ foo_iris_account }}\",\"foo_iris_account\":9900004,\"foogo_domain\":\"foogo.info\",\"foopro_domain\":\"foogo.info\",\"igw_id\":\"igw-1ad5e97f\",\"image\":\"ami-09150b5c79250e26c\",\"keypair\":\"bandwidithaws\",\"logger_elb\":\"qa.logger.foo.io\",\"metrics_agent\":\"collectd\",\"monit_environment\":\"qa\",\"nginx_config\":\"republicwireless-com\",\"peering_id\":\"pcx-52b2c651\",\"product\":\"foo\",\"provider\":\"ec2\",\"region\":\"us-east-1\",\"riak_http_port\":2067,\"scout_environment\":\"QA\",\"service_domain\":\"foo.io\",\"ssh_ca_fingerprint\":\"69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920\",\"ssh_ca_provisioner\":\"site-reliability-engineering@foopro.com\",\"ssh_ca_url\":\"https://api-qa.ca.phoneboothdev.info/\",\"subnet_qa_public_us_east_1a\":\"subnet-50f9cc09\",\"subnet_qa_public_us_east_1c\":\"subnet-2ded22b0\",\"subnet_qa_public_us_east_1d\":\"subnet-6fc0d512\",\"subnet_qa_public_us_east_1e\":\"subnet-c5f2a9ee\",\"subnet_qa_public_us_east_2a\":\"subnet-67fc020e\",\"subnet_qa_public_us_east_2b\":\"subnet-12151b60\",\"subnet_qa_public_us_east_2c\":\"subnet-f25c12b2\",\"subnet_qa_public_us_west_2a\":\"subnet-44b2ca55\",\"subnet_qa_public_us_west_2b\":\"subnet-1dabf772\",\"subnet_qa_public_us_west_2c\":\"subnet-d255c121\",\"telegraf_interval\":500,\"vm_mms_numbers\":[\"9199255565\"],\"vpc_id\":\"vpc-2f0fd9eb\"}"),
 				),
 			},
 			{
@@ -229,56 +239,56 @@ resource %[1]q %[2]q {
           }
         }
         vars = jsonencode({
-          subnet_qa_public_us_east_1a = "subnet-50f9cc09"
-          ssh_ca_fingerprint = "69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920"
-          product = "foo"
-          peering_id = "pcx-52b2c651"
-          logger_elb = "qa.logger.foo.io"
-          provider = "ec2"
-          subnet_qa_public_us_east_1e = "subnet-c5f2a9ee"
-          consul_cluster = "{{ region }}"
-          ec2_dns_suffix = "compute-1"
-          scout_environment = "QA"
-          cluster = "mob"
-          foopro_domain = "foogo.info"
-          email_alert_distro = []
-          subnet_qa_public_us_east_1d = "subnet-6fc0d512"
-          common_build_root_dir = "/home/{{ ansible_user }}"
-          vpc_id = "vpc-2f0fd9eb"
-          cluster_separator = "_"
-          filebeat_version = "oss-2.2.0"
-          region = "us-east-1"
-          foogo_domain = "foogo.info"
-          vm_mms_numbers = ["9199255565"]
-          subnet_qa_public_us_east_2a = "subnet-67fc020e"
-          subnet_qa_public_us_west_2c = "subnet-d255c121"
-          nginx_config = "republicwireless-com"
-          subnet_qa_public_us_west_2b = "subnet-1dabf772"
-          foo_dash_company_id = "{{ foo_iris_account }}"
-          credstash_table = "{{'credential-store_' + cluster + cluster_separator + env}}"
-          service_domain = "foo.io"
-          ssh_ca_provisioner = "site-reliability-engineering@foopro.com"
-          riak_http_port = 2067
-          dog_env = "qa"
-          telegraf_interval = 500
-          env = "qa"
-          elasticsearch_domain = "vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com"
-          cert_name = "star-republicdev-info"
-          cluster_env = "mob_qa"
-          igw_id = "igw-1ad5e97f"
-          monit_environment = "qa"
           ansible_python_interpreter = "python"
-          domain = "phoneboothdev.info"
-          keypair = "bandwidithaws"
-          foo_iris_account = 9900004
-          subnet_qa_public_us_east_2b = "subnet-12151b60"
-          image = "ami-09150b5c79250e26c"
-          subnet_qa_public_us_west_2a = "subnet-44b2ca55"
-          subnet_qa_public_us_east_1c = "subnet-2ded22b0"
+          cert_name = "star-republicdev-info"
+          cluster = "mob"
+          cluster_env = "mob_qa"
+          cluster_separator = "_"
+          common_build_root_dir = "/home/{{ ansible_user }}"
+          consul_cluster = "{{ region }}"
+          credstash_table = "{{'credential-store_' + cluster + cluster_separator + env}}"
+          dog_env = "qa"
           dog_env_group = "www-data"
+          domain = "phoneboothdev.info"
+          ec2_dns_suffix = "compute-1"
+          elasticsearch_domain = "vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com"
+          email_alert_distro = []
+          env = "qa"
+          filebeat_version = "oss-2.2.0"
+          foo_dash_company_id = "{{ foo_iris_account }}"
+          foo_iris_account = 9900004
+          foogo_domain = "foogo.info"
+          foopro_domain = "foogo.info"
+          igw_id = "igw-1ad5e97f"
+          image = "ami-09150b5c79250e26c"
+          keypair = "bandwidithaws"
+          logger_elb = "qa.logger.foo.io"
           metrics_agent = "collectd"
-          subnet_qa_public_us_east_2c = "subnet-f25c12b2"
+          monit_environment = "qa"
+          nginx_config = "republicwireless-com"
+          peering_id = "pcx-52b2c651"
+          product = "foo"
+          provider = "ec2"
+          region = "us-east-1"
+          riak_http_port = 2067
+          scout_environment = "QA"
+          service_domain = "foo.io"
+          ssh_ca_fingerprint = "69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920"
+          ssh_ca_provisioner = "site-reliability-engineering@foopro.com"
           ssh_ca_url = "https://api-qa.ca.phoneboothdev.info/"
+          subnet_qa_public_us_east_1a = "subnet-50f9cc09"
+          subnet_qa_public_us_east_1c = "subnet-2ded22b0"
+          subnet_qa_public_us_east_1d = "subnet-6fc0d512"
+          subnet_qa_public_us_east_1e = "subnet-c5f2a9ee"
+          subnet_qa_public_us_east_2a = "subnet-67fc020e"
+          subnet_qa_public_us_east_2b = "subnet-12151b60"
+          subnet_qa_public_us_east_2c = "subnet-f25c12b2"
+          subnet_qa_public_us_west_2a = "subnet-44b2ca55"
+          subnet_qa_public_us_west_2b = "subnet-1dabf772"
+          subnet_qa_public_us_west_2c = "subnet-d255c121"
+          telegraf_interval = 500
+          vm_mms_numbers = ["9199255565"]
+          vpc_id = "vpc-2f0fd9eb"
       })
     }
   }
@@ -303,57 +313,130 @@ resource %[1]q %[2]q {
           }
         }
         vars = jsonencode({
-          subnet_qa_public_us_east_1a = "subnet-50f9cc09"
-          ssh_ca_fingerprint = "69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920"
-          product = "foo"
-          peering_id = "pcx-52b2c651"
-          logger_elb = "qa.logger.foo.io"
-          provider = "ec2"
-          subnet_qa_public_us_east_1e = "subnet-c5f2a9ee"
-          consul_cluster = "{{ region }}"
-          ec2_dns_suffix = "compute-1"
-          scout_environment = "QA"
-          cluster = "mob"
-          foopro_domain = "foogo.info"
-          email_alert_distro = []
-          subnet_qa_public_us_east_1d = "subnet-6fc0d512"
-          common_build_root_dir = "/home/{{ ansible_user }}"
-          vpc_id = "vpc-2f0fd9eb"
-          cluster_separator = "_"
-          filebeat_version = "oss-2.2.0"
-          region = "us-east-1"
-          foogo_domain = "foogo.info"
-          vm_mms_numbers = ["9199255565"]
-          subnet_qa_public_us_east_2a = "subnet-67fc020e"
-          subnet_qa_public_us_west_2c = "subnet-d255c121"
-          nginx_config = "republicwireless-com"
-          subnet_qa_public_us_west_2b = "subnet-1dabf772"
-          foo_dash_company_id = "{{ foo_iris_account }}"
-          credstash_table = "{{'credential-store_' + cluster + cluster_separator + env}}"
-          service_domain = "foo.io"
-          ssh_ca_provisioner = "site-reliability-engineering@foopro.com"
-          riak_http_port = 2067
-          dog_env = "qa"
-          telegraf_interval = 500
-          env = "qa"
-          elasticsearch_domain = "vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com"
-          cert_name = "star-republicdev-info"
-          cluster_env = "mob_qa"
-          igw_id = "igw-1ad5e97f"
-          monit_environment = "qa"
-          ansible_python_interpreter = "python"
-          domain = "phoneboothdev.info"
-          keypair = "bandwidithaws"
-          foo_iris_account = 9900004
-          subnet_qa_public_us_east_2b = "subnet-12151b60"
-          image = "ami-09150b5c79250e26c"
-          subnet_qa_public_us_west_2a = "subnet-44b2ca55"
-          subnet_qa_public_us_east_1c = "subnet-2ded22b0"
-          dog_env_group = "www-data"
-          metrics_agent = "collectd"
-          subnet_qa_public_us_east_2c = "subnet-f25c12b2"
-          ssh_ca_url = "https://api-qa.ca.phoneboothdev.info/"
 		  test = "best"
+          ansible_python_interpreter = "python"
+          cert_name = "star-republicdev-info"
+          cluster = "mob"
+          cluster_env = "mob_qa"
+          cluster_separator = "_"
+          common_build_root_dir = "/home/{{ ansible_user }}"
+          consul_cluster = "{{ region }}"
+          credstash_table = "{{'credential-store_' + cluster + cluster_separator + env}}"
+          dog_env = "qa"
+          dog_env_group = "www-data"
+          domain = "phoneboothdev.info"
+          ec2_dns_suffix = "compute-1"
+          elasticsearch_domain = "vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com"
+          email_alert_distro = []
+          env = "qa"
+          filebeat_version = "oss-2.2.0"
+          foo_dash_company_id = "{{ foo_iris_account }}"
+          foo_iris_account = 9900004
+          foogo_domain = "foogo.info"
+          foopro_domain = "foogo.info"
+          igw_id = "igw-1ad5e97f"
+          image = "ami-09150b5c79250e26c"
+          keypair = "bandwidithaws"
+          logger_elb = "qa.logger.foo.io"
+          metrics_agent = "collectd"
+          monit_environment = "qa"
+          nginx_config = "republicwireless-com"
+          peering_id = "pcx-52b2c651"
+          product = "foo"
+          provider = "ec2"
+          region = "us-east-1"
+          riak_http_port = 2067
+          scout_environment = "QA"
+          service_domain = "foo.io"
+          ssh_ca_fingerprint = "69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920"
+          ssh_ca_provisioner = "site-reliability-engineering@foopro.com"
+          ssh_ca_url = "https://api-qa.ca.phoneboothdev.info/"
+          subnet_qa_public_us_east_1a = "subnet-50f9cc09"
+          subnet_qa_public_us_east_1c = "subnet-2ded22b0"
+          subnet_qa_public_us_east_1d = "subnet-6fc0d512"
+          subnet_qa_public_us_east_1e = "subnet-c5f2a9ee"
+          subnet_qa_public_us_east_2a = "subnet-67fc020e"
+          subnet_qa_public_us_east_2b = "subnet-12151b60"
+          subnet_qa_public_us_east_2c = "subnet-f25c12b2"
+          subnet_qa_public_us_west_2a = "subnet-44b2ca55"
+          subnet_qa_public_us_west_2b = "subnet-1dabf772"
+          subnet_qa_public_us_west_2c = "subnet-d255c121"
+          telegraf_interval = 500
+          vm_mms_numbers = ["9199255565"]
+          vpc_id = "vpc-2f0fd9eb"
+      })
+    }
+  }
+}
+`, resourceType, name)
+}
+func testAccDogFactConfig_big_update_remove(resourceType, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q 
+    groups = {
+      all = {
+        children = ["dog_test"]
+        hosts = {
+          host2 = {
+            key2 = "value2"
+          }
+          host1 = {
+            key = "value"
+            key2 = "value2"
+          }
+        }
+        vars = jsonencode({
+          ansible_python_interpreter = "python"
+          cert_name = "star-republicdev-info"
+          cluster = "mob"
+          cluster_env = "mob_qa"
+          cluster_separator = "_"
+          common_build_root_dir = "/home/{{ ansible_user }}"
+          consul_cluster = "{{ region }}"
+          credstash_table = "{{'credential-store_' + cluster + cluster_separator + env}}"
+          dog_env = "qa"
+          dog_env_group = "www-data"
+          domain = "phoneboothdev.info"
+          ec2_dns_suffix = "compute-1"
+          elasticsearch_domain = "vpc-logger-qa-m52rd66iwl6df5gieiylyaso4e.us-east-1.es.amazonaws.com"
+          email_alert_distro = []
+          env = "qa"
+          filebeat_version = "oss-2.2.0"
+          foo_dash_company_id = "{{ foo_iris_account }}"
+          foo_iris_account = 9900004
+          foogo_domain = "foogo.info"
+          foopro_domain = "foogo.info"
+          igw_id = "igw-1ad5e97f"
+          image = "ami-09150b5c79250e26c"
+          keypair = "bandwidithaws"
+          logger_elb = "qa.logger.foo.io"
+          metrics_agent = "collectd"
+          monit_environment = "qa"
+          nginx_config = "republicwireless-com"
+          peering_id = "pcx-52b2c651"
+          product = "foo"
+          provider = "ec2"
+          region = "us-east-1"
+          riak_http_port = 2067
+          scout_environment = "QA"
+          service_domain = "foo.io"
+          ssh_ca_fingerprint = "69f6617f461ceb6d05cd57a0b9e05ee27f555cfaaae5b52f6760bd9bcc976920"
+          ssh_ca_provisioner = "site-reliability-engineering@foopro.com"
+          ssh_ca_url = "https://api-qa.ca.phoneboothdev.info/"
+          subnet_qa_public_us_east_1a = "subnet-50f9cc09"
+          subnet_qa_public_us_east_1c = "subnet-2ded22b0"
+          subnet_qa_public_us_east_1d = "subnet-6fc0d512"
+          subnet_qa_public_us_east_1e = "subnet-c5f2a9ee"
+          subnet_qa_public_us_east_2a = "subnet-67fc020e"
+          subnet_qa_public_us_east_2b = "subnet-12151b60"
+          subnet_qa_public_us_east_2c = "subnet-f25c12b2"
+          subnet_qa_public_us_west_2a = "subnet-44b2ca55"
+          subnet_qa_public_us_west_2b = "subnet-1dabf772"
+          subnet_qa_public_us_west_2c = "subnet-d255c121"
+          telegraf_interval = 500
+          vm_mms_numbers = ["9199255565"]
+          vpc_id = "vpc-2f0fd9eb"
       })
     }
   }
