@@ -103,10 +103,10 @@ func link_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "}\n")
         fmt.Fprintf(tf_w, "\n")
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_link.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -137,7 +137,7 @@ func host_export(output_dir string, environment string, host_prefix string) {
         fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
         fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
         fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
-		fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
+        fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
         for key, val := range row.Vars {
         fmt.Fprintf(tf_w, "    %s = %#v\n", key, val)
         }
@@ -146,10 +146,10 @@ func host_export(output_dir string, environment string, host_prefix string) {
         fmt.Fprintf(tf_w, "\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_host.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -184,7 +184,7 @@ func group_export(output_dir string, environment string) {
             regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
             fmt.Fprintf(tf_w, "  ]\n")
             fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
-			fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
+            fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
             for key, val := range row.Vars {
             fmt.Fprintf(tf_w, "    %s = %#v\n", key, val)
             }
@@ -193,10 +193,10 @@ func group_export(output_dir string, environment string) {
 
             fmt.Fprintf(tf_w, "\n")
             //fmt.Fprintf(import_w, "terraform import module.dog.dog_group.%s %s\n", terraformName, row.ID)
-			fmt.Fprintf(import_w, "import {\n")
-			fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-			fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-			fmt.Fprintf(import_w, "}\n")
+            fmt.Fprintf(import_w, "import {\n")
+            fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+            fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+            fmt.Fprintf(import_w, "}\n")
         }
     }
     tf_w.Flush()
@@ -241,10 +241,10 @@ func service_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_service.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -286,10 +286,10 @@ func zone_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_zone.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -303,9 +303,9 @@ func ruleset_export(output_dir string, environment string) {
     c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
 
-	options := api.RulesetsListOptions{} 
-	options.Names = true
-	res, statusCode, err := c.GetRulesets(&options)
+    options := api.RulesetsListOptions{} 
+    options.Names = true
+    res, statusCode, err := c.GetRulesets(&options)
     if err != nil {
         log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
     }
@@ -333,10 +333,10 @@ func ruleset_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "}\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_ruleset.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -367,10 +367,10 @@ func profile_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "}\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_profile.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
@@ -384,13 +384,13 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
         fmt.Fprintf(tf_w, "        comment = \"%s\"\n", rule.Comment)
         fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        environments = %q\n", rule.Environments), "\" \"", "\",\""))
         if rule.Group == "ANY" {
-            if rule.GroupType == "zone" {
+            fmt.Fprintf(tf_w, "        group = \"%s\"\n", rule.Group)
+        } else {
+            if rule.GroupType == "ZONE" {
                 fmt.Fprintf(tf_w, "        group = dog_zone.%s.id\n", rule.Group)
             } else {
                 fmt.Fprintf(tf_w, "        group = dog_group.%s.id\n", rule.Group)
             }
-        } else {
-            fmt.Fprintf(tf_w, "        group = \"%s\"\n", rule.Group)
         }
         fmt.Fprintf(tf_w, "        group_type = \"%s\"\n", rule.GroupType)
         fmt.Fprintf(tf_w, "        interface = \"%s\"\n", rule.Interface)
@@ -427,34 +427,38 @@ func fact_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_fact\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "  \"%s\" {\n", row.Name)
+        fmt.Fprintf(tf_w, "    name = %q\n", row.Name)
         fmt.Fprintf(tf_w, "    groups = {\n")
         for name, group := range row.Groups {
-		fmt.Fprintf(tf_w, "      name = \"%s\"\n", name)
-		fmt.Fprintf(tf_w, "      children = %q\n", group.Children)
-		fmt.Fprintf(tf_w, "      hosts = {\n")
-		for host, hostValues := range group.Hosts {
-		fmt.Fprintf(tf_w, "        %s = {\n", host)
-		for k, v := range hostValues {
-		fmt.Fprintf(tf_w, "          %s = %v\n", k, v)
-		}
-		fmt.Fprintf(tf_w, "        }\n")
-		}
-		fmt.Fprintf(tf_w, "      }\n")
-		fmt.Fprintf(tf_w, "      vars = jsonencode({\n")
-		for key, val := range group.Vars {
-		fmt.Fprintf(tf_w, "        %s = %#v\n", key, val)
-		}
-		fmt.Fprintf(tf_w, "      })\n")
-        fmt.Fprintf(tf_w, "    }\n")
+        fmt.Fprintf(tf_w, "      %s = {\n", name)
+        fmt.Fprintf(tf_w, "        children = %q\n", group.Children)
+        fmt.Fprintf(tf_w, "        hosts = {\n")
+        for host, hostValues := range group.Hosts {
+        fmt.Fprintf(tf_w, "          %s = {\n", host)
+        for k, v := range hostValues {
+        fmt.Fprintf(tf_w, "            %s = %q\n", k, v)
         }
+        fmt.Fprintf(tf_w, "          }\n")
+        }
+        fmt.Fprintf(tf_w, "        }\n")
+        fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
+        for key, val := range group.Vars {
+		if _, ok := val.(float64); ok {
+		fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
+		} else {
+		fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
+		}
+        }
+        fmt.Fprintf(tf_w, "      })\n")
+        fmt.Fprintf(tf_w, "    }\n")
         fmt.Fprintf(tf_w, "  }\n")
+        }
         fmt.Fprintf(tf_w, "}\n")
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_fact.%s %s\n", terraformName, row.ID)
-		fmt.Fprintf(import_w, "import {\n")
-		fmt.Fprintf(import_w, "  id = %q\n", row.ID)
-		fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
-		fmt.Fprintf(import_w, "}\n")
+        fmt.Fprintf(import_w, "import {\n")
+        fmt.Fprintf(import_w, "  id = %q\n", row.ID)
+        fmt.Fprintf(import_w, "  to = module.dog.dog_%s.%s\n", table, terraformName)
+        fmt.Fprintf(import_w, "}\n")
     }
     tf_w.Flush()
     import_w.Flush()
