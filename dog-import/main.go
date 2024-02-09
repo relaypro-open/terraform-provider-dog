@@ -334,7 +334,7 @@ func ruleset_export(output_dir string, environment string) {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_ruleset\" \"%s\" {\n", terraformName)
         fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.name\n", row.Name)
+        fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.id\n", row.Name)
         fmt.Fprintf(tf_w, "  rules = {\n")
         inbound := row.Rules.Inbound
         fmt.Fprintf(tf_w, "    inbound = [\n")
