@@ -118,8 +118,9 @@ func host_export(output_dir string, environment string, host_prefix string) {
     import_w := importOutputFile(output_dir, table)
 
     c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
-
-    res, statusCode, err := c.GetHosts(nil)
+    hla := api.HostsListOptions{}                      
+	hla.Active = "true"
+	res, statusCode, err := c.GetHosts(&hla)
     if err != nil {
         log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
     }
@@ -137,11 +138,14 @@ func host_export(output_dir string, environment string, host_prefix string) {
         fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
         fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
         fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
-        fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
+		if row.Vars == nil {
+		} else {
+		fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
         for key, val := range row.Vars {
         fmt.Fprintf(tf_w, "    %s = %#v\n", key, val)
         }
         fmt.Fprintf(tf_w, "  })\n")
+		}
         fmt.Fprintf(tf_w, "}\n")
         fmt.Fprintf(tf_w, "\n")
 
@@ -184,11 +188,23 @@ func group_export(output_dir string, environment string) {
             regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
             fmt.Fprintf(tf_w, "  ]\n")
             fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+			if row.Vars == nil {
+			} else {
             fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
             for key, val := range row.Vars {
-            fmt.Fprintf(tf_w, "    %s = %#v\n", key, val)
+			if _, ok := val.(float64); ok {
+			fmt.Fprintf(tf_w, "          %s = %v\n", key, int(val.(float64)))
+			} else if _, ok := val.(bool); ok {
+			fmt.Fprintf(tf_w, "          %s = %t\n", key, val)
+			} else if _, ok := val.([]any); ok {
+			b, _ := json.Marshal(val)
+			fmt.Fprintf(tf_w, "          %s = %v\n", key, string(b))
+			} else {
+			fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
+			}
             }
             fmt.Fprintf(tf_w, "  })\n")
+			} 
             fmt.Fprintf(tf_w, "}\n")
 
             fmt.Fprintf(tf_w, "\n")
@@ -383,8 +399,10 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
         fmt.Fprintf(tf_w, "        active = \"%t\"\n", rule.Active)
         fmt.Fprintf(tf_w, "        comment = \"%s\"\n", rule.Comment)
         fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        environments = %q\n", rule.Environments), "\" \"", "\",\""))
-        if rule.Group == "ANY" {
-            fmt.Fprintf(tf_w, "        group = \"%s\"\n", rule.Group)
+        if rule.Group == "any" {
+            fmt.Fprintf(tf_w, "        group = \"any\"\n")
+		} else if rule.Group == "all-active" {
+            fmt.Fprintf(tf_w, "        group = \"all-active\"\n")
         } else {
             if rule.GroupType == "ZONE" {
                 fmt.Fprintf(tf_w, "        group = dog_zone.%s.id\n", rule.Group)
@@ -442,6 +460,9 @@ func fact_export(output_dir string, environment string) {
         }
         fmt.Fprintf(tf_w, "        }\n")
         fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
+		if group.Vars == nil {
+		fmt.Fprintf(tf_w, "          cantbeempty = \"cantbeempty\"\n")
+		} else {
         for key, val := range group.Vars {
 		if _, ok := val.(float64); ok {
 		fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
@@ -449,6 +470,7 @@ func fact_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
 		}
         }
+		}
         fmt.Fprintf(tf_w, "      })\n")
         fmt.Fprintf(tf_w, "    }\n")
         fmt.Fprintf(tf_w, "  }\n")

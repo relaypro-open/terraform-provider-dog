@@ -2,7 +2,7 @@ module dog-import
 
 go 1.18
 
-require github.com/relaypro-open/dog_api_golang v0.0.0-20240129024531-5a9f157ccd5f
+require github.com/relaypro-open/dog_api_golang v0.0.0-20240208215335-0f8f0f4f8b0c
 
 require (
 	github.com/agext/levenshtein v1.2.1 // indirect

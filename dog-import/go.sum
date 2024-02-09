@@ -32,6 +32,10 @@ github.com/relaypro-open/dog_api_golang v0.0.0-20240125200739-21fec9276918 h1:jK
 github.com/relaypro-open/dog_api_golang v0.0.0-20240125200739-21fec9276918/go.mod h1:Adjvqlvq9RdyruC6WjKM5A8Uayn7kSh/bRF9feQvaL8=
 github.com/relaypro-open/dog_api_golang v0.0.0-20240129024531-5a9f157ccd5f h1:SrtxkACIvw8NWa+i/dlW9q0ZF1dDEGZWgYJ9vqk0Wcg=
 github.com/relaypro-open/dog_api_golang v0.0.0-20240129024531-5a9f157ccd5f/go.mod h1:Adjvqlvq9RdyruC6WjKM5A8Uayn7kSh/bRF9feQvaL8=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240208204133-60e38d9d3dca h1:0bnqMGSJU6FBDtD92Dl5ApH1FHW3E112kItXKxvHHuQ=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240208204133-60e38d9d3dca/go.mod h1:9lE3HcDFGGkVwKBgtXY71PAJKfOV4DzK4+uk0MlPq7Y=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240208215335-0f8f0f4f8b0c h1:EXxmiSGmrXd+2TGNVNs+L8pT25Co0PH/x5MQZvNM9gU=
+github.com/relaypro-open/dog_api_golang v0.0.0-20240208215335-0f8f0f4f8b0c/go.mod h1:9lE3HcDFGGkVwKBgtXY71PAJKfOV4DzK4+uk0MlPq7Y=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
