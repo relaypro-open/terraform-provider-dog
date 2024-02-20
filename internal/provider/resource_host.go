@@ -63,6 +63,7 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			"vars": schema.StringAttribute{
 				MarkdownDescription: "json string of vars",
 				Optional:            true,
+				//Required:            true,
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
@@ -103,19 +104,55 @@ type hostResourceData struct {
 	HostKey     string            `tfsdk:"hostkey"`
 	Location    string            `tfsdk:"location"`
 	Name        string            `tfsdk:"name"`
-	Vars        string            `tfsdk:"vars"`
+	Vars        *string            `tfsdk:"vars"`
 }
 
 func HostToApiHost(plan Host) api.Host {
-	newHost := api.Host{
-		Environment: plan.Environment.ValueString(),
-		Group:       plan.Group.ValueString(),
-		HostKey:     plan.HostKey.ValueString(),
-		Location:    plan.Location.ValueString(),
-		Name:        plan.Name.ValueString(),
-		Vars:        plan.Vars.ValueString(),
+	if plan.Vars.ValueString() != "" {
+		newHost := api.Host{
+			Environment: plan.Environment.ValueString(),
+			Group:       plan.Group.ValueString(),
+			HostKey:     plan.HostKey.ValueString(),
+			Location:    plan.Location.ValueString(),
+			Name:        plan.Name.ValueString(),
+			Vars:        plan.Vars.ValueString(),
+		}
+		return newHost
+	} else {
+		newHost := api.Host{
+			Environment: plan.Environment.ValueString(),
+			Group:       plan.Group.ValueString(),
+			HostKey:     plan.HostKey.ValueString(),
+			Location:    plan.Location.ValueString(),
+			Name:        plan.Name.ValueString(),
+		}
+		return newHost
 	}
-	return newHost
+}
+
+func ApiToHost(host api.Host) Host {
+	if host.Vars != "" {
+		h := Host{
+			Environment: types.StringValue(host.Environment),
+			Group:       types.StringValue(host.Group),
+			ID:          types.StringValue(host.ID),
+			HostKey:     types.StringValue(host.HostKey),
+			Location:    types.StringValue(host.Location),
+			Name:        types.StringValue(host.Name),
+			Vars:        types.StringValue(host.Vars),
+		}
+		return h
+	} else {
+		h := Host{
+			Environment: types.StringValue(host.Environment),
+			Group:       types.StringValue(host.Group),
+			ID:          types.StringValue(host.ID),
+			HostKey:     types.StringValue(host.HostKey),
+			Location:    types.StringValue(host.Location),
+			Name:        types.StringValue(host.Name),
+		}
+		return h
+	}
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -125,7 +162,7 @@ func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
-		Vars:        plan.Vars,
+		Vars:        *plan.Vars,
 	}
 	return newHost
 }
@@ -137,23 +174,9 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
-		Vars:        plan.Vars,
+		Vars:        *plan.Vars,
 	}
 	return newHost
-}
-
-func ApiToHost(host api.Host) Host {
-	h := Host{
-		Environment: types.StringValue(host.Environment),
-		Group:       types.StringValue(host.Group),
-		ID:          types.StringValue(host.ID),
-		HostKey:     types.StringValue(host.HostKey),
-		Location:    types.StringValue(host.Location),
-		Name:        types.StringValue(host.Name),
-		Vars:        types.StringValue(host.Vars),
-	}
-
-	return h
 }
 
 func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

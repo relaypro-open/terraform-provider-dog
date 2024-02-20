@@ -119,7 +119,7 @@ type groupResourceData struct {
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars                string                       `tfsdk:"vars"`
+	Vars                *string                       `tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
@@ -136,18 +136,66 @@ func GroupToApiGroup(plan Group) api.Group {
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
-
-	newGroup := api.Group{
-		Description:         plan.Description.ValueString(),
-		Name:                plan.Name.ValueString(),
-		ProfileId:           plan.ProfileId.ValueString(),
-		ProfileName:         plan.ProfileName.ValueString(),
-		ProfileVersion:      plan.ProfileVersion.ValueString(),
-		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                plan.Vars.ValueString(),
+	
+	if plan.Vars.ValueString() != "" {
+		newGroup := api.Group{
+			Description:         plan.Description.ValueString(),
+			Name:                plan.Name.ValueString(),
+			ProfileId:           plan.ProfileId.ValueString(),
+			ProfileName:         plan.ProfileName.ValueString(),
+			ProfileVersion:      plan.ProfileVersion.ValueString(),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                plan.Vars.ValueString(),
+		}
+		return newGroup 
+	} else {
+		newGroup := api.Group{
+			Description:         plan.Description.ValueString(),
+			Name:                plan.Name.ValueString(),
+			ProfileId:           plan.ProfileId.ValueString(),
+			ProfileName:         plan.ProfileName.ValueString(),
+			ProfileVersion:      plan.ProfileVersion.ValueString(),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		}
+		return newGroup 
 	}
-	return newGroup
 }
+
+func ApiToGroup(group api.Group) Group {
+	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
+	for _, region_sgid := range group.Ec2SecurityGroupIds {
+		rs := &Ec2SecurityGroupIds{
+			Region: types.StringValue(region_sgid.Region),
+			SgId:   types.StringValue(region_sgid.SgId),
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+	if group.Vars != "" {
+		h := Group{
+			Description:         types.StringValue(group.Description),
+			ID:                  types.StringValue(group.ID),
+			Name:                types.StringValue(group.Name),
+			ProfileId:           types.StringValue(group.ProfileId),
+			ProfileName:         types.StringValue(group.ProfileName),
+			ProfileVersion:      types.StringValue(group.ProfileVersion),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                types.StringValue(group.Vars),
+		}
+		return h
+	} else {
+		h := Group{
+			Description:         types.StringValue(group.Description),
+			ID:                  types.StringValue(group.ID),
+			Name:                types.StringValue(group.Name),
+			ProfileId:           types.StringValue(group.ProfileId),
+			ProfileName:         types.StringValue(group.ProfileName),
+			ProfileVersion:      types.StringValue(group.ProfileVersion),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		}
+		return h
+	}
+}
+
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
 	for _, region_sgid := range plan.Ec2SecurityGroupIds {
@@ -165,7 +213,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 		ProfileName:         plan.ProfileName,
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                plan.Vars,
+		Vars:                *plan.Vars,
 	}
 	return newGroup
 }
@@ -187,32 +235,9 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 		ProfileName:         plan.ProfileName,
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                plan.Vars,
+		Vars:                *plan.Vars,
 	}
 	return newGroup
-}
-
-func ApiToGroup(group api.Group) Group {
-	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
-	for _, region_sgid := range group.Ec2SecurityGroupIds {
-		rs := &Ec2SecurityGroupIds{
-			Region: types.StringValue(region_sgid.Region),
-			SgId:   types.StringValue(region_sgid.SgId),
-		}
-		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
-	}
-
-	h := Group{
-		Description:         types.StringValue(group.Description),
-		ID:                  types.StringValue(group.ID),
-		Name:                types.StringValue(group.Name),
-		ProfileId:           types.StringValue(group.ProfileId),
-		ProfileName:         types.StringValue(group.ProfileName),
-		ProfileVersion:      types.StringValue(group.ProfileVersion),
-		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                types.StringValue(group.Vars),
-	}
-	return h
 }
 
 func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -225,9 +250,12 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	
+	tflog.Debug(ctx, PrettyFmt("group create plan", plan))
 	newGroup := GroupToApiGroup(plan)
+	tflog.Debug(ctx, PrettyFmt("group create newGroup", newGroup))
 	group, statusCode, err := r.p.dog.CreateGroupEncode(newGroup, nil)
+	tflog.Debug(ctx, PrettyFmt("group create group", group))
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	if err != nil {
@@ -240,6 +268,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 	state = ApiToGroup(group)
+	tflog.Debug(ctx, PrettyFmt("group create state", state))
 
 	plan.ID = state.ID
 

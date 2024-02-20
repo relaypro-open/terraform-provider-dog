@@ -54,14 +54,14 @@ func (*factDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 					Attributes: map[string]schema.Attribute{
 						"vars": schema.StringAttribute{
 							MarkdownDescription: "json string of vars",
-							Optional:            true,
+							Required:            true,
 						},
 						"hosts": schema.MapAttribute{
-							Optional:            true,
+							Required:            true,
 							ElementType:         types.MapType{ElemType: types.StringType},
 						},
 						"children": schema.ListAttribute{
-							Optional:            true,
+							Required:            true,
 							ElementType:         types.StringType,
 						},
 					},
