@@ -459,10 +459,10 @@ func fact_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "          }\n")
         }
         fmt.Fprintf(tf_w, "        }\n")
-        fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
 		if group.Vars == nil {
-		fmt.Fprintf(tf_w, "          cantbeempty = \"cantbeempty\"\n")
+        fmt.Fprintf(tf_w, "        vars = \"null\"\n")
 		} else {
+        fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
         for key, val := range group.Vars {
 		if _, ok := val.(float64); ok {
 		fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
@@ -470,8 +470,8 @@ func fact_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
 		}
         }
-		}
         fmt.Fprintf(tf_w, "      })\n")
+		}
         fmt.Fprintf(tf_w, "    }\n")
         fmt.Fprintf(tf_w, "  }\n")
         }
@@ -514,7 +514,7 @@ func main() {
     fmt.Printf("host_prefix: '%s'\n", host_prefix)
     group_export(output_dir, environment)
     host_export(output_dir, environment, host_prefix)
-    link_export(output_dir, environment)
+    //link_export(output_dir, environment) #TODO disabled while testing
     ruleset_export(output_dir, environment)
     profile_export(output_dir, environment)
     service_export(output_dir, environment)
