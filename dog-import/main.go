@@ -1,15 +1,16 @@
 package main
 
 import (
-    "bufio"
-    "fmt"
-    "log"
-    "os"
-    "strings"
-    "flag"
-    "encoding/json"
+	"bufio"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"reflect"
+	"strings"
 
-    "github.com/relaypro-open/dog_api_golang/api"
+	"github.com/relaypro-open/dog_api_golang/api"
 )
 
 func Pretty(incoming interface{}) (str string) {
@@ -183,7 +184,11 @@ func group_export(output_dir string, environment string) {
             fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
             fmt.Fprintf(tf_w, "  profile_name = dog_profile.%s.name\n", row.ProfileName)
             fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.id\n", row.ProfileName)
+			if row.ProfileVersion == "" {
+            fmt.Fprintf(tf_w, "  profile_version = \"latest\"\n")
+			} else {
             fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
+			}
             fmt.Fprintf(tf_w, "  ec2_security_group_ids = [\n")
             regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
             fmt.Fprintf(tf_w, "  ]\n")
@@ -295,8 +300,25 @@ func zone_export(output_dir string, environment string) {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_zone\" \"%s\" {\n", terraformName)
         fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv4_addresses = %q\n", row.IPv4Addresses), "\" \"", "\",\""))
-        fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv6_addresses = %q\n", row.IPv6Addresses), "\" \"", "\",\""))
+        //fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv4_addresses = %q\n", row.IPv4Addresses), "\" \"", "\",\""))
+
+		if reflect.DeepEqual(row.IPv4Addresses, []string{}) {
+		fmt.Fprintf(tf_w, "  ipv4_addresses = []\n")
+		} else if reflect.DeepEqual(row.IPv4Addresses, []string{""}) {
+		fmt.Fprintf(tf_w, "  ipv4_addresses = []\n")
+		} else {
+		IPv4Addresses := `"`+strings.Join(row.IPv4Addresses, `","`) + `"`
+		fmt.Fprintf(tf_w, "  ipv4_addresses = [%s]\n", IPv4Addresses)
+		}
+		if reflect.DeepEqual(row.IPv6Addresses, []string{}) {
+		fmt.Fprintf(tf_w, "  ipv6_addresses = []\n")
+		} else if reflect.DeepEqual(row.IPv6Addresses, []string{""}) {
+		fmt.Fprintf(tf_w, "  ipv6_addresses = []\n")
+		} else {
+		IPv6Addresses := `"`+strings.Join(row.IPv6Addresses, `","`) + `"`
+		fmt.Fprintf(tf_w, "  ipv6_addresses = [%s]\n", IPv6Addresses)
+		}
+        //fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv6_addresses = %q\n", row.IPv6Addresses), "\" \"", "\",\""))
         fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
         fmt.Fprintf(tf_w, "}\n")
         fmt.Fprintf(tf_w, "\n")
