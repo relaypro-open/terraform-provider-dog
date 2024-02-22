@@ -67,7 +67,7 @@ func (*serviceResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 							Required:            true,
 							ElementType: types.StringType,
 							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches( regexp.MustCompile(`^[0-9:,]*$`), "Must be numeric or : or ,",
+								listvalidator.ValueStringsAre(stringvalidator.RegexMatches( regexp.MustCompile(`^[0-9:]*$`), "Must be numeric or : (to indicate a range)",
 								)),
 							},
 						},

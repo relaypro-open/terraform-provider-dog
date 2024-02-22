@@ -274,8 +274,10 @@ func service_export(output_dir string, environment string) {
 func portprotocols_output(tf_w *bufio.Writer, portProtocols []*api.PortProtocol) {
     for _, port_protocol := range portProtocols {
         fmt.Fprintf(tf_w, "      {\n")
+		Ports := `"`+strings.Join(port_protocol.Ports, `","`) + `"`
         fmt.Fprintf(tf_w, "        protocol = \"%s\"\n", port_protocol.Protocol)
-        fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        ports = %q\n", port_protocol.Ports), "\" \"", "\",\""))
+        //fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        ports = %q\n", port_protocol.Ports), "\" \"", "\",\""))
+		fmt.Fprintf(tf_w, "        ports = [%s]\n", Ports)
         fmt.Fprintf(tf_w, "      },\n")
     }
 }
