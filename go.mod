@@ -2,6 +2,8 @@ module terraform-provider-dog
 
 go 1.20
 
+//replace github.com/relaypro-open/dog_api_golang => /home/dgulino/Documents/workspace/dog_api_golang
+
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
