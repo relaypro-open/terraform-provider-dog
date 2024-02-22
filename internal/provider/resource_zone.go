@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -44,15 +48,32 @@ func (*zoneResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				MarkdownDescription: "List of Ipv4 Addresses",
 				Optional:            true,
 				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b`), "Must be valid IPv4 address"),
+					),
+				},
 			},
 			"ipv6_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv6 Addresses",
 				Optional:            true,
 				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`((([0-9a-fA-F]{0,4})\:){2,7})([0-9a-fA-F]{0,4})`), "Must be valid IPv6 address"),
+					),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Zone name",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 28),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+						"must start with alphanumeric characters, %, _, ., -",
+					),
+				},
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,

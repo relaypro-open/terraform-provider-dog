@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -53,51 +56,145 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				MarkdownDescription: "Rule rules",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"inbound": schema.ListAttribute{
-						ElementType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"action":  types.StringType,
-								"active":  types.BoolType,
-								"comment": types.StringType,
-								"environments": types.ListType{
-									ElemType: types.StringType,
+					"inbound": schema.ListNestedAttribute{
+						Required: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"action": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"ACCEPT",
+										"DROP",
+										"REJECT")},
 								},
-								"group":      types.StringType,
-								"group_type": types.StringType,
-								"interface":  types.StringType,
-								"log":        types.BoolType,
-								"log_prefix": types.StringType,
-								"service":    types.StringType,
-								"states": types.ListType{
-									ElemType: types.StringType,
+								"active": schema.BoolAttribute{
+									Required: true,
 								},
-								"type": types.StringType,
+								"comment": schema.StringAttribute{
+									Required: true,
+								},
+								"environments": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+								},
+								"group": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 37),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
+									},
+								},
+								"group_type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
+								},
+								"interface": schema.StringAttribute{
+									Required: true,
+								},
+								"log": schema.BoolAttribute{
+									Required: true,
+								},
+								"log_prefix": schema.StringAttribute{
+									Required: true,
+								},
+								"service": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthAtLeast(1),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
+									},
+								},
+								"states": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+									Validators: []validator.List{
+										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
+									},
+								},
+								"type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"BASIC", 
+									 	//"CONNLIMIT",  //TODO
+										//"RECENT"      //TODO
+									)},
+								},
 							},
 						},
-						Required: true,
 					},
-					"outbound": schema.ListAttribute{
-						ElementType: types.ObjectType{
-							AttrTypes: map[string]attr.Type{
-								"action":  types.StringType,
-								"active":  types.BoolType,
-								"comment": types.StringType,
-								"environments": types.ListType{
-									ElemType: types.StringType,
+					"outbound": schema.ListNestedAttribute{
+						Required: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"action": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"ACCEPT",
+										"DROP",
+										"REJECT")},
 								},
-								"group":      types.StringType,
-								"group_type": types.StringType,
-								"interface":  types.StringType,
-								"log":        types.BoolType,
-								"log_prefix": types.StringType,
-								"service":    types.StringType,
-								"states": types.ListType{
-									ElemType: types.StringType,
+								"active": schema.BoolAttribute{
+									Required: true,
 								},
-								"type": types.StringType,
+								"comment": schema.StringAttribute{
+									Required: true,
+								},
+								"environments": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+								},
+								"group": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 37),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
+									},
+								},
+								"group_type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
+								},
+								"interface": schema.StringAttribute{
+									Required: true,
+								},
+								"log": schema.BoolAttribute{
+									Required: true,
+								},
+								"log_prefix": schema.StringAttribute{
+									Required: true,
+								},
+								"service": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthAtLeast(1),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
+									},
+								},
+								"states": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+									Validators: []validator.List{
+										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
+									},
+								},
+								"type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"BASIC", 
+									 	//"CONNLIMIT",  //TODO
+										//"RECENT"      //TODO
+									)},
+								},
 							},
 						},
-						Required: true,
 					},
 				},
 			},

@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
 )
@@ -65,6 +68,13 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			},
 			"name": schema.StringAttribute{
 				Required:            true,
+				Validators: []validator.String{
+				stringvalidator.LengthBetween(1, 256),
+				stringvalidator.RegexMatches(
+					regexp.MustCompile(`^[A-Za-z_](0-9A-Za-z_)*`),
+					"must start with alphanumeric characters, _, and -",
+				),
+    },
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,

@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -45,6 +48,13 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 			"name": schema.StringAttribute{
 				MarkdownDescription: "group name",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 28),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+						"must start with 'sg-'",
+					),
+				},
 			},
 			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "group profile id",
@@ -66,10 +76,24 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 						"region": schema.StringAttribute{
 							MarkdownDescription: "EC2 Region",
 							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(9, 256),
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^(.*)-(.*)-(.*)$`),
+									"must be valid region",
+								),
+							},
 						},
 						"sgid": schema.StringAttribute{
 							MarkdownDescription: "EC2 Security Group ID",
 							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(3, 256),
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^sg-(.*)$`),
+									"must start with 'sg-'",
+								),
+							},
 						},
 					},
 				},
