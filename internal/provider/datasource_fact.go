@@ -26,7 +26,7 @@ type (
 	}
 
 	FactGroup struct {
-		Vars     types.String                 `tfsdk:"vars"`
+		Vars     *string                 `tfsdk:"vars"`
 		Hosts    map[string]map[string]string `tfsdk:"hosts"`
 		Children []string                     `tfsdk:"children"`
 	}

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type (
@@ -52,7 +53,7 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 					Attributes: map[string]schema.Attribute{
 						"vars": schema.StringAttribute{
 							MarkdownDescription: "json string of vars",
-							Required:            true,
+							Optional:            true,
 						},
 						"hosts": schema.MapAttribute{
 							Required:            true,
@@ -69,12 +70,12 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			"name": schema.StringAttribute{
 				Required:            true,
 				Validators: []validator.String{
-				stringvalidator.LengthBetween(1, 256),
-				stringvalidator.RegexMatches(
-					regexp.MustCompile(`^[A-Za-z_](0-9A-Za-z_)*`),
-					"must start with alphanumeric characters, _, and -",
-				),
-    },
+					stringvalidator.LengthBetween(1, 256),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z_](0-9A-Za-z_)*`),
+						"must start with alphanumeric characters, _, and -",
+					),
+				},
 			},
 			"id": schema.StringAttribute{
 				Optional:            true,
@@ -113,32 +114,23 @@ type factResourceData struct {
 	Name   string                     `tfsdk:"name"`
 }
 
-func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
-	newGroups := map[string]*api.FactGroup{}
-	for name, group := range plan.Groups {
-		g := &api.FactGroup{
-			Vars:     group.Vars.ValueString(),
-			Hosts:    group.Hosts,
-			Children: group.Children,
-		}
-		newGroups[name] = g
-	}
-	newFact := api.FactCreateRequest{
-		Groups: newGroups,
-		Name:   plan.Name,
-	}
-	return newFact
-}
-
 func FactToApiFact(plan Fact) api.Fact {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.FactGroup{
-			Vars:     group.Vars.ValueString(),
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &api.FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &api.FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
 	newFact := api.Fact{
 		Groups: newGroups,
@@ -150,12 +142,20 @@ func FactToApiFact(plan Fact) api.Fact {
 func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.FactGroup{
-			Vars:     group.Vars.ValueString(),
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &api.FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &api.FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
 	newFact := api.FactUpdateRequest{
 		Groups: newGroups,
@@ -167,12 +167,20 @@ func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 func ApiToFact(fact api.Fact) Fact {
 	newGroups := map[string]*FactGroup{}
 	for name, group := range fact.Groups {
-		g := &FactGroup{
-			Vars:     types.StringValue(group.Vars),
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
 	h := Fact{
 		ID:     types.StringValue(fact.ID),
@@ -193,12 +201,12 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
+	
+	tflog.Debug(ctx, spew.Sprint("ZZZfact plan: %#v", plan))
 	newFact := FactToApiFact(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	tflog.Debug(ctx, spew.Sprint("ZZZfact newFact: %#v", newFact))
 	fact, statusCode, err := r.p.dog.CreateFactEncode(newFact, nil)
-	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
-	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
+	tflog.Debug(ctx, spew.Sprint("ZZZfact fact: %#v", fact))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
 	}
@@ -209,6 +217,7 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	state = ApiToFact(fact)
+	tflog.Debug(ctx, spew.Sprint("ZZZfact state: %#v", state))
 
 	plan.ID = state.ID
 
