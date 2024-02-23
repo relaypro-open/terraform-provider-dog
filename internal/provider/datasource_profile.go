@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
@@ -39,29 +38,27 @@ func (*profileDataSource) Metadata(ctx context.Context, req datasource.MetadataR
 	resp.TypeName = req.ProviderTypeName + "_profile"
 }
 
-func (*profileDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*profileDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Profile data source",
 
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Profile name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"version": {
+			"version": schema.StringAttribute{
 				MarkdownDescription: "Profile version",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Profile identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *profileDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -119,7 +116,7 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	} else {
 		filteredProfilesName = res
 	}
-	
+
 	filteredProfiles := filteredProfilesName
 
 	if filteredProfiles == nil {

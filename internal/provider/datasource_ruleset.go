@@ -6,8 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
@@ -44,7 +43,6 @@ type (
 		Interface    string   `json:"interface"`
 		Log          bool     `json:"log"`
 		LogPrefix    string   `json:"log_prefix"`
-		Order        int      `json:"order"`
 		Service      string   `json:"service"`
 		States       []string `json:"states"`
 		Type         string   `json:"type"`
@@ -63,83 +61,81 @@ func (*rulesetDataSource) Metadata(ctx context.Context, req datasource.MetadataR
 	resp.TypeName = req.ProviderTypeName + "_ruleset"
 }
 
-func (*rulesetDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*rulesetDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Ruleset data source",
 
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "ruleset name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"profile_id": {
+			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "profile id",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"rules": {
+			"rules": schema.SingleNestedAttribute{
 				MarkdownDescription: "Rule rules",
 				Optional:            true,
-				Type: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"inbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
+				//NestedObject: schema.NestedAttributeObject{
+				Attributes: map[string]schema.Attribute{
+					"inbound": schema.ListAttribute{
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"action":  types.StringType,
+								"active":  types.BoolType,
+								"comment": types.StringType,
+								"environments": types.ListType{
+									ElemType: types.StringType,
 								},
+								"group":      types.StringType,
+								"group_type": types.StringType,
+								"interface":  types.StringType,
+								"log":        types.BoolType,
+								"log_prefix": types.StringType,
+								"service":    types.StringType,
+								"states": types.ListType{
+									ElemType: types.StringType,
+								},
+								"type": types.StringType,
 							},
 						},
-						"outbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
-									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
-									},
-									"type": types.StringType,
+						Required: true,
+					},
+					"outbound": schema.ListAttribute{
+						ElementType: types.ObjectType{
+							AttrTypes: map[string]attr.Type{
+								"action":  types.StringType,
+								"active":  types.BoolType,
+								"comment": types.StringType,
+								"environments": types.ListType{
+									ElemType: types.StringType,
 								},
+								"group":      types.StringType,
+								"group_type": types.StringType,
+								"interface":  types.StringType,
+								"log":        types.BoolType,
+								"log_prefix": types.StringType,
+								"service":    types.StringType,
+								"states": types.ListType{
+									ElemType: types.StringType,
+								},
+								"type": types.StringType,
 							},
 						},
+						Required: true,
 					},
 				},
 			},
-			"id": {
+			//},
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Rule identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *rulesetDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -174,7 +170,7 @@ type rulesetDataSourceData struct {
 func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Ruleset
 	var rulesetName string
-	
+
 	req.Config.GetAttribute(ctx, path.Root("name"), &rulesetName)
 
 	res, statusCode, err := d.p.dog.GetRulesets(nil)
@@ -202,7 +198,7 @@ func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	if filteredRulesets == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned no results."))
-	} 
+	}
 	if len(filteredRulesets) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned more than one result."))
 	}
@@ -210,7 +206,7 @@ func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	ruleset := filteredRulesets[0] 
+	ruleset := filteredRulesets[0]
 	// Set state
 	state = ApiToRuleset(ctx, ruleset)
 	diags := resp.State.Set(ctx, &state)

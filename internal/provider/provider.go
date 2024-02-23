@@ -7,10 +7,9 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
@@ -31,8 +30,9 @@ type (
 
 var (
 	_ provider.Provider             = (*dogProvider)(nil)
-	_ provider.ProviderWithMetadata = (*dogProvider)(nil)
+	//_ provider.ProviderWithMetadata = (*dogProvider)(nil)
 )
+
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
@@ -46,22 +46,19 @@ func (p *dogProvider) Metadata(_ context.Context, req provider.MetadataRequest, 
 	resp.TypeName = "dog"
 }
 
-func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"api_endpoint": {
+func (*dogProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"api_endpoint": schema.StringAttribute{
 				MarkdownDescription: "API endpoint URL",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"api_token": {
+			"api_token": schema.StringAttribute{
 				MarkdownDescription: "API Key",
 				Optional:            true,
-				Type:                types.StringType,
-				Sensitive:           true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {

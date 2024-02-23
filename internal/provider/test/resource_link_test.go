@@ -22,9 +22,9 @@ func TestAccDogLink_Basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "address_handling", "union"),
-					resource.TestCheckResourceAttr(resourceName, "connection.port", "5673"),
-					resource.TestCheckResourceAttr(resourceName, "connection.%", "7"),
-					resource.TestCheckResourceAttr(resourceName, "connection.ssl_options.%", "6"),
+					resource.TestCheckResourceAttr(resourceName, "dog_connection.port", "5673"),
+					resource.TestCheckResourceAttr(resourceName, "dog_connection.%", "7"),
+					resource.TestCheckResourceAttr(resourceName, "dog_connection.ssl_options.%", "6"),
 				),
 			},
 			{
@@ -40,7 +40,7 @@ func testAccDogLinkConfig_basic(resourceName, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
   address_handling = "union"
-  connection = {
+  dog_connection = {
     api_port = 15672
     host = "dog-broker.test.domain"
     password = "apassword"

@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -34,48 +37,58 @@ func (*serviceResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_service"
 }
 
-func (*serviceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*serviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Service data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"services": {
+			"services": schema.ListNestedAttribute{
 				MarkdownDescription: "List of Services",
-				Required:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"protocol": {
-						MarkdownDescription: "Service protocol",
-						Required:            true,
-						Type:                types.StringType,
-					},
-					"ports": {
-						MarkdownDescription: "Service ports",
-						Required:            true,
-						Type: types.ListType{
-							ElemType: types.StringType,
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"protocol": schema.StringAttribute{
+							MarkdownDescription: "Service protocol",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.Any(
+									stringvalidator.OneOf("tcp","udp","icmp","udplite","esp","ah","sctp"),
+									stringvalidator.RegexMatches(
+										regexp.MustCompile(`^[0-9]*$`), "Must be numeric",
+									),
+								),
+
+							},
+						},
+						"ports": schema.ListAttribute{
+							MarkdownDescription: "Service ports",
+							Required:            true,
+							ElementType: types.StringType,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.RegexMatches( regexp.MustCompile(`^[0-9:]*$`), "Must be numeric or : (to indicate a range)",
+								)),
+							},
 						},
 					},
-				}),
+				},
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Service name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"version": {
+			"version": schema.Int64Attribute{
 				MarkdownDescription: "Service version",
 				Optional:            true,
-				Type:                types.Int64Type,
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Service identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
