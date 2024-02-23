@@ -1,6 +1,6 @@
 module dog-import
 
-go 1.18
+go 1.21
 
 require github.com/relaypro-open/dog_api_golang v0.0.0-20240209233104-4a472c16e9af
 

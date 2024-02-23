@@ -1,6 +1,6 @@
 module terraform-provider-dog
 
-go 1.20
+go 1.21
 
 //replace github.com/relaypro-open/dog_api_golang => /home/dgulino/Documents/workspace/dog_api_golang
 
@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.29.0
 	github.com/ledongthuc/goterators v1.0.2
-	github.com/relaypro-open/dog_api_golang v0.0.0-20240222225046-31fc6e3fc5c7
+	github.com/relaypro-open/dog_api_golang v1.0.1-0.20240223155142-c1f80179f2ab
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 )
 
@@ -28,7 +28,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/go-resty/resty/v2 v2.7.0 // indirect
+	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/russross/blackfriday v1.6.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
