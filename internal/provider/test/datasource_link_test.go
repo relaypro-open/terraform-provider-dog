@@ -26,7 +26,7 @@ func testAccDogLinkDataSourceConfig(configurableAttribute string) string {
 	return fmt.Sprintf(`
 resource "dog_link" %[1]q {
   address_handling = "union"
-  connection = {
+  dog_connection = {
     api_port = 15672
     host = "dog-broker.test.domain"
     password = "apassword"

@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -36,83 +38,173 @@ func (*rulesetResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_ruleset"
 }
 
-func (*rulesetResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Ruleset data source",
+
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "ruleset name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"profile_id": {
+			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "profile id",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"rules": {
+			"rules": schema.SingleNestedAttribute{
 				MarkdownDescription: "Rule rules",
-				Required:            true,
-				Type: types.ObjectType{
-					AttrTypes: map[string]attr.Type{
-						"inbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
+				Optional:            true,
+				Attributes: map[string]schema.Attribute{
+					"inbound": schema.ListNestedAttribute{
+						Required: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"action": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"ACCEPT",
+										"DROP",
+										"REJECT")},
+								},
+								"active": schema.BoolAttribute{
+									Required: true,
+								},
+								"comment": schema.StringAttribute{
+									Required: true,
+								},
+								"environments": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+								},
+								"group": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 37),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
 									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
+								},
+								"group_type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
+								},
+								"interface": schema.StringAttribute{
+									Required: true,
+								},
+								"log": schema.BoolAttribute{
+									Required: true,
+								},
+								"log_prefix": schema.StringAttribute{
+									Required: true,
+								},
+								"service": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthAtLeast(1),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
 									},
-									"type": types.StringType,
+								},
+								"states": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+									Validators: []validator.List{
+										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
+									},
+								},
+								"type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"BASIC", 
+									 	//"CONNLIMIT",  //TODO
+										//"RECENT"      //TODO
+									)},
 								},
 							},
 						},
-						"outbound": types.ListType{
-							ElemType: types.ObjectType{
-								AttrTypes: map[string]attr.Type{
-									"action":  types.StringType,
-									"active":  types.BoolType,
-									"comment": types.StringType,
-									"environments": types.ListType{
-										ElemType: types.StringType,
+					},
+					"outbound": schema.ListNestedAttribute{
+						Required: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"action": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"ACCEPT",
+										"DROP",
+										"REJECT")},
+								},
+								"active": schema.BoolAttribute{
+									Required: true,
+								},
+								"comment": schema.StringAttribute{
+									Required: true,
+								},
+								"environments": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+								},
+								"group": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(1, 37),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
 									},
-									"group":      types.StringType,
-									"group_type": types.StringType,
-									"interface":  types.StringType,
-									"log":        types.BoolType,
-									"log_prefix": types.StringType,
-									"order":      types.Int64Type,
-									"service":    types.StringType,
-									"states": types.ListType{
-										ElemType: types.StringType,
+								},
+								"group_type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
+								},
+								"interface": schema.StringAttribute{
+									Required: true,
+								},
+								"log": schema.BoolAttribute{
+									Required: true,
+								},
+								"log_prefix": schema.StringAttribute{
+									Required: true,
+								},
+								"service": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{
+										stringvalidator.LengthAtLeast(1),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^[A-Za-z0-9_.-]*$`), "Must begin with alphanumeric, _, ., -",
+										),
 									},
-									"type": types.StringType,
+								},
+								"states": schema.ListAttribute{
+									ElementType: types.StringType,
+									Required: true,
+									Validators: []validator.List{
+										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
+									},
+								},
+								"type": schema.StringAttribute{
+									Required: true,
+									Validators: []validator.String{stringvalidator.OneOf(
+										"BASIC", 
+									 	//"CONNLIMIT",  //TODO
+										//"RECENT"      //TODO
+									)},
 								},
 							},
 						},
 					},
 				},
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Rule identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *rulesetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -160,7 +252,6 @@ type rulesetResourceRule struct {
 	Interface    types.String `tfsdk:"interface"`
 	Log          types.Bool   `tfsdk:"log"`
 	LogPrefix    types.String `tfsdk:"log_prefix"`
-	Order        types.Int64  `tfsdk:"order"`
 	Service      types.String `tfsdk:"service"`
 	States       []string     `tfsdk:"states"`
 	Type         types.String `tfsdk:"type"`
@@ -179,7 +270,6 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    inbound_rule.Interface.ValueString(),
 			Log:          inbound_rule.Log.ValueBool(),
 			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
-			Order:        int(inbound_rule.Order.ValueInt64()),
 			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
 			Type:         inbound_rule.Type.ValueString(),
@@ -198,7 +288,6 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    outbound_rule.Interface.ValueString(),
 			Log:          outbound_rule.Log.ValueBool(),
 			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
-			Order:        int(outbound_rule.Order.ValueInt64()),
 			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
 			Type:         outbound_rule.Type.ValueString(),
@@ -243,7 +332,6 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    inbound_rule.Interface.ValueString(),
 			Log:          inbound_rule.Log.ValueBool(),
 			LogPrefix:    inbound_rule.LogPrefix.ValueString(),
-			Order:        int(inbound_rule.Order.ValueInt64()),
 			Service:      inbound_rule.Service.ValueString(),
 			States:       inbound_rule.States,
 			Type:         inbound_rule.Type.ValueString(),
@@ -262,7 +350,6 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 			Interface:    outbound_rule.Interface.ValueString(),
 			Log:          outbound_rule.Log.ValueBool(),
 			LogPrefix:    outbound_rule.LogPrefix.ValueString(),
-			Order:        int(outbound_rule.Order.ValueInt64()),
 			Service:      outbound_rule.Service.ValueString(),
 			States:       outbound_rule.States,
 			Type:         outbound_rule.Type.ValueString(),
@@ -311,7 +398,6 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 			Interface:    types.StringValue(inbound_rule.Interface),
 			Log:          types.BoolValue(inbound_rule.Log),
 			LogPrefix:    types.StringValue(inbound_rule.LogPrefix),
-			Order:        types.Int64Value(int64(inbound_rule.Order)),
 			Service:      types.StringValue(inbound_rule.Service),
 			States:       inbound_rule.States,
 			Type:         types.StringValue(inbound_rule.Type),
@@ -330,7 +416,6 @@ func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 			Interface:    types.StringValue(outbound_rule.Interface),
 			Log:          types.BoolValue(outbound_rule.Log),
 			LogPrefix:    types.StringValue(outbound_rule.LogPrefix),
-			Order:        types.Int64Value(int64(outbound_rule.Order)),
 			Service:      types.StringValue(outbound_rule.Service),
 			States:       outbound_rule.States,
 			Type:         types.StringValue(outbound_rule.Type),

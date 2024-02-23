@@ -13,7 +13,7 @@ func TestAccDogHost_Basic(t *testing.T) {
 	randomName := "tf-test-host-" + acctest.RandString(5)
 	resourceName := resourceType + "." + randomName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -24,6 +24,17 @@ func TestAccDogHost_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "environment", "*"),
 					resource.TestCheckResourceAttr(resourceName, "hostkey", "1726819861d5245b0afcd25127a7b181a5365620"),
+					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\",\"key2\":\"value2\"}"),
+				),
+			},
+			{
+				Config: testAccDogHostConfig_basic_remove_var(resourceType, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "environment", "*"),
+					resource.TestCheckResourceAttr(resourceName, "hostkey", "1726819861d5245b0afcd25127a7b181a5365620"),
+					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\"}"),
 				),
 			},
 			{
@@ -38,14 +49,30 @@ func TestAccDogHost_Basic(t *testing.T) {
 func testAccDogHostConfig_basic(resourceType, resourceName string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q
   environment = "*"
   group = "dog_test"
   hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
   location = "*"
-  vars = {
-	  test = "dog_host"
-  }
+  name = %[2]q
+  vars = jsonencode({
+	  key = "value"
+	  key2 = "value2"
+  })
+}
+`, resourceType, resourceName)
+}
+
+func testAccDogHostConfig_basic_remove_var(resourceType, resourceName string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  environment = "*"
+  group = "dog_test"
+  hostkey = "1726819861d5245b0afcd25127a7b181a5365620"
+  location = "*"
+  name = %[2]q
+  vars = jsonencode({
+	  key = "value"
+  })
 }
 `, resourceType, resourceName)
 }

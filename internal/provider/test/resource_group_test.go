@@ -13,7 +13,7 @@ func TestAccDogGroup_Basic(t *testing.T) {
 	randomName := "tf_test_group_" + acctest.RandString(5)
 	resourceName := name + "." + randomName
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
@@ -25,6 +25,18 @@ func TestAccDogGroup_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", randomName),
 					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
 					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
+					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\",\"key2\":\"value2\"}"),
+				),
+			},
+			{
+				Config: testAccDogGroupConfig_basic_remove_var(name, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
+					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
+					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\"}"),
 				),
 			},
 			{
@@ -52,7 +64,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "ssh-tcp-22"
         states = []
         type = "BASIC"
@@ -67,7 +78,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "2"
         service = "any"
         states = []
         type = "BASIC"
@@ -84,7 +94,6 @@ resource "dog_ruleset" "resource_group" {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "any"
         states = []
         type = "BASIC"
@@ -118,9 +127,37 @@ resource %[1]q %[2]q {
       sgid = "sg-test"
     }
   ]
-  vars = {
-	  test = "dog_group"
-  }
+  vars = jsonencode({
+	  key = "value"
+	  key2 = "value2"
+  })
+}
+`, name, randomName)
+	gr := testAccDogGroupRulesetResourceConfig()
+	gp := testAccDogGroupProfileResourceConfig()
+
+	to := gr + gp + g
+	return to
+
+}
+
+func testAccDogGroupConfig_basic_remove_var(name, randomName string) string {
+	g := fmt.Sprintf(`
+resource %[1]q %[2]q {
+  description = ""
+  name = %[2]q
+  profile_id = dog_profile.resource_group.id
+  profile_name = dog_profile.resource_group.name
+  profile_version = "latest"
+  ec2_security_group_ids = [
+    { 
+      region = "us-test-region"
+      sgid = "sg-test"
+    }
+  ]
+  vars = jsonencode({
+	  key = "value"
+  })
 }
 `, name, randomName)
 	gr := testAccDogGroupRulesetResourceConfig()

@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -34,50 +36,52 @@ func (*hostResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_host"
 }
 
-func (*hostResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Host data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"environment": {
+			"environment": schema.StringAttribute{
 				MarkdownDescription: "Host environment",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"group": {
-				MarkdownDescription: "Host group",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"hostkey": {
-				MarkdownDescription: "Host key",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"location": {
-				MarkdownDescription: "Host location",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"name": {
-				MarkdownDescription: "Host name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for fact",
-				Type:                types.MapType{ElemType: types.StringType},
 				Optional:            true,
 			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Host identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+			"group": schema.StringAttribute{
+				MarkdownDescription: "Host group",
+				Optional:            true,
+			},
+			"hostkey": schema.StringAttribute{
+				MarkdownDescription: "Host key",
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(10, 256),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9+%_.-](.*)$`),
+						"must start with alphanumeric characters, %, _, ., -",
+					),
 				},
-				Type: types.StringType,
+			},
+			"location": schema.StringAttribute{
+				MarkdownDescription: "Host location",
+				Optional:            true,
+			},
+			"name": schema.StringAttribute{
+				MarkdownDescription: "Host name",
+				Optional:            true,
+			},
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
+				Optional:            true,
+				//Required:            true,
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Host identifier",
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *hostResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -110,7 +114,55 @@ type hostResourceData struct {
 	HostKey     string            `tfsdk:"hostkey"`
 	Location    string            `tfsdk:"location"`
 	Name        string            `tfsdk:"name"`
-	Vars        map[string]string `tfsdk:"vars"`
+	Vars        *string            `tfsdk:"vars"`
+}
+
+func HostToApiHost(plan Host) api.Host {
+	if plan.Vars.ValueString() != "" {
+		newHost := api.Host{
+			Environment: plan.Environment.ValueString(),
+			Group:       plan.Group.ValueString(),
+			HostKey:     plan.HostKey.ValueString(),
+			Location:    plan.Location.ValueString(),
+			Name:        plan.Name.ValueString(),
+			Vars:        plan.Vars.ValueString(),
+		}
+		return newHost
+	} else {
+		newHost := api.Host{
+			Environment: plan.Environment.ValueString(),
+			Group:       plan.Group.ValueString(),
+			HostKey:     plan.HostKey.ValueString(),
+			Location:    plan.Location.ValueString(),
+			Name:        plan.Name.ValueString(),
+		}
+		return newHost
+	}
+}
+
+func ApiToHost(host api.Host) Host {
+	if host.Vars != "" {
+		h := Host{
+			Environment: types.StringValue(host.Environment),
+			Group:       types.StringValue(host.Group),
+			ID:          types.StringValue(host.ID),
+			HostKey:     types.StringValue(host.HostKey),
+			Location:    types.StringValue(host.Location),
+			Name:        types.StringValue(host.Name),
+			Vars:        types.StringValue(host.Vars),
+		}
+		return h
+	} else {
+		h := Host{
+			Environment: types.StringValue(host.Environment),
+			Group:       types.StringValue(host.Group),
+			ID:          types.StringValue(host.ID),
+			HostKey:     types.StringValue(host.HostKey),
+			Location:    types.StringValue(host.Location),
+			Name:        types.StringValue(host.Name),
+		}
+		return h
+	}
 }
 
 func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
@@ -120,7 +172,7 @@ func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
-		Vars:        plan.Vars,
+		Vars:        *plan.Vars,
 	}
 	return newHost
 }
@@ -132,34 +184,16 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 		HostKey:     plan.HostKey,
 		Location:    plan.Location,
 		Name:        plan.Name,
-		Vars:        plan.Vars,
+		Vars:        *plan.Vars,
 	}
 	return newHost
-}
-
-func ApiToHost(host api.Host) Host {
-	newVars := map[string]string{}
-	for k, v := range host.Vars {
-		newVars[k] = v
-	}
-
-	h := Host{
-		Environment: types.StringValue(host.Environment),
-		Group:       types.StringValue(host.Group),
-		ID:          types.StringValue(host.ID),
-		HostKey:     types.StringValue(host.HostKey),
-		Location:    types.StringValue(host.Location),
-		Name:        types.StringValue(host.Name),
-		Vars:        newVars,
-	}
-
-	return h
 }
 
 func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Host
 
-	var plan hostResourceData
+	//var plan hostResourceData
+	var plan Host
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
@@ -167,9 +201,9 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	newHost := HostToCreateRequest(plan)
+	newHost := HostToApiHost(plan)
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	host, statusCode, err := r.p.dog.CreateHost(newHost, nil)
+	host, statusCode, err := r.p.dog.CreateHostEncode(newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	if err != nil {
@@ -208,7 +242,7 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	host, statusCode, err := r.p.dog.GetHost(hostID, nil)
+	host, statusCode, err := r.p.dog.GetHostEncode(hostID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -235,15 +269,15 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	hostID := state.ID.ValueString()
 
-	var plan hostResourceData
+	var plan Host
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newHost := HostToUpdateRequest(plan)
-	host, statusCode, err := r.p.dog.UpdateHost(hostID, newHost, nil)
+	newHost := HostToApiHost(plan)
+	host, statusCode, err := r.p.dog.UpdateHostEncode(hostID, newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	state = ApiToHost(host)

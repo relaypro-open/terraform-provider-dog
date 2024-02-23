@@ -27,39 +27,40 @@ func testAccDogFactDataSourceConfig(name string) string {
 resource "dog_fact" %[1]q {
   name = %[1]q 
   groups = {
-	  "all" = {
-	   vars = {
-			key = "value"
-			key2 = "value2"
-		}
-		hosts = {
-		  host1 = {
-			key = "value",
-			key2 = "value2"
-		  }
-		  host2 = {
-			key2 = "value2"
-		  }
+		all= {
+			vars = jsonencode({
+				key = "value",
+				key2 = "value2"
+			}),
+			hosts = {
+				host1 = {
+					key = "value",
+					key2 = "value2"
+				},
+				host2 = {
+					key2 = "value2"
+				}
+			},
+			children = [
+				"test"
+			]
 		},
-		children = [
-			"test"
-		]
-	 },
-	 "app" = {
-		vars = {
-			key = "value"
+		app = {
+			vars = jsonencode({
+				key = "value"
+			}),
+			hosts = {
+				host1 = {
+					key = "value"
+				}
+			},
+			children = [
+				"test2"
+			]
 		}
-		hosts = {
-		  host1 = {
-			key = "value"
-		  }
-		},
-		children = [
-			"test2"
-		]
-	 }
-  }
+	}
 }
+
 
 data "dog_fact" %[1]q {
   name = dog_fact.%[1]s.name 

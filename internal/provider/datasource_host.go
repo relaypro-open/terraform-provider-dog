@@ -5,9 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
@@ -27,7 +26,7 @@ type (
 		HostKey     types.String      `tfsdk:"hostkey"`
 		Location    types.String      `tfsdk:"location"`
 		Name        types.String      `tfsdk:"name"`
-		Vars        map[string]string `tfsdk:"vars"`
+		Vars        types.String      `tfsdk:"vars"`
 	}
 )
 
@@ -43,50 +42,44 @@ func (*hostDataSource) Metadata(ctx context.Context, req datasource.MetadataRequ
 	resp.TypeName = req.ProviderTypeName + "_host"
 }
 
-func (*hostDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*hostDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Host data source",
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"environment": {
+			"environment": schema.StringAttribute{
 				MarkdownDescription: "Host environment",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"group": {
+			"group": schema.StringAttribute{
 				MarkdownDescription: "Host group",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"hostkey": {
+			"hostkey": schema.StringAttribute{
 				MarkdownDescription: "Host key",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"location": {
+			"location": schema.StringAttribute{
 				MarkdownDescription: "Host location",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Host name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for fact",
-				Type:                types.MapType{ElemType: types.StringType},
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Host identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *hostDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -124,7 +117,7 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	req.Config.GetAttribute(ctx, path.Root("hostkey"), &hostHostkey)
 	req.Config.GetAttribute(ctx, path.Root("name"), &hostName)
 
-	res, statusCode, err := d.p.dog.GetHosts(nil)
+	res, statusCode, err := d.p.dog.GetHostsEncode(nil)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read hosts, got error: %s", err))
 	}

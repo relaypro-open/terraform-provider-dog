@@ -5,8 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
@@ -27,7 +26,7 @@ type (
 	}
 
 	FactGroup struct {
-		Vars     map[string]string            `tfsdk:"vars"`
+		Vars     *string                 `tfsdk:"vars"`
 		Hosts    map[string]map[string]string `tfsdk:"hosts"`
 		Children []string                     `tfsdk:"children"`
 	}
@@ -45,46 +44,39 @@ func (*factDataSource) Metadata(ctx context.Context, req datasource.MetadataRequ
 	resp.TypeName = req.ProviderTypeName + "_fact"
 }
 
-func (*factDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*factDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Fact data source",
 
-		Attributes: map[string]tfsdk.Attribute{
-			// This description is used by the documentation generator and the language server.
-			"groups": {
-				MarkdownDescription: "List of fact groups",
-				Optional:            true,
-				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
-					"vars": {
-						MarkdownDescription: "Arbitrary collection of variables used for fact",
-						Optional:            true,
-						Type:                types.MapType{ElemType: types.StringType},
+		Attributes: map[string]schema.Attribute{
+			"groups": schema.MapNestedAttribute{
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"vars": schema.StringAttribute{
+							MarkdownDescription: "json string of vars",
+							Required:            true,
+						},
+						"hosts": schema.MapAttribute{
+							Required:            true,
+							ElementType:         types.MapType{ElemType: types.StringType},
+						},
+						"children": schema.ListAttribute{
+							Required:            true,
+							ElementType:         types.StringType,
+						},
 					},
-					"hosts": {
-						MarkdownDescription: "Arbitrary collection of hosts used for fact",
-						Optional:            true,
-						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
-					},
-					"children": {
-						MarkdownDescription: "fact group children",
-						Optional:            true,
-						Type:                types.ListType{ElemType: types.StringType},
-					},
-				}),
+				},
+				Optional: true,
 			},
-			"name": {
-				MarkdownDescription: "Fact name",
+			"name": schema.StringAttribute{
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Fact identifier",
-				Type: types.StringType,
+			"id": schema.StringAttribute{
+				Optional:            true,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *factDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
@@ -122,7 +114,7 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	req.Config.GetAttribute(ctx, path.Root("name"), &factName)
 
-	res, statusCode, err := d.p.dog.GetFacts(nil)
+	res, statusCode, err := d.p.dog.GetFactsEncode(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -146,7 +138,7 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	if filteredFacts == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned no results."))
-	} 
+	}
 	if len(filteredFacts) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned more than one result."))
 	}
@@ -154,7 +146,7 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	fact := filteredFacts[0] 
+	fact := filteredFacts[0]
 	// Set state
 	state = ApiToFact(fact)
 	diags := resp.State.Set(ctx, &state)
