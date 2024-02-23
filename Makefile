@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog
 BINARY=terraform-provider-${NAME}
-VERSION=v1.0.29
+VERSION=v1.0.30
 OS_ARCH=linux_amd64
 
 default: install
