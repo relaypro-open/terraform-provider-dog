@@ -3,12 +3,13 @@ HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog
 BINARY=terraform-provider-${NAME}
-VERSION=0.0.1
+VERSION=v1.0.29
 OS_ARCH=linux_amd64
 
 default: install
 
 build:
+	go mod vendor
 	go build -o ./bin/${BINARY}
 
 debug-build:
@@ -32,7 +33,12 @@ release:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
 
 github_release:
-	goreleaser release --rm-dist
+	git tag ${VERSION}
+	git push --tags --force
+
+delete_release:
+	git tag -d ${VERSION}
+	 git push --delete origin ${VERSION}
 
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
@@ -43,7 +49,7 @@ test:
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc:
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m -count=1
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120s -count=1
 
 update_api:
 	go get github.com/relaypro-open/dog_api_golang@main

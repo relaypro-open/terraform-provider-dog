@@ -7,10 +7,9 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
+	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
@@ -31,8 +30,9 @@ type (
 
 var (
 	_ provider.Provider             = (*dogProvider)(nil)
-	_ provider.ProviderWithMetadata = (*dogProvider)(nil)
+	//_ provider.ProviderWithMetadata = (*dogProvider)(nil)
 )
+
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
@@ -46,22 +46,19 @@ func (p *dogProvider) Metadata(_ context.Context, req provider.MetadataRequest, 
 	resp.TypeName = "dog"
 }
 
-func (*dogProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"api_endpoint": {
+func (*dogProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"api_endpoint": schema.StringAttribute{
 				MarkdownDescription: "API endpoint URL",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"api_token": {
+			"api_token": schema.StringAttribute{
 				MarkdownDescription: "API Key",
 				Optional:            true,
-				Type:                types.StringType,
-				Sensitive:           true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -76,7 +73,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	// If practitioner provided a configuration value for any of the
 	// attributes, it must be a known value.
 
-	if config.API_Endpoint.Unknown {
+	if config.API_Endpoint.IsUnknown() {
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Endpoint",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API endpoint. "+
@@ -84,7 +81,7 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 		)
 	}
 
-	if config.Api_Token.Unknown {
+	if config.Api_Token.IsUnknown() {
 		resp.Diagnostics.AddError(
 			"Unknown Dog API Key",
 			"The provider cannot create the Dog API client as there is an unknown configuration value for the Dog API key. "+
@@ -113,8 +110,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_endpoint == "" || api_token == "" {
 		resp.Diagnostics.AddError(
 			"config values",
-			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.Value)+
-				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.Value)+
+			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.ValueString() )+
+				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.ValueString() )+
 				fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
 				fmt.Sprintf("api_token: %+v\n", api_token),
 		)

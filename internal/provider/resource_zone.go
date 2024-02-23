@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -34,39 +37,52 @@ func (*zoneResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_zone"
 }
 
-func (*zoneResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*zoneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Zone data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"ipv4_addresses": {
+			"ipv4_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv4 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
+				Optional:            true,
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						regexp.MustCompile(`\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\b`), "Must be valid IPv4 address"),
+					),
 				},
 			},
-			"ipv6_addresses": {
+			"ipv6_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv6 Addresses",
-				Required:            true,
-				Type: types.ListType{
-					ElemType: types.StringType,
+				Optional:            true,
+				ElementType: types.StringType,
+				Validators: []validator.List{
+					listvalidator.ValueStringsAre(stringvalidator.RegexMatches(
+						//regexp.MustCompile(`((([0-9a-f]{0,4})\:){2,7})([0-9a-f]{0,4})`), "Must be valid IPv6 address and lowercase"),
+						regexp.MustCompile(`^s*((([0-9a-f]{1,4}:){7}([0-9a-f]{1,4}|:))|(([0-9a-f]{1,4}:){6}(:[0-9a-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9a-f]{1,4}:){5}(((:[0-9a-f]{1,4}){1,2})|:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9a-f]{1,4}:){4}(((:[0-9a-f]{1,4}){1,3})|((:[0-9a-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9a-f]{1,4}:){3}(((:[0-9a-f]{1,4}){1,4})|((:[0-9a-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9a-f]{1,4}:){2}(((:[0-9a-f]{1,4}){1,5})|((:[0-9a-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9a-f]{1,4}:){1}(((:[0-9a-f]{1,4}){1,6})|((:[0-9a-f]{1,4}){0,4}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:[0-9a-f]{1,4}){1,7})|((:[0-9a-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?$`), "Must be valid IPv6 address AND lowercase"),
+					),
 				},
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Zone name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Zone identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 28),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+						"must start with alphanumeric characters, %, _, ., -",
+					),
 				},
-				Type: types.StringType,
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Zone identifier",
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *zoneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -143,10 +159,10 @@ func ApiToZone(zone api.Zone) Zone {
 		newIpv6Addresses = append(newIpv6Addresses, ipv6)
 	}
 	h := Zone{
-		ID:            types.String{Value: zone.ID},
+		ID:            types.StringValue(zone.ID),
 		IPv4Addresses: newIpv4Addresses,
 		IPv6Addresses: newIpv6Addresses,
-		Name:          types.String{Value: zone.Name},
+		Name:          types.StringValue(zone.Name),
 	}
 	return h
 }
@@ -199,7 +215,7 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -228,7 +244,7 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 
 	var plan zoneResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -275,7 +291,7 @@ func (r *zoneResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	zoneID := state.ID.Value
+	zoneID := state.ID.ValueString()
 	zone, statusCode, err := r.p.dog.DeleteZone(zoneID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

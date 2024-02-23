@@ -4,15 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
+	"github.com/davecgh/go-spew/spew"
 )
 
 type (
@@ -34,46 +37,52 @@ func (*factResource) Metadata(ctx context.Context, req resource.MetadataRequest,
 	resp.TypeName = req.ProviderTypeName + "_fact"
 }
 
-func (*factResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"groups": {
-				MarkdownDescription: "List of fact groups",
-				Required:            true,
-				Attributes: tfsdk.MapNestedAttributes(map[string]tfsdk.Attribute{
-					"vars": {
-						MarkdownDescription: "Arbitrary collection of variables used for fact",
-						Required:            true,
-						Type:                types.MapType{ElemType: types.StringType},
+			//"groups": schema.MapAttribute{
+			//ElementType: types.StringType,
+			//"groups": schema.ListNestedAttribute{
+			//NestedObject: schema.NestedAttributeObject{
+			//Attributes: map[string]schema.Attribute{
+			"groups": schema.MapNestedAttribute{
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"vars": schema.StringAttribute{
+							MarkdownDescription: "json string of vars",
+							Optional:            true,
+						},
+						"hosts": schema.MapAttribute{
+							Required:            true,
+							ElementType:         types.MapType{ElemType: types.StringType},
+						},
+						"children": schema.ListAttribute{
+							Required:            true,
+							ElementType:         types.StringType,
+						},
 					},
-					"hosts": {
-						MarkdownDescription: "Arbitrary collection of hosts used for fact",
-						Required:            true,
-						Type:                types.MapType{ElemType: types.MapType{ElemType: types.StringType}},
-					},
-					"children": {
-						MarkdownDescription: "fact group children",
-						Required:            true,
-						Type:                types.ListType{ElemType: types.StringType},
-					},
-				}),
-			},
-			"name": {
-				MarkdownDescription: "Fact name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Fact identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
 				},
-				Type: types.StringType,
+				Required:            true,
+			},
+			"name": schema.StringAttribute{
+				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 256),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z_](0-9A-Za-z_)*`),
+						"must start with alphanumeric characters, _, and -",
+					),
+				},
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *factResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -105,19 +114,27 @@ type factResourceData struct {
 	Name   string                     `tfsdk:"name"`
 }
 
-func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
+func FactToApiFact(plan Fact) api.Fact {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.FactGroup{
-			Vars:     group.Vars,
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &api.FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &api.FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
-	newFact := api.FactCreateRequest{
+	newFact := api.Fact{
 		Groups: newGroups,
-		Name:   plan.Name,
+		Name:   plan.Name.ValueString(),
 	}
 	return newFact
 }
@@ -125,12 +142,20 @@ func FactToCreateRequest(plan factResourceData) api.FactCreateRequest {
 func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 	newGroups := map[string]*api.FactGroup{}
 	for name, group := range plan.Groups {
-		g := &api.FactGroup{
-			Vars:     group.Vars,
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &api.FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &api.FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
 	newFact := api.FactUpdateRequest{
 		Groups: newGroups,
@@ -142,17 +167,25 @@ func FactToUpdateRequest(plan factResourceData) api.FactUpdateRequest {
 func ApiToFact(fact api.Fact) Fact {
 	newGroups := map[string]*FactGroup{}
 	for name, group := range fact.Groups {
-		g := &FactGroup{
-			Vars:     group.Vars,
-			Hosts:    group.Hosts,
-			Children: group.Children,
+		if group.Vars == nil {
+			g := &FactGroup{
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
+		} else {
+			g := &FactGroup{
+				Vars:     group.Vars,
+				Hosts:    group.Hosts,
+				Children: group.Children,
+			}
+			newGroups[name] = g
 		}
-		newGroups[name] = g
 	}
 	h := Fact{
-		ID:     types.String{Value: fact.ID},
+		ID:     types.StringValue(fact.ID),
 		Groups: newGroups,
-		Name:   types.String{Value: fact.Name},
+		Name:   types.StringValue(fact.Name),
 	}
 
 	return h
@@ -161,19 +194,19 @@ func ApiToFact(fact api.Fact) Fact {
 func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Fact
 
-	var plan factResourceData
+	var plan Fact
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	newFact := FactToCreateRequest(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	fact, statusCode, err := r.p.dog.CreateFact(newFact, nil)
-	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
-	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
+	
+	tflog.Debug(ctx, spew.Sprint("ZZZfact plan: %#v", plan))
+	newFact := FactToApiFact(plan)
+	tflog.Debug(ctx, spew.Sprint("ZZZfact newFact: %#v", newFact))
+	fact, statusCode, err := r.p.dog.CreateFactEncode(newFact, nil)
+	tflog.Debug(ctx, spew.Sprint("ZZZfact fact: %#v", fact))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
 	}
@@ -184,6 +217,7 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	state = ApiToFact(fact)
+	tflog.Debug(ctx, spew.Sprint("ZZZfact state: %#v", state))
 
 	plan.ID = state.ID
 
@@ -206,11 +240,11 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
-	fact, statusCode, err := r.p.dog.GetFact(factID, nil)
+	fact, statusCode, err := r.p.dog.GetFactEncode(factID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -235,17 +269,17 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 
-	var plan factResourceData
+	var plan Fact
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newFact := FactToUpdateRequest(plan)
-	fact, statusCode, err := r.p.dog.UpdateFact(factID, newFact, nil)
+	newFact := FactToApiFact(plan)
+	fact, statusCode, err := r.p.dog.UpdateFactEncode(factID, newFact, nil)
 	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	state = ApiToFact(fact)
@@ -282,7 +316,7 @@ func (r *factResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	factID := state.ID.Value
+	factID := state.ID.ValueString()
 	fact, statusCode, err := r.p.dog.DeleteFact(factID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -34,48 +37,58 @@ func (*serviceResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_service"
 }
 
-func (*serviceResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*serviceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Service data source",
+
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"services": {
+			"services": schema.ListNestedAttribute{
 				MarkdownDescription: "List of Services",
-				Required:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"protocol": {
-						MarkdownDescription: "Service protocol",
-						Required:            true,
-						Type:                types.StringType,
-					},
-					"ports": {
-						MarkdownDescription: "Service ports",
-						Required:            true,
-						Type: types.ListType{
-							ElemType: types.StringType,
+				Optional:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"protocol": schema.StringAttribute{
+							MarkdownDescription: "Service protocol",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.Any(
+									stringvalidator.OneOf("tcp","udp","icmp","udplite","esp","ah","sctp"),
+									stringvalidator.RegexMatches(
+										regexp.MustCompile(`^[0-9]*$`), "Must be numeric",
+									),
+								),
+
+							},
+						},
+						"ports": schema.ListAttribute{
+							MarkdownDescription: "Service ports",
+							Required:            true,
+							ElementType: types.StringType,
+							Validators: []validator.List{
+								listvalidator.ValueStringsAre(stringvalidator.RegexMatches( regexp.MustCompile(`^[0-9:]*$`), "Must be numeric or : (to indicate a range)",
+								)),
+							},
 						},
 					},
-				}),
+				},
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Service name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"version": {
+			"version": schema.Int64Attribute{
 				MarkdownDescription: "Service version",
 				Optional:            true,
-				Type:                types.Int64Type,
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
+				Optional:            true,
 				MarkdownDescription: "Service identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *serviceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -118,7 +131,7 @@ func ServiceToCreateRequest(plan serviceResourceData) api.ServiceCreateRequest {
 	for _, port_protocol := range plan.Services {
 		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: port_protocol.Protocol.Value,
+			Protocol: port_protocol.Protocol.ValueString(),
 		}
 		newServices = append(newServices, pp)
 	}
@@ -136,7 +149,7 @@ func ServiceToUpdateRequest(plan serviceResourceData) api.ServiceUpdateRequest {
 	for _, port_protocol := range plan.Services {
 		pp := &api.PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: port_protocol.Protocol.Value,
+			Protocol: port_protocol.Protocol.ValueString(),
 		}
 		newServices = append(newServices, pp)
 	}
@@ -154,15 +167,15 @@ func ApiToService(service api.Service) Service {
 	for _, port_protocol := range service.Services {
 		pp := &PortProtocol{
 			Ports:    port_protocol.Ports,
-			Protocol: types.String{Value: port_protocol.Protocol},
+			Protocol: types.StringValue(port_protocol.Protocol),
 		}
 		newServices = append(newServices, pp)
 	}
 	h := Service{
-		ID:       types.String{Value: service.ID},
+		ID:       types.StringValue(service.ID),
 		Services: newServices,
-		Name:     types.String{Value: service.Name},
-		Version:  types.Int64{Value: int64(service.Version)},
+		Name:     types.StringValue(service.Name),
+		Version:  types.Int64Value(int64(service.Version)),
 	}
 	return h
 }
@@ -215,7 +228,7 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -244,7 +257,7 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 
 	var plan serviceResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -291,7 +304,7 @@ func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	serviceID := state.ID.Value
+	serviceID := state.ID.ValueString()
 	service, statusCode, err := r.p.dog.DeleteService(serviceID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

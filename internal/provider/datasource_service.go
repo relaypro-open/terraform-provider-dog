@@ -7,9 +7,8 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/ledongthuc/goterators"
@@ -50,48 +49,45 @@ func (*serviceDataSource) Metadata(ctx context.Context, req datasource.MetadataR
 	resp.TypeName = req.ProviderTypeName + "_service"
 }
 
-func (*serviceDataSource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
+func (*serviceDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Service data source",
 
-		Attributes: map[string]tfsdk.Attribute{
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"services": {
+			"services": schema.ListNestedAttribute{
 				MarkdownDescription: "List of Services",
 				Optional:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"protocol": {
-						MarkdownDescription: "Service protocol",
-						Required:            true,
-						Type:                types.StringType,
-					},
-					"ports": {
-						MarkdownDescription: "Service ports",
-						Required:            true,
-						Type: types.ListType{
-							ElemType: types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"protocol": schema.StringAttribute{
+							MarkdownDescription: "Service protocol",
+							Required:            true,
+						},
+						"ports": schema.ListAttribute{
+							MarkdownDescription: "Service ports",
+							Required:            true,
+							ElementType: types.StringType,
 						},
 					},
-				}),
+				},
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Service name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"version": {
+			"version": schema.Int64Attribute{
 				MarkdownDescription: "Service version",
 				Optional:            true,
-				Type:                types.Int64Type,
 			},
-			"id": {
+			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Service identifier",
-				Type: types.StringType,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (d *serviceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {

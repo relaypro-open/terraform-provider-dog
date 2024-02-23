@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -34,66 +36,79 @@ func (*groupResource) Metadata(ctx context.Context, req resource.MetadataRequest
 	resp.TypeName = req.ProviderTypeName + "_group"
 }
 
-func (*groupResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
+func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		Attributes: map[string]schema.Attribute{
 			// This description is used by the documentation generator and the language server.
-			"description": {
+			"description": schema.StringAttribute{
 				MarkdownDescription: "group description",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"name": {
+			"name": schema.StringAttribute{
 				MarkdownDescription: "group name",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 28),
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+						"must start with 'sg-'",
+					),
+				},
 			},
-			"profile_id": {
+			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "group profile id",
-				Required:            true,
-				Type:                types.StringType,
+				Optional:            true,
 			},
-			"profile_name": {
+			"profile_name": schema.StringAttribute{
 				MarkdownDescription: "group profile name",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"profile_version": {
+			"profile_version": schema.StringAttribute{
 				MarkdownDescription: "group profile version",
 				Optional:            true,
-				Type:                types.StringType,
 			},
-			"ec2_security_group_ids": {
+			"ec2_security_group_ids": schema.ListNestedAttribute{
 				MarkdownDescription: "List of EC2 Security Groups to control",
 				Optional:            true,
-				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
-					"region": {
-						MarkdownDescription: "EC2 Region",
-						Required:            true,
-						Type:                types.StringType,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"region": schema.StringAttribute{
+							MarkdownDescription: "EC2 Region",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(9, 256),
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^(.*)-(.*)-(.*)$`),
+									"must be valid region",
+								),
+							},
+						},
+						"sgid": schema.StringAttribute{
+							MarkdownDescription: "EC2 Security Group ID",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthBetween(3, 256),
+								stringvalidator.RegexMatches(
+									regexp.MustCompile(`^sg-(.*)$`),
+									"must start with 'sg-'",
+								),
+							},
+						},
 					},
-					"sgid": {
-						MarkdownDescription: "EC2 Security Group ID",
-						Required:            true,
-						Type:                types.StringType,
-					},
-				}),
+				},
 			},
-			"vars": {
-				MarkdownDescription: "Arbitrary collection of variables used for inventory",
-				Type:                types.MapType{ElemType: types.StringType},
+			"vars": schema.StringAttribute{
+				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
-			"id": {
-				Computed:            true,
+			"id": schema.StringAttribute{
 				MarkdownDescription: "group identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
-				},
-				Type: types.StringType,
+				Optional:            true,
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *groupResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -128,12 +143,81 @@ type groupResourceData struct {
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars                map[string]string                  `tfsdk:"vars"`
+	Vars                *string                       `tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
 	Region string `tfsdk:"region"`
 	SgId   string `tfsdk:"sgid"`
+}
+
+func GroupToApiGroup(plan Group) api.Group {
+	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
+	for _, region_sgid := range plan.Ec2SecurityGroupIds {
+		rs := &api.Ec2SecurityGroupIds{
+			Region: region_sgid.Region.ValueString(),
+			SgId:   region_sgid.SgId.ValueString(),
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+	
+	if plan.Vars.ValueString() != "" {
+		newGroup := api.Group{
+			Description:         plan.Description.ValueString(),
+			Name:                plan.Name.ValueString(),
+			ProfileId:           plan.ProfileId.ValueString(),
+			ProfileName:         plan.ProfileName.ValueString(),
+			ProfileVersion:      plan.ProfileVersion.ValueString(),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                plan.Vars.ValueString(),
+		}
+		return newGroup 
+	} else {
+		newGroup := api.Group{
+			Description:         plan.Description.ValueString(),
+			Name:                plan.Name.ValueString(),
+			ProfileId:           plan.ProfileId.ValueString(),
+			ProfileName:         plan.ProfileName.ValueString(),
+			ProfileVersion:      plan.ProfileVersion.ValueString(),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		}
+		return newGroup 
+	}
+}
+
+func ApiToGroup(group api.Group) Group {
+	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
+	for _, region_sgid := range group.Ec2SecurityGroupIds {
+		rs := &Ec2SecurityGroupIds{
+			Region: types.StringValue(region_sgid.Region),
+			SgId:   types.StringValue(region_sgid.SgId),
+		}
+		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+	}
+	if group.Vars != "" {
+		h := Group{
+			Description:         types.StringValue(group.Description),
+			ID:                  types.StringValue(group.ID),
+			Name:                types.StringValue(group.Name),
+			ProfileId:           types.StringValue(group.ProfileId),
+			ProfileName:         types.StringValue(group.ProfileName),
+			ProfileVersion:      types.StringValue(group.ProfileVersion),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                types.StringValue(group.Vars),
+		}
+		return h
+	} else {
+		h := Group{
+			Description:         types.StringValue(group.Description),
+			ID:                  types.StringValue(group.ID),
+			Name:                types.StringValue(group.Name),
+			ProfileId:           types.StringValue(group.ProfileId),
+			ProfileName:         types.StringValue(group.ProfileName),
+			ProfileVersion:      types.StringValue(group.ProfileVersion),
+			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		}
+		return h
+	}
 }
 
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
@@ -153,7 +237,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 		ProfileName:         plan.ProfileName,
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                plan.Vars,
+		Vars:                *plan.Vars,
 	}
 	return newGroup
 }
@@ -175,52 +259,27 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 		ProfileName:         plan.ProfileName,
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                plan.Vars,
+		Vars:                *plan.Vars,
 	}
 	return newGroup
-}
-
-func ApiToGroup(group api.Group) Group {
-	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
-	for _, region_sgid := range group.Ec2SecurityGroupIds {
-		rs := &Ec2SecurityGroupIds{
-			Region: types.String{Value: region_sgid.Region},
-			SgId:   types.String{Value: region_sgid.SgId},
-		}
-		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
-	}
-
-	newVars := map[string]string{}
-	for k, v := range group.Vars {
-		newVars[k] = v
-	}
-
-	h := Group{
-		Description:         types.String{Value: group.Description},
-		ID:                  types.String{Value: group.ID},
-		Name:                types.String{Value: group.Name},
-		ProfileId:           types.String{Value: group.ProfileId},
-		ProfileName:         types.String{Value: group.ProfileName},
-		ProfileVersion:      types.String{Value: group.ProfileVersion},
-		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-		Vars:                newVars,
-	}
-	return h
 }
 
 func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var state Group
 
-	var plan groupResourceData
+	var plan Group
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	//	resp.Diagnostics.AddError("Client Error", fmt.Sprintf("client: %+v\n", r.provider.client))
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	newGroup := GroupToCreateRequest(plan)
-	group, statusCode, err := r.p.dog.CreateGroup(newGroup, nil)
+	
+	tflog.Debug(ctx, PrettyFmt("group create plan", plan))
+	newGroup := GroupToApiGroup(plan)
+	tflog.Debug(ctx, PrettyFmt("group create newGroup", newGroup))
+	group, statusCode, err := r.p.dog.CreateGroupEncode(newGroup, nil)
+	tflog.Debug(ctx, PrettyFmt("group create group", group))
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	if err != nil {
@@ -233,6 +292,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 	state = ApiToGroup(group)
+	tflog.Debug(ctx, PrettyFmt("group create state", state))
 
 	plan.ID = state.ID
 
@@ -255,9 +315,9 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 
-	group, statusCode, err := r.p.dog.GetGroup(groupID, nil)
+	group, statusCode, err := r.p.dog.GetGroupEncode(groupID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
@@ -282,17 +342,17 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 
-	var plan groupResourceData
+	var plan Group
 	diags = req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	newGroup := GroupToUpdateRequest(plan)
-	group, statusCode, err := r.p.dog.UpdateGroup(groupID, newGroup, nil)
+	newGroup := GroupToApiGroup(plan)
+	group, statusCode, err := r.p.dog.UpdateGroupEncode(groupID, newGroup, nil)
 	log.Printf(fmt.Sprintf("group: %+v\n", group))
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	state = ApiToGroup(group)
@@ -329,7 +389,7 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	groupID := state.ID.Value
+	groupID := state.ID.ValueString()
 	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))

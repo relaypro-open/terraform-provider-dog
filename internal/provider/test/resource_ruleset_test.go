@@ -69,7 +69,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "ssh-tcp-22"
         states = []
         type = "BASIC"
@@ -84,7 +83,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "2"
         service = "any"
         states = []
         type = "BASIC"
@@ -101,7 +99,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "any"
         states = []
         type = "BASIC"
@@ -128,7 +125,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "ssh-tcp-22"
         states = []
         type = "BASIC"
@@ -143,7 +139,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "2"
         service = "any"
         states = []
         type = "BASIC"
@@ -160,7 +155,6 @@ resource %[1]q %[2]q {
         interface = ""
         log = "false"
         log_prefix = ""
-        order = "1"
         service = "any"
         states = []
         type = "BASIC"

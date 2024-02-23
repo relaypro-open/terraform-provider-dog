@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -40,29 +41,30 @@ func (*profileResource) Metadata(ctx context.Context, req resource.MetadataReque
 	resp.TypeName = req.ProviderTypeName + "_profile"
 }
 
-func (*profileResource) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
-	return tfsdk.Schema{
-		Attributes: map[string]tfsdk.Attribute{
-			"name": {
+func (*profileResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		// This description is used by the documentation generator and the language server.
+		MarkdownDescription: "Profile data source",
+
+		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
 				MarkdownDescription: "Profile name",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"version": {
-				MarkdownDescription: "Profile version",
-				Required:            true,
-				Type:                types.StringType,
-			},
-			"id": {
-				Computed:            true,
-				MarkdownDescription: "Profile identifier",
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown(),
+				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
 				},
-				Type: types.StringType,
+			},
+			"version": schema.StringAttribute{
+				MarkdownDescription: "Profile version",
+				Optional:            true,
+			},
+			"id": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: "Profile identifier",
+				Computed: true,
 			},
 		},
-	}, nil
+	}
 }
 
 func (r *profileResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
@@ -108,9 +110,9 @@ func ProfileToUpdateRequest(plan profileResourceData) api.ProfileUpdateRequest {
 func ApiToProfile(profile api.Profile) Profile {
 	h := Profile{
 		//Created:     types.Int64{Value: int64(profile.Created)},
-		ID:      types.String{Value: profile.ID},
-		Name:    types.String{Value: profile.Name},
-		Version: types.String{Value: profile.Version},
+		ID:      types.StringValue(profile.ID),
+		Name:    types.StringValue(profile.Name),
+		Version: types.StringValue(profile.Version),
 	}
 	return h
 }
@@ -163,7 +165,7 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 
 	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
@@ -192,7 +194,7 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 
 	var plan profileResourceData
 	diags = req.Plan.Get(ctx, &plan)
@@ -236,7 +238,7 @@ func (r *profileResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	profileID := state.ID.Value
+	profileID := state.ID.ValueString()
 	profile, statusCode, err := r.p.dog.DeleteProfile(profileID, nil)
 	if statusCode != 204 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
