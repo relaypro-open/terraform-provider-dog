@@ -80,27 +80,27 @@ func link_export(output_dir string, environment string) {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_link\" \"%s\" {\n", terraformName)
         fmt.Fprintf(tf_w, "  address_handling = \"%s\"\n", row.AddressHandling)
-        fmt.Fprintf(tf_w, "  dog_connection = {\n")
+        fmt.Fprintf(tf_w, "  dog_connection   = {\n")
         fmt.Fprintf(tf_w, "    api_port = %d\n", row.Connection.ApiPort)
-        fmt.Fprintf(tf_w, "    host = \"%s\"\n", row.Connection.Host)
+        fmt.Fprintf(tf_w, "    host     = \"%s\"\n", row.Connection.Host)
         fmt.Fprintf(tf_w, "    password = \"%s\"\n", row.Connection.Password)
-        fmt.Fprintf(tf_w, "    port = %d\n", row.Connection.Port)
+        fmt.Fprintf(tf_w, "    port     = %d\n", row.Connection.Port)
         fmt.Fprintf(tf_w, "    ssl_options = {\n")
-        fmt.Fprintf(tf_w, "        cacertfile = \"%s\"\n", row.Connection.SSLOptions.CaCertFile)
-        fmt.Fprintf(tf_w, "        certfile = \"%s\"\n", row.Connection.SSLOptions.CertFile)
-        fmt.Fprintf(tf_w, "        fail_if_no_peer_cert = %t\n", row.Connection.SSLOptions.FailIfNoPeerCert)
-        fmt.Fprintf(tf_w, "        keyfile = \"%s\"\n", row.Connection.SSLOptions.KeyFile)
+        fmt.Fprintf(tf_w, "        cacertfile             = \"%s\"\n", row.Connection.SSLOptions.CaCertFile)
+        fmt.Fprintf(tf_w, "        certfile               = \"%s\"\n", row.Connection.SSLOptions.CertFile)
+        fmt.Fprintf(tf_w, "        fail_if_no_peer_cert   = %t\n", row.Connection.SSLOptions.FailIfNoPeerCert)
+        fmt.Fprintf(tf_w, "        keyfile                = \"%s\"\n", row.Connection.SSLOptions.KeyFile)
         fmt.Fprintf(tf_w, "        server_name_indication = \"%s\"\n", row.Connection.SSLOptions.ServerNameIndication)
         fmt.Fprintf(tf_w, "        verify = \"%s\"\n", row.Connection.SSLOptions.Verify)
         fmt.Fprintf(tf_w, "      },\n")
-        fmt.Fprintf(tf_w, "    user = \"%s\"\n", row.Connection.User)
+        fmt.Fprintf(tf_w, "    user         = \"%s\"\n", row.Connection.User)
         fmt.Fprintf(tf_w, "    virtual_host = \"%s\"\n", row.Connection.VirtualHost)
         fmt.Fprintf(tf_w, "  }\n")
         fmt.Fprintf(tf_w, "  connection_type = \"%s\"\n", row.ConnectionType)
-        fmt.Fprintf(tf_w, "  direction = \"%s\"\n", row.Direction)
-        fmt.Fprintf(tf_w, "  enabled = %t\n", row.Enabled)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+        fmt.Fprintf(tf_w, "  direction       = \"%s\"\n", row.Direction)
+        fmt.Fprintf(tf_w, "  enabled         = %t\n", row.Enabled)
+        fmt.Fprintf(tf_w, "  name            = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  provider        = dog.%s\n", environment)
         fmt.Fprintf(tf_w, "}\n")
         fmt.Fprintf(tf_w, "\n")
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_link.%s %s\n", terraformName, row.ID)
@@ -134,11 +134,11 @@ func host_export(output_dir string, environment string, host_prefix string) {
         terraformName :=  toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_host\" \"%s\" {\n", terraformName)
         fmt.Fprintf(tf_w, "  environment = \"%s\"\n", row.Environment)
-        fmt.Fprintf(tf_w, "  group = dog_group.%s.name\n", row.Group)
-        fmt.Fprintf(tf_w, "  hostkey = \"%s\"\n", row.HostKey)
-        fmt.Fprintf(tf_w, "  location = \"%s\"\n", row.Location)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+        fmt.Fprintf(tf_w, "  group       = dog_group.%s.name\n", row.Group)
+        fmt.Fprintf(tf_w, "  hostkey     = \"%s\"\n", row.HostKey)
+        fmt.Fprintf(tf_w, "  location    = \"%s\"\n", row.Location)
+        fmt.Fprintf(tf_w, "  name        = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  provider    = dog.%s\n", environment)
 		if row.Vars == nil {
 		} else {
 		fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
@@ -180,14 +180,14 @@ func group_export(output_dir string, environment string) {
         if row.ID != "all-active" {
             terraformName := toTerraformName(row.Name)
             fmt.Fprintf(tf_w, "resource \"dog_group\" \"%s\" {\n", terraformName)
-            fmt.Fprintf(tf_w, "  description = \"%s\"\n", row.Description)
-            fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-            fmt.Fprintf(tf_w, "  profile_name = dog_profile.%s.name\n", row.ProfileName)
-            fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.id\n", row.ProfileName)
+            fmt.Fprintf(tf_w, "  description            = \"%s\"\n", row.Description)
+            fmt.Fprintf(tf_w, "  name                   = \"%s\"\n", row.Name)
+            fmt.Fprintf(tf_w, "  profile_name           = dog_profile.%s.name\n", row.ProfileName)
+            fmt.Fprintf(tf_w, "  profile_id             = dog_profile.%s.id\n", row.ProfileName)
 			if row.ProfileVersion == "" {
-            fmt.Fprintf(tf_w, "  profile_version = \"latest\"\n")
+            fmt.Fprintf(tf_w, "  profile_version        = \"latest\"\n")
 			} else {
-            fmt.Fprintf(tf_w, "  profile_version = \"%s\"\n", row.ProfileVersion)
+            fmt.Fprintf(tf_w, "  profile_version        = \"%s\"\n", row.ProfileVersion)
 			}
             fmt.Fprintf(tf_w, "  ec2_security_group_ids = [\n")
             regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
@@ -228,7 +228,7 @@ func regionsgid_output(tf_w *bufio.Writer, ec2SecurityGroupIds []*api.Ec2Securit
     for _, region_sgid := range ec2SecurityGroupIds {
         fmt.Fprintf(tf_w, "      {\n")
         fmt.Fprintf(tf_w, "        region = \"%s\"\n", region_sgid.Region)
-        fmt.Fprintf(tf_w, "        sgid = \"%s\"\n", region_sgid.SgId)
+        fmt.Fprintf(tf_w, "        sgid   = \"%s\"\n", region_sgid.SgId)
         fmt.Fprintf(tf_w, "      },\n")
     }
 }
@@ -252,8 +252,8 @@ func service_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_service\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, "  version = \"%d\"\n", row.Version)
+        fmt.Fprintf(tf_w, "  name     = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  version  = \"%d\"\n", row.Version)
         fmt.Fprintf(tf_w, "  services = [\n")
         portprotocols_output(tf_w, row.Services)
         fmt.Fprintf(tf_w, "  ]\n")
@@ -276,7 +276,7 @@ func portprotocols_output(tf_w *bufio.Writer, portProtocols []*api.PortProtocol)
         fmt.Fprintf(tf_w, "      {\n")
 		Ports := `"`+strings.Join(port_protocol.Ports, `","`) + `"`
         fmt.Fprintf(tf_w, "        protocol = \"%s\"\n", port_protocol.Protocol)
-		fmt.Fprintf(tf_w, "        ports = [%s]\n", Ports)
+		fmt.Fprintf(tf_w, "        ports    = [%s]\n", Ports)
         fmt.Fprintf(tf_w, "      },\n")
     }
 }
@@ -300,7 +300,7 @@ func zone_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_zone\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  name           = \"%s\"\n", row.Name)
         //fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv4_addresses = %q\n", row.IPv4Addresses), "\" \"", "\",\""))
 
 		if reflect.DeepEqual(row.IPv4Addresses, []string{}) {
@@ -320,7 +320,7 @@ func zone_export(output_dir string, environment string) {
 		fmt.Fprintf(tf_w, "  ipv6_addresses = [%s]\n", IPv6Addresses)
 		}
         //fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("  ipv6_addresses = %q\n", row.IPv6Addresses), "\" \"", "\",\""))
-        fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+        fmt.Fprintf(tf_w, "  provider       = dog.%s\n", environment)
         fmt.Fprintf(tf_w, "}\n")
         fmt.Fprintf(tf_w, "\n")
 
@@ -356,11 +356,11 @@ func ruleset_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_ruleset\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  name       = \"%s\"\n", row.Name)
         fmt.Fprintf(tf_w, "  profile_id = dog_profile.%s.id\n", row.Name)
-        fmt.Fprintf(tf_w, "  rules = {\n")
+        fmt.Fprintf(tf_w, "  rules      = {\n")
         inbound := row.Rules.Inbound
-        fmt.Fprintf(tf_w, "    inbound = [\n")
+        fmt.Fprintf(tf_w, "    inbound  = [\n")
         rules_output(tf_w, inbound)
         fmt.Fprintf(tf_w, "    ]\n")
         fmt.Fprintf(tf_w, "    outbound = [\n")
@@ -368,7 +368,7 @@ func ruleset_export(output_dir string, environment string) {
         rules_output(tf_w, outbound)
         fmt.Fprintf(tf_w, "    ]\n")
         fmt.Fprintf(tf_w, "  }\n")
-        fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+        fmt.Fprintf(tf_w, "  provider   = dog.%s\n", environment)
         fmt.Fprintf(tf_w, "}\n")
 
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_ruleset.%s %s\n", terraformName, row.ID)
@@ -400,8 +400,8 @@ func profile_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_profile\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "  name = \"%s\"\n", row.Name)
-        fmt.Fprintf(tf_w, "  version = \"%s\"\n", row.Version)
+        fmt.Fprintf(tf_w, "  name     = \"%s\"\n", row.Name)
+        fmt.Fprintf(tf_w, "  version  = \"%s\"\n", row.Version)
         fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
         fmt.Fprintf(tf_w, "}\n")
 
@@ -418,32 +418,34 @@ func profile_export(output_dir string, environment string) {
 func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
     for _, rule := range rules {
         fmt.Fprintf(tf_w, "      {\n")
-        fmt.Fprintf(tf_w, "        action = \"%s\"\n", rule.Action)
-        fmt.Fprintf(tf_w, "        active = \"%t\"\n", rule.Active)
-        fmt.Fprintf(tf_w, "        comment = \"%s\"\n", rule.Comment)
-        fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        environments = %q\n", rule.Environments), "\" \"", "\",\""))
+        fmt.Fprintf(tf_w, "        action       = \"%s\"\n", rule.Action)
+        fmt.Fprintf(tf_w, "        active       = \"%t\"\n", rule.Active)
+        fmt.Fprintf(tf_w, "        comment      = \"%s\"\n", rule.Comment)
+        fmt.Fprintf(tf_w, strings.ReplaceAll(
+	      fmt.Sprintf("        environments = %q\n", rule.Environments), "\" \"", "\",\""))
         if rule.Group == "any" {
-            fmt.Fprintf(tf_w, "        group = \"any\"\n")
+        fmt.Fprintf(tf_w, "        group       = \"any\"\n")
 		} else if rule.Group == "all-active" {
-            fmt.Fprintf(tf_w, "        group = \"all-active\"\n")
+        fmt.Fprintf(tf_w, "        group       = \"all-active\"\n")
         } else {
             if rule.GroupType == "ZONE" {
-                fmt.Fprintf(tf_w, "        group = dog_zone.%s.id\n", rule.Group)
+        fmt.Fprintf(tf_w, "        group       = dog_zone.%s.id\n", rule.Group)
             } else {
-                fmt.Fprintf(tf_w, "        group = dog_group.%s.id\n", rule.Group)
+        fmt.Fprintf(tf_w, "        group       = dog_group.%s.id\n", rule.Group)
             }
         }
-        fmt.Fprintf(tf_w, "        group_type = \"%s\"\n", rule.GroupType)
-        fmt.Fprintf(tf_w, "        interface = \"%s\"\n", rule.Interface)
+        fmt.Fprintf(tf_w, "        group_type   = \"%s\"\n", rule.GroupType)
+        fmt.Fprintf(tf_w, "        interface    = \"%s\"\n", rule.Interface)
         fmt.Fprintf(tf_w, "        log = \"%t\"\n", rule.Log)
-        fmt.Fprintf(tf_w, "        log_prefix = \"%s\"\n", rule.LogPrefix)
+        fmt.Fprintf(tf_w, "        log_prefix   = \"%s\"\n", rule.LogPrefix)
         if rule.Service == "any" {
-            fmt.Fprintf(tf_w, "        service = \"%s\"\n", rule.Service)
+        fmt.Fprintf(tf_w, "        service      = \"%s\"\n", rule.Service)
         } else {
-            fmt.Fprintf(tf_w, "        service = dog_service.%s.id\n", rule.Service)
+        fmt.Fprintf(tf_w, "        service      = dog_service.%s.id\n", rule.Service)
         }
-        fmt.Fprintf(tf_w, strings.ReplaceAll(fmt.Sprintf("        states = %q\n", rule.States), "\" \"", "\",\""))
-        fmt.Fprintf(tf_w, "        type = \"%s\"\n", rule.Type)
+        fmt.Fprintf(tf_w, strings.ReplaceAll(
+	      fmt.Sprintf("        states      = %q\n", rule.States), "\" \"", "\",\""))
+        fmt.Fprintf(tf_w, "        type        = \"%s\"\n", rule.Type)
 
         fmt.Fprintf(tf_w, "      },\n")
     }
@@ -468,22 +470,21 @@ func fact_export(output_dir string, environment string) {
     for _, row := range res {
         terraformName := toTerraformName(row.Name)
         fmt.Fprintf(tf_w, "resource \"dog_fact\" \"%s\" {\n", terraformName)
-        fmt.Fprintf(tf_w, "    name = %q\n", row.Name)
-        fmt.Fprintf(tf_w, "    groups = {\n")
+        fmt.Fprintf(tf_w, "    name         = %q\n", row.Name)
+        fmt.Fprintf(tf_w, "    groups       = {\n")
         for name, group := range row.Groups {
         fmt.Fprintf(tf_w, "      %s = {\n", name)
         fmt.Fprintf(tf_w, "        children = %q\n", group.Children)
-        fmt.Fprintf(tf_w, "        hosts = {\n")
+        fmt.Fprintf(tf_w, "        hosts    = {\n")
         for host, hostValues := range group.Hosts {
-        fmt.Fprintf(tf_w, "          %s = {\n", host)
+        fmt.Fprintf(tf_w, "          %s     = {\n", host)
         for k, v := range hostValues {
-        fmt.Fprintf(tf_w, "            %s = %q\n", k, v)
+        fmt.Fprintf(tf_w, "            %s   = %q\n", k, v)
         }
         fmt.Fprintf(tf_w, "          }\n")
         }
         fmt.Fprintf(tf_w, "        }\n")
 		if group.Vars == nil {
-        fmt.Fprintf(tf_w, "        vars = \"null\"\n")
 		} else {
         fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
         for key, val := range group.Vars {
@@ -537,7 +538,7 @@ func main() {
     fmt.Printf("host_prefix: '%s'\n", host_prefix)
     group_export(output_dir, environment)
     host_export(output_dir, environment, host_prefix)
-    //link_export(output_dir, environment) #TODO disabled while testing
+    link_export(output_dir, environment) //TODO disabled while testing
     ruleset_export(output_dir, environment)
     profile_export(output_dir, environment)
     service_export(output_dir, environment)
