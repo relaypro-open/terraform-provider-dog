@@ -312,15 +312,16 @@ service.tf
 zone.tf
 ```
 
-Scripts are also created to import this configuration into terraform's state: 
+Import blocks are also created to import these resources into Terraform's state.  They need to be
+copied into the main.tf of your Terraform environment, but can be removed after the import.
 
 ```
-group_import.sh
-host_import.sh
-link_import.sh
-profile_import.sh
-service_import.sh
-zone_import.sh
+group_import.tf
+host_import.tf
+link_import.tf
+profile_import.tf
+service_import.tf
+zone_import.tf
 ```
 
 You may want or need to reorganize these files to fit into your Terraform organization.
