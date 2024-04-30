@@ -3,7 +3,6 @@ package dog
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -114,18 +113,17 @@ type hostResourceData struct {
 	HostKey     string            `tfsdk:"hostkey"`
 	Location    string            `tfsdk:"location"`
 	Name        string            `tfsdk:"name"`
-	Vars        *string            `tfsdk:"vars"`
+	Vars        *string           `tfsdk:"vars"`
 }
 
 func HostToApiHost(plan Host) api.Host {
-	if plan.Vars.ValueString() != "" {
+	if plan.Vars == nil {
 		newHost := api.Host{
 			Environment: plan.Environment.ValueString(),
 			Group:       plan.Group.ValueString(),
 			HostKey:     plan.HostKey.ValueString(),
 			Location:    plan.Location.ValueString(),
 			Name:        plan.Name.ValueString(),
-			Vars:        plan.Vars.ValueString(),
 		}
 		return newHost
 	} else {
@@ -135,13 +133,14 @@ func HostToApiHost(plan Host) api.Host {
 			HostKey:     plan.HostKey.ValueString(),
 			Location:    plan.Location.ValueString(),
 			Name:        plan.Name.ValueString(),
+			Vars:        *plan.Vars,
 		}
 		return newHost
 	}
 }
 
 func ApiToHost(host api.Host) Host {
-	if host.Vars != "" {
+	if host.Vars == "" {
 		h := Host{
 			Environment: types.StringValue(host.Environment),
 			Group:       types.StringValue(host.Group),
@@ -149,7 +148,6 @@ func ApiToHost(host api.Host) Host {
 			HostKey:     types.StringValue(host.HostKey),
 			Location:    types.StringValue(host.Location),
 			Name:        types.StringValue(host.Name),
-			Vars:        types.StringValue(host.Vars),
 		}
 		return h
 	} else {
@@ -160,6 +158,7 @@ func ApiToHost(host api.Host) Host {
 			HostKey:     types.StringValue(host.HostKey),
 			Location:    types.StringValue(host.Location),
 			Name:        types.StringValue(host.Name),
+			Vars:        &host.Vars,
 		}
 		return h
 	}
@@ -201,21 +200,23 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
+	tflog.Trace(ctx,fmt.Sprintf("plan: %+v\n", plan))
 	newHost := HostToApiHost(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	tflog.Trace(ctx,fmt.Sprintf("newHost: %+v\n", newHost))
+	tflog.Trace(ctx,fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	host, statusCode, err := r.p.dog.CreateHostEncode(newHost, nil)
-	log.Printf(fmt.Sprintf("host: %+v\n", host))
-	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
+	tflog.Trace(ctx,fmt.Sprintf("host: %+v\n", host))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 	}
 	if statusCode != 201 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	state = ApiToHost(host)
+	tflog.Trace(ctx,fmt.Sprintf("state: %+v\n", state))
 
 	plan.ID = state.ID
 
@@ -240,11 +241,11 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	hostID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	tflog.Trace(ctx, fmt.Sprintf("r.p: %+v\n", r.p))
+	tflog.Trace(ctx, fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	host, statusCode, err := r.p.dog.GetHostEncode(hostID, nil)
 	if statusCode != 200 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))
@@ -278,7 +279,6 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	newHost := HostToApiHost(plan)
 	host, statusCode, err := r.p.dog.UpdateHostEncode(hostID, newHost, nil)
-	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
 	state = ApiToHost(host)
 	if err != nil {
@@ -286,7 +286,7 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -317,7 +317,7 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	hostID := state.ID.ValueString()
 	host, statusCode, err := r.p.dog.DeleteHost(hostID, nil)
 	if statusCode != 204 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read host, got error: %s", err))

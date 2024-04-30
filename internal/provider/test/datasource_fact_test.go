@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestProvider_DogFactNameAttribute(t *testing.T) {
@@ -32,7 +32,7 @@ resource "dog_fact" %[1]q {
 				key = "value",
 				key2 = "value2"
 			}),
-			hosts = {
+			hosts = jsonencode({
 				host1 = {
 					key = "value",
 					key2 = "value2"
@@ -40,7 +40,7 @@ resource "dog_fact" %[1]q {
 				host2 = {
 					key2 = "value2"
 				}
-			},
+			}),
 			children = [
 				"test"
 			]
@@ -49,11 +49,11 @@ resource "dog_fact" %[1]q {
 			vars = jsonencode({
 				key = "value"
 			}),
-			hosts = {
+			hosts = jsonencode({
 				host1 = {
 					key = "value"
 				}
-			},
+			}),
 			children = [
 				"test2"
 			]

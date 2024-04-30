@@ -1,0 +1,920 @@
+2024/02/23 15:05:54 fact: {ID:bf203910-d560-4ced-a4cd-d34dd136c7ae Name:tf_test_fact_ehw4u Groups:map[all:0xc0006ef500 app:0xc0006ef560]}
+2024/02/23 15:05:54 p.dog: &{Client:0xc000212c80}
+2024/02/23 15:05:54 p.configured: true
+2024/02/23 15:05:54 p.version: dog
+2024/02/23 15:05:54 p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:54 p.configured: true
+2024/02/23 15:05:54 p.version: dog
+2024/02/23 15:05:54 r.p: {dog:0xc00007e588 configured:false version:}
+2024/02/23 15:05:54 r.p.dog: &{Client:0xc0002c8500}
+2024/02/23 15:05:54 p.dog: &{Client:0xc0002c8500}
+2024/02/23 15:05:54 p.configured: true
+2024/02/23 15:05:54 p.version: dog
+2024/02/23 15:05:54 p.dog: &{Client:0xc00030e280}
+2024/02/23 15:05:54 p.configured: true
+2024/02/23 15:05:54 p.version: dog
+2024/02/23 15:05:54 r.p: {dog:0xc0005360c0 configured:false version:}
+2024/02/23 15:05:54 r.p.dog: &{Client:0xc0002c8500}
+2024/02/23 15:05:54 p.dog: &{Client:0xc0002c8500}
+2024/02/23 15:05:54 p.configured: true
+2024/02/23 15:05:54 p.version: dog
+2024/02/23 15:05:55 p.dog: &{Client:0xc000858500}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 fact: {ID:bf203910-d560-4ced-a4cd-d34dd136c7ae Name:tf_test_fact_ehw4u Groups:map[all:0xc00001a7b0 app:0xc00001a7e0]}
+2024/02/23 15:05:55 p.dog: &{Client:0xc000858280}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 p.dog: &{Client:0xc000184c80}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 r.p: {dog:0xc0003ae208 configured:false version:}
+2024/02/23 15:05:55 r.p.dog: &{Client:0xc000676780}
+2024/02/23 15:05:55 p.dog: &{Client:0xc000676780}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 p.dog: &{Client:0xc0002c9400}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 r.p: {dog:0xc00007e160 configured:false version:}
+2024/02/23 15:05:55 r.p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:55 p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:55 p.dog: &{Client:0xc0006b8000}
+2024/02/23 15:05:55 p.configured: true
+2024/02/23 15:05:55 p.version: dog
+2024/02/23 15:05:56 fact: {ID:13cd8a37-1ef7-47c8-9930-c168657a766f Name:tf_test_fact_big_i7fd1 Groups:map[all:0xc000786210]}
+2024/02/23 15:05:56 p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:56 p.configured: true
+2024/02/23 15:05:56 p.version: dog
+2024/02/23 15:05:57 p.dog: &{Client:0xc000360c80}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 r.p: {dog:0xc000494030 configured:false version:}
+2024/02/23 15:05:57 r.p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:57 p.dog: &{Client:0xc000184780}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 p.dog: &{Client:0xc000864500}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 r.p: {dog:0xc00007e558 configured:false version:}
+2024/02/23 15:05:57 r.p.dog: &{Client:0xc000865900}
+2024/02/23 15:05:57 p.dog: &{Client:0xc000865900}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 p.dog: &{Client:0xc000864280}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 fact: {ID:13cd8a37-1ef7-47c8-9930-c168657a766f Name:tf_test_fact_big_i7fd1 Groups:map[all:0xc000772900]}
+2024/02/23 15:05:57 p.dog: &{Client:0xc0008e2780}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 p.dog: &{Client:0xc0008e2280}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 r.p: {dog:0xc00007e530 configured:false version:}
+2024/02/23 15:05:57 r.p.dog: &{Client:0xc0008e2500}
+2024/02/23 15:05:57 p.dog: &{Client:0xc0008e2500}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 p.dog: &{Client:0xc0002c8500}
+2024/02/23 15:05:57 p.configured: true
+2024/02/23 15:05:57 p.version: dog
+2024/02/23 15:05:57 r.p: {dog:0xc0005360e8 configured:false version:}
+2024/02/23 15:05:57 r.p.dog: &{Client:0xc0007a0280}
+2024/02/23 15:05:58 p.dog: &{Client:0xc0007a0280}
+2024/02/23 15:05:58 p.configured: true
+2024/02/23 15:05:58 p.version: dog
+2024/02/23 15:05:58 p.dog: &{Client:0xc0007a0780}
+2024/02/23 15:05:58 p.configured: true
+2024/02/23 15:05:58 p.version: dog
+2024/04/25 18:21:31 fact: {ID:b8a20975-a15e-4059-8702-be8759400479 Name:tf_test_fact_qxaxu Groups:map[all:0xc00052e480 app:0xc00052e4e0]}
+2024/04/25 18:21:31 p.dog: &{Client:0xc00039c500}
+2024/04/25 18:21:31 p.configured: true
+2024/04/25 18:21:31 p.version: dog
+2024/04/25 18:21:32 p.dog: &{Client:0xc000264500}
+2024/04/25 18:21:32 p.configured: true
+2024/04/25 18:21:32 p.version: dog
+2024/04/25 18:21:32 r.p: {dog:0xc000128150 configured:false version:}
+2024/04/25 18:21:32 r.p.dog: &{Client:0xc000264c80}
+2024/04/25 18:21:32 p.dog: &{Client:0xc000264c80}
+2024/04/25 18:21:32 p.configured: true
+2024/04/25 18:21:32 p.version: dog
+2024/04/25 18:21:32 p.dog: &{Client:0xc000186a00}
+2024/04/25 18:21:32 p.configured: true
+2024/04/25 18:21:32 p.version: dog
+2024/04/25 18:21:32 r.p: {dog:0xc00007e9f8 configured:false version:}
+2024/04/25 18:21:32 r.p.dog: &{Client:0xc000790f00}
+2024/04/25 18:21:32 p.dog: &{Client:0xc000790f00}
+2024/04/25 18:21:32 p.configured: true
+2024/04/25 18:21:32 p.version: dog
+2024/04/25 18:21:32 p.dog: &{Client:0xc000265680}
+2024/04/25 18:21:32 p.configured: true
+2024/04/25 18:21:32 p.version: dog
+2024/04/25 18:21:32 fact: {ID:b8a20975-a15e-4059-8702-be8759400479 Name:tf_test_fact_qxaxu Groups:map[all:0xc000768480 app:0xc0007684b0]}
+2024/04/25 18:21:33 p.dog: &{Client:0xc000186a00}
+2024/04/25 18:21:33 p.configured: true
+2024/04/25 18:21:33 p.version: dog
+2024/04/25 18:21:33 p.dog: &{Client:0xc000186780}
+2024/04/25 18:21:33 p.configured: true
+2024/04/25 18:21:33 p.version: dog
+2024/04/25 18:21:33 r.p: {dog:0xc00007e910 configured:false version:}
+2024/04/25 18:21:33 r.p.dog: &{Client:0xc0004a8a00}
+2024/04/25 18:21:33 p.dog: &{Client:0xc0004a8a00}
+2024/04/25 18:21:33 p.configured: true
+2024/04/25 18:21:33 p.version: dog
+2024/04/25 18:21:34 p.dog: &{Client:0xc000186a00}
+2024/04/25 18:21:34 p.configured: true
+2024/04/25 18:21:34 p.version: dog
+2024/04/25 18:21:34 r.p: {dog:0xc000450110 configured:false version:}
+2024/04/25 18:21:34 r.p.dog: &{Client:0xc0004dc280}
+2024/04/25 18:21:34 p.dog: &{Client:0xc0004dc280}
+2024/04/25 18:21:34 p.configured: true
+2024/04/25 18:21:34 p.version: dog
+2024/04/25 18:21:34 p.dog: &{Client:0xc000264500}
+2024/04/25 18:21:34 p.configured: true
+2024/04/25 18:21:34 p.version: dog
+2024/04/25 18:21:36 fact: {ID:662f0b11-393f-44c2-92b2-2321b6001b6e Name:tf_test_fact_big_y0rou Groups:map[all:0xc000741650]}
+2024/04/25 18:21:36 p.dog: &{Client:0xc000265400}
+2024/04/25 18:21:36 p.configured: true
+2024/04/25 18:21:36 p.version: dog
+2024/04/25 18:21:37 p.dog: &{Client:0xc000264000}
+2024/04/25 18:21:37 p.configured: true
+2024/04/25 18:21:37 p.version: dog
+2024/04/25 18:21:37 r.p: {dog:0xc00036c110 configured:false version:}
+2024/04/25 18:21:37 r.p.dog: &{Client:0xc0003e0780}
+2024/04/25 18:21:37 p.dog: &{Client:0xc0003e0780}
+2024/04/25 18:21:37 p.configured: true
+2024/04/25 18:21:37 p.version: dog
+2024/04/25 18:21:37 p.dog: &{Client:0xc000186780}
+2024/04/25 18:21:37 p.configured: true
+2024/04/25 18:21:37 p.version: dog
+2024/04/25 18:21:37 r.p: {dog:0xc000600050 configured:false version:}
+2024/04/25 18:21:37 r.p.dog: &{Client:0xc0003e0280}
+2024/04/25 18:21:37 p.dog: &{Client:0xc0003e0280}
+2024/04/25 18:21:37 p.configured: true
+2024/04/25 18:21:37 p.version: dog
+2024/04/25 18:21:37 p.dog: &{Client:0xc000264000}
+2024/04/25 18:21:37 p.configured: true
+2024/04/25 18:21:37 p.version: dog
+2024/04/25 18:21:37 fact: {ID:662f0b11-393f-44c2-92b2-2321b6001b6e Name:tf_test_fact_big_y0rou Groups:map[all:0xc00077ad20]}
+2024/04/25 18:21:38 p.dog: &{Client:0xc000780500}
+2024/04/25 18:21:38 p.configured: true
+2024/04/25 18:21:38 p.version: dog
+2024/04/25 18:21:38 p.dog: &{Client:0xc000186c80}
+2024/04/25 18:21:38 p.configured: true
+2024/04/25 18:21:38 p.version: dog
+2024/04/25 18:21:38 r.p: {dog:0xc00007e668 configured:false version:}
+2024/04/25 18:21:38 r.p.dog: &{Client:0xc000264500}
+2024/04/25 18:21:38 p.dog: &{Client:0xc000264500}
+2024/04/25 18:21:38 p.configured: true
+2024/04/25 18:21:38 p.version: dog
+2024/04/25 18:21:38 p.dog: &{Client:0xc00048bb80}
+2024/04/25 18:21:38 p.configured: true
+2024/04/25 18:21:38 p.version: dog
+2024/04/25 18:21:38 r.p: {dog:0xc00007e658 configured:false version:}
+2024/04/25 18:21:38 r.p.dog: &{Client:0xc00054a280}
+2024/04/25 18:21:39 p.dog: &{Client:0xc00054a280}
+2024/04/25 18:21:39 p.configured: true
+2024/04/25 18:21:39 p.version: dog
+2024/04/25 18:21:39 p.dog: &{Client:0xc00048a500}
+2024/04/25 18:21:39 p.configured: true
+2024/04/25 18:21:39 p.version: dog
+2024/04/25 18:22:24 fact: {ID:9628d4a5-b39d-4ed2-87b3-1a6a05297be6 Name:tf_test_fact_q2ok3 Groups:map[all:0xc0005c2ea0 app:0xc0005c2e40]}
+2024/04/25 18:22:24 p.dog: &{Client:0xc0002cb400}
+2024/04/25 18:22:24 p.configured: true
+2024/04/25 18:22:24 p.version: dog
+2024/04/25 18:22:24 p.dog: &{Client:0xc0005fd680}
+2024/04/25 18:22:24 p.configured: true
+2024/04/25 18:22:24 p.version: dog
+2024/04/25 18:22:24 r.p: {dog:0xc0004184a0 configured:false version:}
+2024/04/25 18:22:24 r.p.dog: &{Client:0xc0002cb900}
+2024/04/25 18:22:24 p.dog: &{Client:0xc0002cb900}
+2024/04/25 18:22:24 p.configured: true
+2024/04/25 18:22:24 p.version: dog
+2024/04/25 18:22:24 p.dog: &{Client:0xc00097d680}
+2024/04/25 18:22:24 p.configured: true
+2024/04/25 18:22:24 p.version: dog
+2024/04/25 18:22:24 r.p: {dog:0xc00062e078 configured:false version:}
+2024/04/25 18:22:24 r.p.dog: &{Client:0xc00046e280}
+2024/04/25 18:22:25 p.dog: &{Client:0xc00046e280}
+2024/04/25 18:22:25 p.configured: true
+2024/04/25 18:22:25 p.version: dog
+2024/04/25 18:22:25 p.dog: &{Client:0xc0000f6280}
+2024/04/25 18:22:25 p.configured: true
+2024/04/25 18:22:25 p.version: dog
+2024/04/25 18:22:25 fact: {ID:9628d4a5-b39d-4ed2-87b3-1a6a05297be6 Name:tf_test_fact_q2ok3 Groups:map[all:0xc0005fc300 app:0xc0005fc330]}
+2024/04/25 18:22:25 p.dog: &{Client:0xc0000f6500}
+2024/04/25 18:22:25 p.configured: true
+2024/04/25 18:22:25 p.version: dog
+2024/04/25 18:22:25 p.dog: &{Client:0xc0000f7900}
+2024/04/25 18:22:25 p.configured: true
+2024/04/25 18:22:25 p.version: dog
+2024/04/25 18:22:25 r.p: {dog:0xc00039c0f0 configured:false version:}
+2024/04/25 18:22:25 r.p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:26 p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:26 p.configured: true
+2024/04/25 18:22:26 p.version: dog
+2024/04/25 18:22:26 p.dog: &{Client:0xc0002ca500}
+2024/04/25 18:22:26 p.configured: true
+2024/04/25 18:22:26 p.version: dog
+2024/04/25 18:22:26 r.p: {dog:0xc00039c4e0 configured:false version:}
+2024/04/25 18:22:26 r.p.dog: &{Client:0xc000186a00}
+2024/04/25 18:22:27 p.dog: &{Client:0xc000186a00}
+2024/04/25 18:22:27 p.configured: true
+2024/04/25 18:22:27 p.version: dog
+2024/04/25 18:22:27 p.dog: &{Client:0xc0002ca500}
+2024/04/25 18:22:27 p.configured: true
+2024/04/25 18:22:27 p.version: dog
+2024/04/25 18:22:29 fact: {ID:53b029fa-8205-4c1a-8d1a-bd2e3ef4531a Name:tf_test_fact_big_7g7tr Groups:map[all:0xc00050c360]}
+2024/04/25 18:22:29 p.dog: &{Client:0xc0002ca500}
+2024/04/25 18:22:29 p.configured: true
+2024/04/25 18:22:29 p.version: dog
+2024/04/25 18:22:29 p.dog: &{Client:0xc0002ca000}
+2024/04/25 18:22:29 p.configured: true
+2024/04/25 18:22:29 p.version: dog
+2024/04/25 18:22:29 r.p: {dog:0xc00039c120 configured:false version:}
+2024/04/25 18:22:29 r.p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:30 p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:30 p.configured: true
+2024/04/25 18:22:30 p.version: dog
+2024/04/25 18:22:30 p.dog: &{Client:0xc000489680}
+2024/04/25 18:22:30 p.configured: true
+2024/04/25 18:22:30 p.version: dog
+2024/04/25 18:22:30 r.p: {dog:0xc00034c070 configured:false version:}
+2024/04/25 18:22:30 r.p.dog: &{Client:0xc0002cb400}
+2024/04/25 18:22:30 p.dog: &{Client:0xc0002cb400}
+2024/04/25 18:22:30 p.configured: true
+2024/04/25 18:22:30 p.version: dog
+2024/04/25 18:22:30 p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:30 p.configured: true
+2024/04/25 18:22:30 p.version: dog
+2024/04/25 18:22:30 fact: {ID:53b029fa-8205-4c1a-8d1a-bd2e3ef4531a Name:tf_test_fact_big_7g7tr Groups:map[all:0xc0005da4b0]}
+2024/04/25 18:22:31 p.dog: &{Client:0xc000768500}
+2024/04/25 18:22:31 p.configured: true
+2024/04/25 18:22:31 p.version: dog
+2024/04/25 18:22:31 p.dog: &{Client:0xc000187400}
+2024/04/25 18:22:31 p.configured: true
+2024/04/25 18:22:31 p.version: dog
+2024/04/25 18:22:31 r.p: {dog:0xc00011a880 configured:false version:}
+2024/04/25 18:22:31 r.p.dog: &{Client:0xc0004fe500}
+2024/04/25 18:22:31 p.dog: &{Client:0xc0004fe500}
+2024/04/25 18:22:31 p.configured: true
+2024/04/25 18:22:31 p.version: dog
+2024/04/25 18:22:32 p.dog: &{Client:0xc000186780}
+2024/04/25 18:22:32 p.configured: true
+2024/04/25 18:22:32 p.version: dog
+2024/04/25 18:22:32 r.p: {dog:0xc00039c590 configured:false version:}
+2024/04/25 18:22:32 r.p.dog: &{Client:0xc000665180}
+2024/04/25 18:22:32 p.dog: &{Client:0xc000665180}
+2024/04/25 18:22:32 p.configured: true
+2024/04/25 18:22:32 p.version: dog
+2024/04/25 18:22:32 p.dog: &{Client:0xc000664000}
+2024/04/25 18:22:32 p.configured: true
+2024/04/25 18:22:32 p.version: dog
+2024/04/25 18:33:05 fact: {ID:87c1a673-3e3b-4cf4-ab82-e1c1864e51a0 Name:tf_test_fact_rls3w Groups:map[all:0xc0005e7380 app:0xc0005e73e0]}
+2024/04/25 18:33:05 p.dog: &{Client:0xc000555680}
+2024/04/25 18:33:05 p.configured: true
+2024/04/25 18:33:05 p.version: dog
+2024/04/25 18:33:05 p.dog: &{Client:0xc000554280}
+2024/04/25 18:33:05 p.configured: true
+2024/04/25 18:33:05 p.version: dog
+2024/04/25 18:33:05 r.p: {dog:0xc00060e270 configured:false version:}
+2024/04/25 18:33:05 r.p.dog: &{Client:0xc000555b80}
+2024/04/25 18:33:05 p.dog: &{Client:0xc000555b80}
+2024/04/25 18:33:05 p.configured: true
+2024/04/25 18:33:05 p.version: dog
+2024/04/25 18:33:05 p.dog: &{Client:0xc00039c500}
+2024/04/25 18:33:05 p.configured: true
+2024/04/25 18:33:05 p.version: dog
+2024/04/25 18:33:05 r.p: {dog:0xc00051e230 configured:false version:}
+2024/04/25 18:33:05 r.p.dog: &{Client:0xc0003ec500}
+2024/04/25 18:33:06 p.dog: &{Client:0xc0003ec500}
+2024/04/25 18:33:06 p.configured: true
+2024/04/25 18:33:06 p.version: dog
+2024/04/25 18:33:06 p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:06 p.configured: true
+2024/04/25 18:33:06 p.version: dog
+2024/04/25 18:33:06 fact: {ID:87c1a673-3e3b-4cf4-ab82-e1c1864e51a0 Name:tf_test_fact_rls3w Groups:map[all:0xc000708960 app:0xc000708990]}
+2024/04/25 18:33:06 p.dog: &{Client:0xc000184a00}
+2024/04/25 18:33:06 p.configured: true
+2024/04/25 18:33:06 p.version: dog
+2024/04/25 18:33:06 p.dog: &{Client:0xc00035a280}
+2024/04/25 18:33:06 p.configured: true
+2024/04/25 18:33:06 p.version: dog
+2024/04/25 18:33:06 r.p: {dog:0xc000134048 configured:false version:}
+2024/04/25 18:33:06 r.p.dog: &{Client:0xc000264500}
+2024/04/25 18:33:07 p.dog: &{Client:0xc000264500}
+2024/04/25 18:33:07 p.configured: true
+2024/04/25 18:33:07 p.version: dog
+2024/04/25 18:33:07 p.dog: &{Client:0xc00039d180}
+2024/04/25 18:33:07 p.configured: true
+2024/04/25 18:33:07 p.version: dog
+2024/04/25 18:33:07 r.p: {dog:0xc00060e1a8 configured:false version:}
+2024/04/25 18:33:07 r.p.dog: &{Client:0xc00039ca00}
+2024/04/25 18:33:07 p.dog: &{Client:0xc00039ca00}
+2024/04/25 18:33:07 p.configured: true
+2024/04/25 18:33:07 p.version: dog
+2024/04/25 18:33:07 p.dog: &{Client:0xc00039c500}
+2024/04/25 18:33:07 p.configured: true
+2024/04/25 18:33:07 p.version: dog
+2024/04/25 18:33:10 fact: {ID:0f9c13f2-49f5-4314-bca5-013bfadc4a3c Name:tf_test_fact_big_yy9zi Groups:map[all:0xc000442570]}
+2024/04/25 18:33:10 p.dog: &{Client:0xc000184a00}
+2024/04/25 18:33:10 p.configured: true
+2024/04/25 18:33:10 p.version: dog
+2024/04/25 18:33:10 p.dog: &{Client:0xc000264500}
+2024/04/25 18:33:10 p.configured: true
+2024/04/25 18:33:10 p.version: dog
+2024/04/25 18:33:10 r.p: {dog:0xc000134050 configured:false version:}
+2024/04/25 18:33:10 r.p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:13 p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:13 p.configured: true
+2024/04/25 18:33:13 p.version: dog
+2024/04/25 18:33:13 p.dog: &{Client:0xc000510280}
+2024/04/25 18:33:13 p.configured: true
+2024/04/25 18:33:13 p.version: dog
+2024/04/25 18:33:13 r.p: {dog:0xc000134050 configured:false version:}
+2024/04/25 18:33:13 r.p.dog: &{Client:0xc000510000}
+2024/04/25 18:33:13 p.dog: &{Client:0xc000510000}
+2024/04/25 18:33:13 p.configured: true
+2024/04/25 18:33:13 p.version: dog
+2024/04/25 18:33:13 p.dog: &{Client:0xc000264c80}
+2024/04/25 18:33:13 p.configured: true
+2024/04/25 18:33:13 p.version: dog
+2024/04/25 18:33:13 fact: {ID:0f9c13f2-49f5-4314-bca5-013bfadc4a3c Name:tf_test_fact_big_yy9zi Groups:map[all:0xc0001406c0]}
+2024/04/25 18:33:14 p.dog: &{Client:0xc00039c280}
+2024/04/25 18:33:14 p.configured: true
+2024/04/25 18:33:14 p.version: dog
+2024/04/25 18:33:14 p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:14 p.configured: true
+2024/04/25 18:33:14 p.version: dog
+2024/04/25 18:33:14 r.p: {dog:0xc000162508 configured:false version:}
+2024/04/25 18:33:14 r.p.dog: &{Client:0xc00045f180}
+2024/04/25 18:33:14 p.dog: &{Client:0xc00045f180}
+2024/04/25 18:33:14 p.configured: true
+2024/04/25 18:33:14 p.version: dog
+2024/04/25 18:33:15 p.dog: &{Client:0xc000264500}
+2024/04/25 18:33:15 p.configured: true
+2024/04/25 18:33:15 p.version: dog
+2024/04/25 18:33:15 r.p: {dog:0xc000162068 configured:false version:}
+2024/04/25 18:33:15 r.p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:15 p.dog: &{Client:0xc000184780}
+2024/04/25 18:33:15 p.configured: true
+2024/04/25 18:33:15 p.version: dog
+2024/04/25 18:33:15 p.dog: &{Client:0xc000264500}
+2024/04/25 18:33:15 p.configured: true
+2024/04/25 18:33:15 p.version: dog
+2024/04/26 14:14:27 fact: {ID:358afb46-65df-432c-b63e-cde4cdbb5cfb Name:tf_test_fact_6ntq7 Groups:map[all:0xc0006554a0 app:0xc000655500]}
+2024/04/26 14:14:27 p.dog: &{Client:0xc00065c000}
+2024/04/26 14:14:27 p.configured: true
+2024/04/26 14:14:27 p.version: dog
+2024/04/26 14:14:27 p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:27 p.configured: true
+2024/04/26 14:14:27 p.version: dog
+2024/04/26 14:14:27 r.p: {dog:0xc0003ee038 configured:false version:}
+2024/04/26 14:14:27 r.p.dog: &{Client:0xc000330280}
+2024/04/26 14:14:27 p.dog: &{Client:0xc000330280}
+2024/04/26 14:14:27 p.configured: true
+2024/04/26 14:14:27 p.version: dog
+2024/04/26 14:14:27 p.dog: &{Client:0xc000330500}
+2024/04/26 14:14:27 p.configured: true
+2024/04/26 14:14:27 p.version: dog
+2024/04/26 14:14:27 r.p: {dog:0xc000252080 configured:false version:}
+2024/04/26 14:14:27 r.p.dog: &{Client:0xc000264500}
+2024/04/26 14:14:27 p.dog: &{Client:0xc000264500}
+2024/04/26 14:14:27 p.configured: true
+2024/04/26 14:14:27 p.version: dog
+2024/04/26 14:14:28 p.dog: &{Client:0xc00064c780}
+2024/04/26 14:14:28 p.configured: true
+2024/04/26 14:14:28 p.version: dog
+2024/04/26 14:14:28 fact: {ID:358afb46-65df-432c-b63e-cde4cdbb5cfb Name:tf_test_fact_6ntq7 Groups:map[all:0xc0004fffb0 app:0xc0006e0000]}
+2024/04/26 14:14:28 p.dog: &{Client:0xc000186a00}
+2024/04/26 14:14:28 p.configured: true
+2024/04/26 14:14:28 p.version: dog
+2024/04/26 14:14:28 p.dog: &{Client:0xc000265b80}
+2024/04/26 14:14:28 p.configured: true
+2024/04/26 14:14:28 p.version: dog
+2024/04/26 14:14:28 r.p: {dog:0xc000126058 configured:false version:}
+2024/04/26 14:14:28 r.p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:28 p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:28 p.configured: true
+2024/04/26 14:14:28 p.version: dog
+2024/04/26 14:14:29 p.dog: &{Client:0xc00034f180}
+2024/04/26 14:14:29 p.configured: true
+2024/04/26 14:14:29 p.version: dog
+2024/04/26 14:14:29 r.p: {dog:0xc00007c6e0 configured:false version:}
+2024/04/26 14:14:29 r.p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:29 p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:29 p.configured: true
+2024/04/26 14:14:29 p.version: dog
+2024/04/26 14:14:29 p.dog: &{Client:0xc000187180}
+2024/04/26 14:14:29 p.configured: true
+2024/04/26 14:14:29 p.version: dog
+2024/04/26 14:14:32 fact: {ID:915bba87-c34e-4b84-8577-24bab88314fc Name:tf_test_fact_big_blea7 Groups:map[all:0xc00038b140]}
+2024/04/26 14:14:32 p.dog: &{Client:0xc000187180}
+2024/04/26 14:14:32 p.configured: true
+2024/04/26 14:14:32 p.version: dog
+2024/04/26 14:14:32 p.dog: &{Client:0xc000264c80}
+2024/04/26 14:14:32 p.configured: true
+2024/04/26 14:14:32 p.version: dog
+2024/04/26 14:14:32 r.p: {dog:0xc00007c698 configured:false version:}
+2024/04/26 14:14:32 r.p.dog: &{Client:0xc0000e8280}
+2024/04/26 14:14:32 p.dog: &{Client:0xc0000e8280}
+2024/04/26 14:14:32 p.configured: true
+2024/04/26 14:14:32 p.version: dog
+2024/04/26 14:14:32 p.dog: &{Client:0xc000264500}
+2024/04/26 14:14:32 p.configured: true
+2024/04/26 14:14:32 p.version: dog
+2024/04/26 14:14:33 r.p: {dog:0xc000252280 configured:false version:}
+2024/04/26 14:14:33 r.p.dog: &{Client:0xc000264000}
+2024/04/26 14:14:33 p.dog: &{Client:0xc000264000}
+2024/04/26 14:14:33 p.configured: true
+2024/04/26 14:14:33 p.version: dog
+2024/04/26 14:14:33 p.dog: &{Client:0xc00050c780}
+2024/04/26 14:14:33 p.configured: true
+2024/04/26 14:14:33 p.version: dog
+2024/04/26 14:14:33 fact: {ID:915bba87-c34e-4b84-8577-24bab88314fc Name:tf_test_fact_big_blea7 Groups:map[all:0xc0002469f0]}
+2024/04/26 14:14:33 p.dog: &{Client:0xc000264c80}
+2024/04/26 14:14:33 p.configured: true
+2024/04/26 14:14:33 p.version: dog
+2024/04/26 14:14:33 p.dog: &{Client:0xc000186780}
+2024/04/26 14:14:33 p.configured: true
+2024/04/26 14:14:33 p.version: dog
+2024/04/26 14:14:33 r.p: {dog:0xc0003ee038 configured:false version:}
+2024/04/26 14:14:33 r.p.dog: &{Client:0xc000264500}
+2024/04/26 14:14:34 p.dog: &{Client:0xc000264500}
+2024/04/26 14:14:34 p.configured: true
+2024/04/26 14:14:34 p.version: dog
+2024/04/26 14:14:34 p.dog: &{Client:0xc000690780}
+2024/04/26 14:14:34 p.configured: true
+2024/04/26 14:14:34 p.version: dog
+2024/04/26 14:14:34 r.p: {dog:0xc0003ee1e8 configured:false version:}
+2024/04/26 14:14:34 r.p.dog: &{Client:0xc000264000}
+2024/04/26 14:14:35 p.dog: &{Client:0xc000264000}
+2024/04/26 14:14:35 p.configured: true
+2024/04/26 14:14:35 p.version: dog
+2024/04/26 14:14:35 p.dog: &{Client:0xc0005dc780}
+2024/04/26 14:14:35 p.configured: true
+2024/04/26 14:14:35 p.version: dog
+2024/04/26 14:30:16 fact: {ID:c9cf99d5-3818-4cc6-8096-619a2393eb05 Name:tf_test_fact_bc874 Groups:map[all:0xc0000d8360 app:0xc0000d83c0]}
+2024/04/26 14:30:16 p.dog: &{Client:0xc000187180}
+2024/04/26 14:30:16 p.configured: true
+2024/04/26 14:30:16 p.version: dog
+2024/04/26 14:30:16 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:16 p.configured: true
+2024/04/26 14:30:16 p.version: dog
+2024/04/26 14:30:16 r.p: {dog:0xc000016080 configured:false version:}
+2024/04/26 14:30:16 r.p.dog: &{Client:0xc000186780}
+2024/04/26 14:30:16 p.dog: &{Client:0xc000186780}
+2024/04/26 14:30:16 p.configured: true
+2024/04/26 14:30:16 p.version: dog
+2024/04/26 14:30:16 p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:16 p.configured: true
+2024/04/26 14:30:16 p.version: dog
+2024/04/26 14:30:16 r.p: {dog:0xc00038c170 configured:false version:}
+2024/04/26 14:30:16 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:17 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:17 p.configured: true
+2024/04/26 14:30:17 p.version: dog
+2024/04/26 14:30:17 p.dog: &{Client:0xc0002ca000}
+2024/04/26 14:30:17 p.configured: true
+2024/04/26 14:30:17 p.version: dog
+2024/04/26 14:30:17 fact: {ID:c9cf99d5-3818-4cc6-8096-619a2393eb05 Name:tf_test_fact_bc874 Groups:map[all:0xc0006c8ff0 app:0xc0006c9020]}
+2024/04/26 14:30:17 p.dog: &{Client:0xc000568780}
+2024/04/26 14:30:17 p.configured: true
+2024/04/26 14:30:17 p.version: dog
+2024/04/26 14:30:18 p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:18 p.configured: true
+2024/04/26 14:30:18 p.version: dog
+2024/04/26 14:30:18 r.p: {dog:0xc00038c600 configured:false version:}
+2024/04/26 14:30:18 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:18 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:18 p.configured: true
+2024/04/26 14:30:18 p.version: dog
+2024/04/26 14:30:18 p.dog: &{Client:0xc000186c80}
+2024/04/26 14:30:18 p.configured: true
+2024/04/26 14:30:18 p.version: dog
+2024/04/26 14:30:18 r.p: {dog:0xc00011a688 configured:false version:}
+2024/04/26 14:30:18 r.p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:19 p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:19 p.configured: true
+2024/04/26 14:30:19 p.version: dog
+2024/04/26 14:30:19 p.dog: &{Client:0xc0005bf900}
+2024/04/26 14:30:19 p.configured: true
+2024/04/26 14:30:19 p.version: dog
+2024/04/26 14:30:21 fact: {ID:f1facdf3-f04a-4759-8dd0-4ae4c5f0c6a9 Name:tf_test_fact_big_xbzu2 Groups:map[all:0xc0006c40f0]}
+2024/04/26 14:30:21 p.dog: &{Client:0xc000186780}
+2024/04/26 14:30:21 p.configured: true
+2024/04/26 14:30:21 p.version: dog
+2024/04/26 14:30:21 p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:21 p.configured: true
+2024/04/26 14:30:21 p.version: dog
+2024/04/26 14:30:21 r.p: {dog:0xc00042c060 configured:false version:}
+2024/04/26 14:30:21 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:22 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:22 p.configured: true
+2024/04/26 14:30:22 p.version: dog
+2024/04/26 14:30:22 p.dog: &{Client:0xc000592500}
+2024/04/26 14:30:22 p.configured: true
+2024/04/26 14:30:22 p.version: dog
+2024/04/26 14:30:22 r.p: {dog:0xc000482050 configured:false version:}
+2024/04/26 14:30:22 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:22 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:22 p.configured: true
+2024/04/26 14:30:22 p.version: dog
+2024/04/26 14:30:22 p.dog: &{Client:0xc0000da280}
+2024/04/26 14:30:22 p.configured: true
+2024/04/26 14:30:22 p.version: dog
+2024/04/26 14:30:22 fact: {ID:f1facdf3-f04a-4759-8dd0-4ae4c5f0c6a9 Name:tf_test_fact_big_xbzu2 Groups:map[all:0xc0006c00c0]}
+2024/04/26 14:30:23 p.dog: &{Client:0xc0002cac80}
+2024/04/26 14:30:23 p.configured: true
+2024/04/26 14:30:23 p.version: dog
+2024/04/26 14:30:23 p.dog: &{Client:0xc000424500}
+2024/04/26 14:30:23 p.configured: true
+2024/04/26 14:30:23 p.version: dog
+2024/04/26 14:30:23 r.p: {dog:0xc00038c158 configured:false version:}
+2024/04/26 14:30:23 r.p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:23 p.dog: &{Client:0xc0002ca500}
+2024/04/26 14:30:23 p.configured: true
+2024/04/26 14:30:23 p.version: dog
+2024/04/26 14:30:24 p.dog: &{Client:0xc0005c4280}
+2024/04/26 14:30:24 p.configured: true
+2024/04/26 14:30:24 p.version: dog
+2024/04/26 14:30:24 r.p: {dog:0xc00042c230 configured:false version:}
+2024/04/26 14:30:24 r.p.dog: &{Client:0xc0002cb680}
+2024/04/26 14:30:24 p.dog: &{Client:0xc0002cb680}
+2024/04/26 14:30:24 p.configured: true
+2024/04/26 14:30:24 p.version: dog
+2024/04/26 14:30:24 p.dog: &{Client:0xc0002d4500}
+2024/04/26 14:30:24 p.configured: true
+2024/04/26 14:30:24 p.version: dog
+2024/04/26 17:16:37 fact: {ID:e70e153b-db9c-4bf0-8d46-e12ac52be08a Name:tf_test_fact_j0exc Groups:map[all:0xc0006f25d0 app:0xc0006f2630]}
+2024/04/26 17:16:37 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:37 p.configured: true
+2024/04/26 17:16:37 p.version: dog
+2024/04/26 17:16:38 p.dog: &{Client:0xc000187b80}
+2024/04/26 17:16:38 p.configured: true
+2024/04/26 17:16:38 p.version: dog
+2024/04/26 17:16:38 r.p: {dog:0xc0004ce028 configured:false version:}
+2024/04/26 17:16:38 r.p.dog: &{Client:0xc000456500}
+2024/04/26 17:16:38 p.dog: &{Client:0xc000456500}
+2024/04/26 17:16:38 p.configured: true
+2024/04/26 17:16:38 p.version: dog
+2024/04/26 17:16:38 p.dog: &{Client:0xc00021c280}
+2024/04/26 17:16:38 p.configured: true
+2024/04/26 17:16:38 p.version: dog
+2024/04/26 17:16:38 r.p: {dog:0xc0003b80a8 configured:false version:}
+2024/04/26 17:16:38 r.p.dog: &{Client:0xc000186780}
+2024/04/26 17:16:38 p.dog: &{Client:0xc000186780}
+2024/04/26 17:16:38 p.configured: true
+2024/04/26 17:16:38 p.version: dog
+2024/04/26 17:16:39 p.dog: &{Client:0xc00002c280}
+2024/04/26 17:16:39 p.configured: true
+2024/04/26 17:16:39 p.version: dog
+2024/04/26 17:16:39 fact: {ID:e70e153b-db9c-4bf0-8d46-e12ac52be08a Name:tf_test_fact_j0exc Groups:map[all:0xc0004fe570 app:0xc0004fe5a0]}
+2024/04/26 17:16:39 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:39 p.configured: true
+2024/04/26 17:16:39 p.version: dog
+2024/04/26 17:16:39 p.dog: &{Client:0xc000186780}
+2024/04/26 17:16:39 p.configured: true
+2024/04/26 17:16:39 p.version: dog
+2024/04/26 17:16:39 r.p: {dog:0xc0004ce058 configured:false version:}
+2024/04/26 17:16:39 r.p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:39 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:39 p.configured: true
+2024/04/26 17:16:39 p.version: dog
+2024/04/26 17:16:40 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:16:40 p.configured: true
+2024/04/26 17:16:40 p.version: dog
+2024/04/26 17:16:40 r.p: {dog:0xc00011a6f0 configured:false version:}
+2024/04/26 17:16:40 r.p.dog: &{Client:0xc000570280}
+2024/04/26 17:16:40 p.dog: &{Client:0xc000570280}
+2024/04/26 17:16:40 p.configured: true
+2024/04/26 17:16:40 p.version: dog
+2024/04/26 17:16:40 p.dog: &{Client:0xc000571180}
+2024/04/26 17:16:40 p.configured: true
+2024/04/26 17:16:40 p.version: dog
+2024/04/26 17:16:42 fact: {ID:aeb1a7d6-fc28-4e68-8148-70a1315de3de Name:tf_test_fact_big_1ts4g Groups:map[all:0xc000786e40]}
+2024/04/26 17:16:42 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:16:42 p.configured: true
+2024/04/26 17:16:42 p.version: dog
+2024/04/26 17:16:43 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:16:43 p.configured: true
+2024/04/26 17:16:43 p.version: dog
+2024/04/26 17:16:43 r.p: {dog:0xc000760148 configured:false version:}
+2024/04/26 17:16:43 r.p.dog: &{Client:0xc000630f00}
+2024/04/26 17:16:43 p.dog: &{Client:0xc000630f00}
+2024/04/26 17:16:43 p.configured: true
+2024/04/26 17:16:43 p.version: dog
+2024/04/26 17:16:43 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:43 p.configured: true
+2024/04/26 17:16:43 p.version: dog
+2024/04/26 17:16:43 r.p: {dog:0xc0000dc080 configured:false version:}
+2024/04/26 17:16:43 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:16:43 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:16:43 p.configured: true
+2024/04/26 17:16:43 p.version: dog
+2024/04/26 17:16:44 p.dog: &{Client:0xc0004f4500}
+2024/04/26 17:16:44 p.configured: true
+2024/04/26 17:16:44 p.version: dog
+2024/04/26 17:16:44 fact: {ID:aeb1a7d6-fc28-4e68-8148-70a1315de3de Name:tf_test_fact_big_1ts4g Groups:map[all:0xc0005ab110]}
+2024/04/26 17:16:44 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:16:44 p.configured: true
+2024/04/26 17:16:44 p.version: dog
+2024/04/26 17:16:44 p.dog: &{Client:0xc0002ca000}
+2024/04/26 17:16:44 p.configured: true
+2024/04/26 17:16:44 p.version: dog
+2024/04/26 17:16:44 r.p: {dog:0xc0000ea038 configured:false version:}
+2024/04/26 17:16:44 r.p.dog: &{Client:0xc0007a0000}
+2024/04/26 17:16:44 p.dog: &{Client:0xc0007a0000}
+2024/04/26 17:16:44 p.configured: true
+2024/04/26 17:16:44 p.version: dog
+2024/04/26 17:16:45 p.dog: &{Client:0xc0007a0500}
+2024/04/26 17:16:45 p.configured: true
+2024/04/26 17:16:45 p.version: dog
+2024/04/26 17:16:45 r.p: {dog:0xc0000ea248 configured:false version:}
+2024/04/26 17:16:45 r.p.dog: &{Client:0xc0007a1900}
+2024/04/26 17:16:45 p.dog: &{Client:0xc0007a1900}
+2024/04/26 17:16:45 p.configured: true
+2024/04/26 17:16:45 p.version: dog
+2024/04/26 17:16:45 p.dog: &{Client:0xc0007a0500}
+2024/04/26 17:16:45 p.configured: true
+2024/04/26 17:16:45 p.version: dog
+2024/04/26 17:17:40 fact: {ID:692083c8-7d88-44d3-bd28-90ddbeb4526c Name:tf_test_fact_7ev09 Groups:map[all:0xc0002fdd70 app:0xc0002fddd0]}
+2024/04/26 17:17:40 p.dog: &{Client:0xc00027a280}
+2024/04/26 17:17:40 p.configured: true
+2024/04/26 17:17:40 p.version: dog
+2024/04/26 17:17:41 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:41 p.configured: true
+2024/04/26 17:17:41 p.version: dog
+2024/04/26 17:17:41 r.p: {dog:0xc0007a2028 configured:false version:}
+2024/04/26 17:17:41 r.p.dog: &{Client:0xc0001aa280}
+2024/04/26 17:17:41 p.dog: &{Client:0xc0001aa280}
+2024/04/26 17:17:41 p.configured: true
+2024/04/26 17:17:41 p.version: dog
+2024/04/26 17:17:41 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:41 p.configured: true
+2024/04/26 17:17:41 p.version: dog
+2024/04/26 17:17:41 r.p: {dog:0xc0004980a8 configured:false version:}
+2024/04/26 17:17:41 r.p.dog: &{Client:0xc000414280}
+2024/04/26 17:17:41 p.dog: &{Client:0xc000414280}
+2024/04/26 17:17:41 p.configured: true
+2024/04/26 17:17:41 p.version: dog
+2024/04/26 17:17:42 p.dog: &{Client:0xc000414780}
+2024/04/26 17:17:42 p.configured: true
+2024/04/26 17:17:42 p.version: dog
+2024/04/26 17:17:42 fact: {ID:692083c8-7d88-44d3-bd28-90ddbeb4526c Name:tf_test_fact_7ev09 Groups:map[all:0xc00066c300 app:0xc00066c330]}
+2024/04/26 17:17:42 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:42 p.configured: true
+2024/04/26 17:17:42 p.version: dog
+2024/04/26 17:17:42 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:17:42 p.configured: true
+2024/04/26 17:17:42 p.version: dog
+2024/04/26 17:17:42 r.p: {dog:0xc00011a688 configured:false version:}
+2024/04/26 17:17:42 r.p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:42 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:42 p.configured: true
+2024/04/26 17:17:42 p.version: dog
+2024/04/26 17:17:43 p.dog: &{Client:0xc00031a280}
+2024/04/26 17:17:43 p.configured: true
+2024/04/26 17:17:43 p.version: dog
+2024/04/26 17:17:43 r.p: {dog:0xc000498150 configured:false version:}
+2024/04/26 17:17:43 r.p.dog: &{Client:0xc00031a500}
+2024/04/26 17:17:43 p.dog: &{Client:0xc00031a500}
+2024/04/26 17:17:43 p.configured: true
+2024/04/26 17:17:43 p.version: dog
+2024/04/26 17:17:43 p.dog: &{Client:0xc000187b80}
+2024/04/26 17:17:43 p.configured: true
+2024/04/26 17:17:43 p.version: dog
+2024/04/26 17:17:45 fact: {ID:d89b0e50-f971-4ef5-ab6b-4abd9bbf0749 Name:tf_test_fact_big_vd03n Groups:map[all:0xc0001dd5f0]}
+2024/04/26 17:17:46 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:46 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:46 r.p: {dog:0xc0004980b0 configured:false version:}
+2024/04/26 17:17:46 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:17:46 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:46 p.dog: &{Client:0xc0003e4780}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:46 r.p: {dog:0xc0004980b8 configured:false version:}
+2024/04/26 17:17:46 r.p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:17:46 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:46 p.dog: &{Client:0xc00034e780}
+2024/04/26 17:17:46 p.configured: true
+2024/04/26 17:17:46 p.version: dog
+2024/04/26 17:17:47 fact: {ID:d89b0e50-f971-4ef5-ab6b-4abd9bbf0749 Name:tf_test_fact_big_vd03n Groups:map[all:0xc0008971a0]}
+2024/04/26 17:17:47 p.dog: &{Client:0xc00034e280}
+2024/04/26 17:17:47 p.configured: true
+2024/04/26 17:17:47 p.version: dog
+2024/04/26 17:17:47 p.dog: &{Client:0xc00034e500}
+2024/04/26 17:17:47 p.configured: true
+2024/04/26 17:17:47 p.version: dog
+2024/04/26 17:17:47 r.p: {dog:0xc0003a21f0 configured:false version:}
+2024/04/26 17:17:47 r.p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:47 p.dog: &{Client:0xc000186780}
+2024/04/26 17:17:47 p.configured: true
+2024/04/26 17:17:47 p.version: dog
+2024/04/26 17:17:48 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:17:48 p.configured: true
+2024/04/26 17:17:48 p.version: dog
+2024/04/26 17:17:48 r.p: {dog:0xc00011a690 configured:false version:}
+2024/04/26 17:17:48 r.p.dog: &{Client:0xc0002cb400}
+2024/04/26 17:17:48 p.dog: &{Client:0xc0002cb400}
+2024/04/26 17:17:48 p.configured: true
+2024/04/26 17:17:48 p.version: dog
+2024/04/26 17:17:48 p.dog: &{Client:0xc00062fb80}
+2024/04/26 17:17:48 p.configured: true
+2024/04/26 17:17:48 p.version: dog
+2024/04/26 17:19:26 fact: {ID:b77961ca-5f20-480f-a359-5b5a04ceaee6 Name:tf_test_fact_6zkex Groups:map[all:0xc00070acc0 app:0xc00070ac60]}
+2024/04/26 17:19:26 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:19:26 p.configured: true
+2024/04/26 17:19:26 p.version: dog
+2024/04/26 17:19:26 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:19:26 p.configured: true
+2024/04/26 17:19:26 p.version: dog
+2024/04/26 17:19:26 r.p: {dog:0xc0003ea050 configured:false version:}
+2024/04/26 17:19:26 r.p.dog: &{Client:0xc000186780}
+2024/04/26 17:19:26 p.dog: &{Client:0xc000186780}
+2024/04/26 17:19:26 p.configured: true
+2024/04/26 17:19:26 p.version: dog
+2024/04/26 17:19:26 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:19:26 p.configured: true
+2024/04/26 17:19:26 p.version: dog
+2024/04/26 17:19:26 r.p: {dog:0xc00039c058 configured:false version:}
+2024/04/26 17:19:26 r.p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:19:26 p.dog: &{Client:0xc0002cac80}
+2024/04/26 17:19:26 p.configured: true
+2024/04/26 17:19:26 p.version: dog
+2024/04/26 17:19:27 p.dog: &{Client:0xc000318c80}
+2024/04/26 17:19:27 p.configured: true
+2024/04/26 17:19:27 p.version: dog
+2024/04/26 17:19:27 fact: {ID:b77961ca-5f20-480f-a359-5b5a04ceaee6 Name:tf_test_fact_6zkex Groups:map[all:0xc000692a80 app:0xc000692a20]}
+2024/04/26 17:19:27 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:19:27 p.configured: true
+2024/04/26 17:19:27 p.version: dog
+2024/04/26 17:19:27 p.dog: &{Client:0xc000186780}
+2024/04/26 17:19:27 p.configured: true
+2024/04/26 17:19:27 p.version: dog
+2024/04/26 17:19:27 r.p: {dog:0xc0000da0f0 configured:false version:}
+2024/04/26 17:19:27 r.p.dog: &{Client:0xc000186a00}
+2024/04/26 17:19:27 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:19:27 p.configured: true
+2024/04/26 17:19:27 p.version: dog
+2024/04/26 17:19:28 p.dog: &{Client:0xc0002ca500}
+2024/04/26 17:19:28 p.configured: true
+2024/04/26 17:19:28 p.version: dog
+2024/04/26 17:19:28 r.p: {dog:0xc0004a0050 configured:false version:}
+2024/04/26 17:19:28 r.p.dog: &{Client:0xc000186500}
+2024/04/26 17:19:28 p.dog: &{Client:0xc000186500}
+2024/04/26 17:19:28 p.configured: true
+2024/04/26 17:19:28 p.version: dog
+2024/04/26 17:19:28 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:19:28 p.configured: true
+2024/04/26 17:19:28 p.version: dog
+2024/04/26 17:19:30 fact: {ID:4310e37d-4e4f-40c3-a579-3c361cfc20e2 Name:tf_test_fact_big_ar1sq Groups:map[all:0xc0005663c0]}
+2024/04/26 17:19:30 p.dog: &{Client:0xc0002ca000}
+2024/04/26 17:19:30 p.configured: true
+2024/04/26 17:19:30 p.version: dog
+2024/04/26 17:19:31 p.dog: &{Client:0xc0000bd680}
+2024/04/26 17:19:31 p.configured: true
+2024/04/26 17:19:31 p.version: dog
+2024/04/26 17:19:31 r.p: {dog:0xc0004c81b0 configured:false version:}
+2024/04/26 17:19:31 r.p.dog: &{Client:0xc000310500}
+2024/04/26 17:19:31 p.dog: &{Client:0xc000310500}
+2024/04/26 17:19:31 p.configured: true
+2024/04/26 17:19:31 p.version: dog
+2024/04/26 17:19:31 p.dog: &{Client:0xc000310280}
+2024/04/26 17:19:31 p.configured: true
+2024/04/26 17:19:31 p.version: dog
+2024/04/26 17:19:31 r.p: {dog:0xc0004c8040 configured:false version:}
+2024/04/26 17:19:31 r.p.dog: &{Client:0xc000310500}
+2024/04/26 17:19:31 p.dog: &{Client:0xc000310500}
+2024/04/26 17:19:31 p.configured: true
+2024/04/26 17:19:31 p.version: dog
+2024/04/26 17:19:31 p.dog: &{Client:0xc000446280}
+2024/04/26 17:19:31 p.configured: true
+2024/04/26 17:19:31 p.version: dog
+2024/04/26 17:19:31 fact: {ID:4310e37d-4e4f-40c3-a579-3c361cfc20e2 Name:tf_test_fact_big_ar1sq Groups:map[all:0xc00066a360]}
+2024/04/26 17:19:32 p.dog: &{Client:0xc000186c80}
+2024/04/26 17:19:32 p.configured: true
+2024/04/26 17:19:32 p.version: dog
+2024/04/26 17:19:32 p.dog: &{Client:0xc0000ea780}
+2024/04/26 17:19:32 p.configured: true
+2024/04/26 17:19:32 p.version: dog
+2024/04/26 17:19:32 r.p: {dog:0xc0000da1c0 configured:false version:}
+2024/04/26 17:19:32 r.p.dog: &{Client:0xc000186c80}
+2024/04/26 17:19:32 p.dog: &{Client:0xc000186c80}
+2024/04/26 17:19:32 p.configured: true
+2024/04/26 17:19:32 p.version: dog
+2024/04/26 17:19:33 p.dog: &{Client:0xc000187180}
+2024/04/26 17:19:33 p.configured: true
+2024/04/26 17:19:33 p.version: dog
+2024/04/26 17:19:33 r.p: {dog:0xc0003ea048 configured:false version:}
+2024/04/26 17:19:33 r.p.dog: &{Client:0xc0000e2280}
+2024/04/26 17:19:33 p.dog: &{Client:0xc0000e2280}
+2024/04/26 17:19:33 p.configured: true
+2024/04/26 17:19:33 p.version: dog
+2024/04/26 17:19:33 p.dog: &{Client:0xc0000e2f00}
+2024/04/26 17:19:33 p.configured: true
+2024/04/26 17:19:33 p.version: dog
+2024/04/26 17:20:01 fact: {ID:3859330e-9756-4140-a082-dc82da12d4d0 Name:tf_test_fact_dyt01 Groups:map[all:0xc00049f410 app:0xc00049f470]}
+2024/04/26 17:20:01 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:20:01 p.configured: true
+2024/04/26 17:20:01 p.version: dog
+2024/04/26 17:20:02 p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:02 p.configured: true
+2024/04/26 17:20:02 p.version: dog
+2024/04/26 17:20:02 r.p: {dog:0xc00039c1b8 configured:false version:}
+2024/04/26 17:20:02 r.p.dog: &{Client:0xc000186a00}
+2024/04/26 17:20:02 p.dog: &{Client:0xc000186a00}
+2024/04/26 17:20:02 p.configured: true
+2024/04/26 17:20:02 p.version: dog
+2024/04/26 17:20:02 p.dog: &{Client:0xc000328280}
+2024/04/26 17:20:02 p.configured: true
+2024/04/26 17:20:02 p.version: dog
+2024/04/26 17:20:02 r.p: {dog:0xc00012c480 configured:false version:}
+2024/04/26 17:20:02 r.p.dog: &{Client:0xc000328780}
+2024/04/26 17:20:02 p.dog: &{Client:0xc000328780}
+2024/04/26 17:20:02 p.configured: true
+2024/04/26 17:20:02 p.version: dog
+2024/04/26 17:20:02 p.dog: &{Client:0xc000328500}
+2024/04/26 17:20:02 p.configured: true
+2024/04/26 17:20:02 p.version: dog
+2024/04/26 17:20:02 fact: {ID:3859330e-9756-4140-a082-dc82da12d4d0 Name:tf_test_fact_dyt01 Groups:map[all:0xc000700090 app:0xc0007000c0]}
+2024/04/26 17:20:03 p.dog: &{Client:0xc000328280}
+2024/04/26 17:20:03 p.configured: true
+2024/04/26 17:20:03 p.version: dog
+2024/04/26 17:20:03 p.dog: &{Client:0xc000186780}
+2024/04/26 17:20:03 p.configured: true
+2024/04/26 17:20:03 p.version: dog
+2024/04/26 17:20:03 r.p: {dog:0xc000486118 configured:false version:}
+2024/04/26 17:20:03 r.p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:03 p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:03 p.configured: true
+2024/04/26 17:20:03 p.version: dog
+2024/04/26 17:20:04 p.dog: &{Client:0xc000186780}
+2024/04/26 17:20:04 p.configured: true
+2024/04/26 17:20:04 p.version: dog
+2024/04/26 17:20:04 r.p: {dog:0xc000486078 configured:false version:}
+2024/04/26 17:20:04 r.p.dog: &{Client:0xc000126280}
+2024/04/26 17:20:04 p.dog: &{Client:0xc000126280}
+2024/04/26 17:20:04 p.configured: true
+2024/04/26 17:20:04 p.version: dog
+2024/04/26 17:20:04 p.dog: &{Client:0xc000127900}
+2024/04/26 17:20:04 p.configured: true
+2024/04/26 17:20:04 p.version: dog
+2024/04/26 17:20:06 fact: {ID:b2fb073f-c940-4e0a-a8e6-1e47997a7479 Name:tf_test_fact_big_mo2sm Groups:map[all:0xc00058ffb0]}
+2024/04/26 17:20:06 p.dog: &{Client:0xc0003ba280}
+2024/04/26 17:20:06 p.configured: true
+2024/04/26 17:20:06 p.version: dog
+2024/04/26 17:20:07 p.dog: &{Client:0xc000186780}
+2024/04/26 17:20:07 p.configured: true
+2024/04/26 17:20:07 p.version: dog
+2024/04/26 17:20:07 r.p: {dog:0xc0004862d8 configured:false version:}
+2024/04/26 17:20:07 r.p.dog: &{Client:0xc000306c80}
+2024/04/26 17:20:07 p.dog: &{Client:0xc000306c80}
+2024/04/26 17:20:07 p.configured: true
+2024/04/26 17:20:07 p.version: dog
+2024/04/26 17:20:07 p.dog: &{Client:0xc000306500}
+2024/04/26 17:20:07 p.configured: true
+2024/04/26 17:20:07 p.version: dog
+2024/04/26 17:20:07 r.p: {dog:0xc0004860a0 configured:false version:}
+2024/04/26 17:20:07 r.p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:07 p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:07 p.configured: true
+2024/04/26 17:20:07 p.version: dog
+2024/04/26 17:20:08 p.dog: &{Client:0xc000164a00}
+2024/04/26 17:20:08 p.configured: true
+2024/04/26 17:20:08 p.version: dog
+2024/04/26 17:20:08 fact: {ID:b2fb073f-c940-4e0a-a8e6-1e47997a7479 Name:tf_test_fact_big_mo2sm Groups:map[all:0xc00042c2d0]}
+2024/04/26 17:20:08 p.dog: &{Client:0xc000186780}
+2024/04/26 17:20:08 p.configured: true
+2024/04/26 17:20:08 p.version: dog
+2024/04/26 17:20:08 p.dog: &{Client:0xc000265400}
+2024/04/26 17:20:08 p.configured: true
+2024/04/26 17:20:08 p.version: dog
+2024/04/26 17:20:08 r.p: {dog:0xc0005da0d8 configured:false version:}
+2024/04/26 17:20:08 r.p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:08 p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:08 p.configured: true
+2024/04/26 17:20:08 p.version: dog
+2024/04/26 17:20:09 p.dog: &{Client:0xc000186780}
+2024/04/26 17:20:09 p.configured: true
+2024/04/26 17:20:09 p.version: dog
+2024/04/26 17:20:09 r.p: {dog:0xc0005da468 configured:false version:}
+2024/04/26 17:20:09 r.p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:09 p.dog: &{Client:0xc000264500}
+2024/04/26 17:20:09 p.configured: true
+2024/04/26 17:20:09 p.version: dog
+2024/04/26 17:20:09 p.dog: &{Client:0xc000186c80}
+2024/04/26 17:20:09 p.configured: true
+2024/04/26 17:20:09 p.version: dog

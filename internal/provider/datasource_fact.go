@@ -22,13 +22,13 @@ type (
 	Fact struct {
 		ID     types.String               `tfsdk:"id"`
 		Name   types.String               `tfsdk:"name"`
-		Groups map[string]*FactGroup `tfsdk:"groups"`
+		Groups map[string]*FactGroup      `tfsdk:"groups"`
 	}
 
 	FactGroup struct {
-		Vars     *string                 `tfsdk:"vars"`
-		Hosts    map[string]map[string]string `tfsdk:"hosts"`
-		Children []string                     `tfsdk:"children"`
+		Vars     *string            `tfsdk:"vars"`
+		Hosts    map[string]map[string]*string `tfsdk:"hosts"`
+		Children []string                      `tfsdk:"children"`
 	}
 )
 
@@ -56,10 +56,14 @@ func (*factDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 							MarkdownDescription: "json string of vars",
 							Required:            true,
 						},
-						"hosts": schema.MapAttribute{
-							Required:            true,
-							ElementType:         types.MapType{ElemType: types.StringType},
+						"hosts": schema.StringAttribute{
+							MarkdownDescription: "json string of hosts",
+							Optional:            true,
 						},
+						//"hosts": schema.MapAttribute{
+						//	Required:            true,
+						//	ElementType:         types.MapType{ElemType: types.StringType},
+						//},
 						"children": schema.ListAttribute{
 							Required:            true,
 							ElementType:         types.StringType,
@@ -116,7 +120,7 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	res, statusCode, err := d.p.dog.GetFactsEncode(nil)
 	if (statusCode < 200 || statusCode > 299) && statusCode != 404 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read facts, got error: %s", err))

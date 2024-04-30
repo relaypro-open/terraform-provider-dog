@@ -55,10 +55,14 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 							MarkdownDescription: "json string of vars",
 							Optional:            true,
 						},
-						"hosts": schema.MapAttribute{
-							Required:            true,
-							ElementType:         types.MapType{ElemType: types.StringType},
+						"hosts": schema.StringAttribute{
+							MarkdownDescription: "json string of hosts",
+							Optional:            true,
 						},
+						//"hosts": schema.MapAttribute{
+						//	Required:            true,
+						//	ElementType:         types.MapType{ElemType: types.StringType},
+						//},
 						"children": schema.ListAttribute{
 							Required:            true,
 							ElementType:         types.StringType,
@@ -211,7 +215,7 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
 	}
 	if statusCode != 201 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -246,7 +250,7 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
 	fact, statusCode, err := r.p.dog.GetFactEncode(factID, nil)
 	if statusCode != 200 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read fact, got error: %s", err))
@@ -288,7 +292,7 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -319,7 +323,7 @@ func (r *factResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	factID := state.ID.ValueString()
 	fact, statusCode, err := r.p.dog.DeleteFact(factID, nil)
 	if statusCode != 204 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read fact, got error: %s", err))

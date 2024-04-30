@@ -143,7 +143,7 @@ type groupResourceData struct {
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars                *string                       `tfsdk:"vars"`
+	Vars                *string                            `tfsdk:"vars"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
@@ -161,7 +161,7 @@ func GroupToApiGroup(plan Group) api.Group {
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 	
-	if plan.Vars.ValueString() != "" {
+	if plan.Vars == nil {
 		newGroup := api.Group{
 			Description:         plan.Description.ValueString(),
 			Name:                plan.Name.ValueString(),
@@ -169,7 +169,6 @@ func GroupToApiGroup(plan Group) api.Group {
 			ProfileName:         plan.ProfileName.ValueString(),
 			ProfileVersion:      plan.ProfileVersion.ValueString(),
 			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-			Vars:                plan.Vars.ValueString(),
 		}
 		return newGroup 
 	} else {
@@ -180,6 +179,7 @@ func GroupToApiGroup(plan Group) api.Group {
 			ProfileName:         plan.ProfileName.ValueString(),
 			ProfileVersion:      plan.ProfileVersion.ValueString(),
 			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                *plan.Vars,
 		}
 		return newGroup 
 	}
@@ -203,7 +203,6 @@ func ApiToGroup(group api.Group) Group {
 			ProfileName:         types.StringValue(group.ProfileName),
 			ProfileVersion:      types.StringValue(group.ProfileVersion),
 			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-			Vars:                types.StringValue(group.Vars),
 		}
 		return h
 	} else {
@@ -215,6 +214,7 @@ func ApiToGroup(group api.Group) Group {
 			ProfileName:         types.StringValue(group.ProfileName),
 			ProfileVersion:      types.StringValue(group.ProfileVersion),
 			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			Vars:                &group.Vars,
 		}
 		return h
 	}
@@ -286,7 +286,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 	}
 	if statusCode != 201 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -319,7 +319,7 @@ func (r *groupResource) Read(ctx context.Context, req resource.ReadRequest, resp
 
 	group, statusCode, err := r.p.dog.GetGroupEncode(groupID, nil)
 	if statusCode != 200 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
@@ -361,7 +361,7 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if resp.Diagnostics.HasError() {
 		return
@@ -392,7 +392,7 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	groupID := state.ID.ValueString()
 	group, statusCode, err := r.p.dog.DeleteGroup(groupID, nil)
 	if statusCode != 204 {
-		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
+		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
 	}
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read group, got error: %s", err))
