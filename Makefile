@@ -52,5 +52,5 @@ testacc:
 	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120s -count=1
 
 update_api:
-	go get github.com/relaypro-open/dog_api_golang@main
+	GOPROXY=direct go get github.com/relaypro-open/dog_api_golang@main
 	go mod vendor
