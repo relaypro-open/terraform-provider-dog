@@ -472,34 +472,66 @@ func fact_export(output_dir string, environment string) {
         fmt.Fprintf(tf_w, "resource \"dog_fact\" \"%s\" {\n", terraformName)
         fmt.Fprintf(tf_w, "    name         = %q\n", row.Name)
         fmt.Fprintf(tf_w, "    groups       = {\n")
-        for name, group := range row.Groups {
-        fmt.Fprintf(tf_w, "      %s = {\n", name)
-        fmt.Fprintf(tf_w, "        children = %q\n", group.Children)
-        fmt.Fprintf(tf_w, "        hosts    = {\n")
-        for host, hostValues := range group.Hosts {
-        fmt.Fprintf(tf_w, "          %s     = {\n", host)
-        for k, v := range hostValues {
-        fmt.Fprintf(tf_w, "            %s   = %q\n", k, v)
-        }
-        fmt.Fprintf(tf_w, "          }\n")
-        }
-        fmt.Fprintf(tf_w, "        }\n")
-		if group.Vars == nil {
-		} else {
-        fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
-        for key, val := range group.Vars {
-		if _, ok := val.(float64); ok {
-		fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
-		} else {
-		fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
+		for name, group := range row.Groups {
+			fmt.Fprintf(tf_w, "      %s = {\n", name)
+
+			if interfaceIsSlice(group.Children) {
+				stringsJson, err := json.Marshal(group.Children)
+				if err != nil {
+					log.Fatal("Cannot encode to JSON ", err)
+				}
+				fmt.Printf("len(stringsJson)=%d\n", len(stringsJson))
+				if string(stringsJson) == "null" {
+					fmt.Fprintf(tf_w, "        children = []\n")
+				} else {
+					fmt.Fprintf(tf_w, "        children = %s\n", stringsJson)
+				}
+			} else {
+				fmt.Fprintf(tf_w, "        children = %q\n", group.Children)
+			}
+			if group.Hosts == nil {
+			} else {
+				fmt.Fprintf(tf_w, "        hosts = jsonencode({\n")
+				for host, hostValues := range group.Hosts {
+					fmt.Fprintf(tf_w, "          \"%s\"     = {\n", host)
+					for key, val := range hostValues {
+						if _, ok := val.(float64); ok {
+							fmt.Fprintf(tf_w, "            \"%s\" = %#v\n", key, int(val.(float64)))
+						} else if _, ok := val.(bool); ok {
+							fmt.Fprintf(tf_w, "            \"%s\" = %#v\n", key, bool(val.(bool)))
+						} else {
+							fmt.Fprintf(tf_w, "            \"%s\" = %q\n", key, val)
+						}
+					}
+					fmt.Fprintf(tf_w, "          }\n")
+				}
+				fmt.Fprintf(tf_w, "        })\n")
+			}
+			if group.Vars == nil {
+			} else {
+				fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
+				for key, val := range group.Vars {
+					fmt.Printf("variable val=%v is of type %v \n", val, reflect.ValueOf(val).Kind())
+					if _, ok := val.(float64); ok {
+						fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
+					} else if _, ok := val.(bool); ok {
+						fmt.Fprintf(tf_w, "          %s = %#v\n", key, bool(val.(bool)))
+					} else if interfaceIsSlice(val) {
+						stringsJson, err := json.Marshal(val)
+						if err != nil {
+							log.Fatal("Cannot encode to JSON ", err)
+						}
+						fmt.Fprintf(tf_w, "          %s = %s\n", key, stringsJson)
+					} else {
+						fmt.Fprintf(tf_w, "          %s = %q\n", key, val)
+					}
+				}
+				fmt.Fprintf(tf_w, "      })\n")
+			}
+			fmt.Fprintf(tf_w, "    }\n")
 		}
-        }
-        fmt.Fprintf(tf_w, "      })\n")
-		}
-        fmt.Fprintf(tf_w, "    }\n")
-        fmt.Fprintf(tf_w, "  }\n")
-        }
-        fmt.Fprintf(tf_w, "}\n")
+		fmt.Fprintf(tf_w, "  }\n")
+		fmt.Fprintf(tf_w, "}\n")
         //fmt.Fprintf(import_w, "terraform import module.dog.dog_fact.%s %s\n", terraformName, row.ID)
         fmt.Fprintf(import_w, "import {\n")
         fmt.Fprintf(import_w, "  id = %q\n", row.ID)
@@ -510,6 +542,14 @@ func fact_export(output_dir string, environment string) {
     import_w.Flush()
 }
 
+func interfaceIsSlice(t interface{}) bool {
+	switch reflect.TypeOf(t).Kind() {
+	case reflect.Slice:
+		return true
+	default:
+		return false
+	}
+}
 
 var environment string
 var output_dir string
