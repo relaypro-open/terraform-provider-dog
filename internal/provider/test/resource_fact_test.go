@@ -63,7 +63,7 @@ resource %[1]q %[2]q {
 		key = "value"
 		key2 = "value2"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value",
 	    key2 = "value2"
@@ -71,7 +71,7 @@ resource %[1]q %[2]q {
 	  host2 = {
 	    key2 = "value2"
 	  }
-	},
+	}),
 	children = [
 		"test"
 	]
@@ -80,11 +80,11 @@ resource %[1]q %[2]q {
 	vars = jsonencode({
 		key = "value"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value"
 	  }
-	},
+	}),
 	children = [
 		"test2"
 	]
@@ -105,7 +105,7 @@ resource %[1]q %[2]q {
 		key2 = "value2"
 		key3 = "value3 + 3"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value",
 	    key2 = "value2"
@@ -113,7 +113,7 @@ resource %[1]q %[2]q {
 	  host2 = {
 	    key2 = "value2"
 	  }
-	},
+	}),
 	children = [
 		"test"
 	]
@@ -123,11 +123,11 @@ resource %[1]q %[2]q {
 		key = "value"
 		key2 = "value2"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value"
 	  }
-	},
+	}),
 	children = [
 		"test2"
 	]
@@ -147,7 +147,7 @@ resource %[1]q %[2]q {
 		key2 = "value2"
 		key3 = "value3"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value",
 	    key2 = "value2"
@@ -155,7 +155,7 @@ resource %[1]q %[2]q {
 	  host2 = {
 	    key2 = "value2"
 	  }
-	},
+	}),
 	children = [
 		"test"
 	]
@@ -164,11 +164,11 @@ resource %[1]q %[2]q {
 	vars = jsonencode({
 		key = "value"
 	})
-	hosts = {
+	hosts = jsonencode({
 	  host1 = {
 	    key = "value"
 	  }
-	},
+	}),
 	children = [
 		"test2"
 	]
@@ -229,7 +229,7 @@ resource %[1]q %[2]q {
     groups = {
       all = {
         children = ["dog_test"]
-        hosts = {
+        hosts = jsonencode({
           host2 = {
             key2 = "value2"
           }
@@ -237,7 +237,7 @@ resource %[1]q %[2]q {
             key = "value"
             key2 = "value2"
           }
-        }
+        })
         vars = jsonencode({
           ansible_python_interpreter = "python"
           cert_name = "star-republicdev-info"
@@ -303,7 +303,7 @@ resource %[1]q %[2]q {
     groups = {
       all = {
         children = ["dog_test"]
-        hosts = {
+        hosts = jsonencode({
           host2 = {
             key2 = "value2"
           }
@@ -311,7 +311,7 @@ resource %[1]q %[2]q {
             key = "value"
             key2 = "value2"
           }
-        }
+        })
         vars = jsonencode({
 		  test = "best"
           ansible_python_interpreter = "python"
@@ -377,7 +377,7 @@ resource %[1]q %[2]q {
     groups = {
       all = {
         children = ["dog_test"]
-        hosts = {
+        hosts = jsonencode({
           host2 = {
             key2 = "value2"
           }
@@ -385,7 +385,7 @@ resource %[1]q %[2]q {
             key = "value"
             key2 = "value2"
           }
-        }
+        })
         vars = jsonencode({
           ansible_python_interpreter = "python"
           cert_name = "star-republicdev-info"

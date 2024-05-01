@@ -2,13 +2,13 @@ module dog-import
 
 go 1.21
 
-require github.com/relaypro-open/dog_api_golang v0.0.0-20240209233104-4a472c16e9af
+require github.com/relaypro-open/dog_api_golang v1.0.1-0.20240501145058-9dda0fc74cbc
 
 require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/go-resty/resty/v2 v2.7.0 // indirect
+	github.com/go-resty/resty/v2 v2.11.0 // indirect
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/gookit/color v1.5.4 // indirect
 	github.com/gookit/goutil v0.6.15 // indirect
