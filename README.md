@@ -284,13 +284,13 @@ data "dog_zone" "test_zone" {
 
 ## Importing dog resources
 
-NOTE: dog-import uses APIv1, NOT APIv2.
+NOTE: dog-import uses APIv2, NOT APIv1.
 example:
 
 ```
- export DOG_API_ENDPOINT="http://dog:8000/api"
- NOT
  export DOG_API_ENDPOINT="http://dog:8000/api/V2"
+ NOT
+ export DOG_API_ENDPOINT="http://dog:8000/api"
 ```
 
 If you have an existing dog configuration, you can batch import this config:
@@ -310,6 +310,7 @@ link.tf
 profile.tf
 service.tf
 zone.tf
+ruleset.tf
 ```
 
 Import blocks are also created to import these resources into Terraform's state.  They need to be
@@ -322,6 +323,7 @@ link_import.tf
 profile_import.tf
 service_import.tf
 zone_import.tf
+ruleset_import.tf
 ```
 
 You may want or need to reorganize these files to fit into your Terraform organization.

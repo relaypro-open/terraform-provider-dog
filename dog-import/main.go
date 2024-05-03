@@ -344,6 +344,7 @@ func ruleset_export(output_dir string, environment string) {
 
     options := api.RulesetsListOptions{} 
     options.Names = true
+	options.Active = true
     res, statusCode, err := c.GetRulesets(&options)
     if err != nil {
         log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
