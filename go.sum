@@ -166,14 +166,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.2.3 h1:NP0eAhjcjImqslEwo/1hq7gpajME0fTLTezBKDqfXqo=
 github.com/posener/complete v1.2.3/go.mod h1:WZIdtGGp+qx0sLrYKtIRAruyNpv6hFCicSgv7Sy7s/s=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240223155142-c1f80179f2ab h1:Lkl2fTQ5y0Jb5IhQ1zmLzBa+xhZzAdFOy1QD9LRO0WM=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240223155142-c1f80179f2ab/go.mod h1:aSEjRNKDWQBgJv6LpePvHVbBd84tEvUoTHRDWWdJCB0=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240501145058-9dda0fc74cbc h1:kVy5VTnXvAaJihD3fQ6Gi7dyciWSbjYPd8z74nNCkQ0=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240501145058-9dda0fc74cbc/go.mod h1:aSEjRNKDWQBgJv6LpePvHVbBd84tEvUoTHRDWWdJCB0=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240501195052-ef38d92e61ff h1:2tMZMuSMWLOpI+bHSNWoMYIVUcqlg87Kb77KRY4nIaI=
-github.com/relaypro-open/dog_api_golang v1.0.1-0.20240501195052-ef38d92e61ff/go.mod h1:aSEjRNKDWQBgJv6LpePvHVbBd84tEvUoTHRDWWdJCB0=
-github.com/relaypro-open/dog_api_golang v1.0.2-0.20240503141604-0dd564059740 h1:B/tTPNqno5hFFVRhCwISyafCC2LqfyS1fWqKA1OPqgI=
-github.com/relaypro-open/dog_api_golang v1.0.2-0.20240503141604-0dd564059740/go.mod h1:aSEjRNKDWQBgJv6LpePvHVbBd84tEvUoTHRDWWdJCB0=
+github.com/relaypro-open/dog_api_golang v1.0.2 h1:mKpXm8yMgpZ+NoLhJs1fGu3umahVXb8WIzVoOZG08+U=
+github.com/relaypro-open/dog_api_golang v1.0.2/go.mod h1:aSEjRNKDWQBgJv6LpePvHVbBd84tEvUoTHRDWWdJCB0=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
 github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99yedzYV+kq4uf4=
 github.com/russross/blackfriday v1.6.0 h1:KqfZb0pUVN2lYqZUYRddxF4OR8ZMURnJIG5Y3VRLtww=
