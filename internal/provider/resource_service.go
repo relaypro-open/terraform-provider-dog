@@ -6,13 +6,13 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -54,21 +54,19 @@ func (*serviceResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 							Required:            true,
 							Validators: []validator.String{
 								stringvalidator.Any(
-									stringvalidator.OneOf("tcp","udp","icmp","udplite","esp","ah","sctp"),
+									stringvalidator.OneOf("tcp", "udp", "icmp", "udplite", "esp", "ah", "sctp"),
 									stringvalidator.RegexMatches(
 										regexp.MustCompile(`^[0-9]*$`), "Must be numeric",
 									),
 								),
-
 							},
 						},
 						"ports": schema.ListAttribute{
 							MarkdownDescription: "Service ports",
 							Required:            true,
-							ElementType: types.StringType,
+							ElementType:         types.StringType,
 							Validators: []validator.List{
-								listvalidator.ValueStringsAre(stringvalidator.RegexMatches( regexp.MustCompile(`^[0-9:]*$`), "Must be numeric or : (to indicate a range)",
-								)),
+								listvalidator.ValueStringsAre(stringvalidator.RegexMatches(regexp.MustCompile(`^[0-9:]*$`), "Must be numeric or : (to indicate a range)")),
 							},
 						},
 					},
@@ -85,7 +83,7 @@ func (*serviceResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Service identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}

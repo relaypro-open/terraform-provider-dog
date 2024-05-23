@@ -68,7 +68,7 @@ func (*serviceDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 						"ports": schema.ListAttribute{
 							MarkdownDescription: "Service ports",
 							Required:            true,
-							ElementType: types.StringType,
+							ElementType:         types.StringType,
 						},
 					},
 				},
@@ -84,7 +84,7 @@ func (*serviceDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Service identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}
@@ -158,7 +158,6 @@ func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServicesProtocol: %#v", filteredServicesProtocol))
 
 	filteredServices := filteredServicesProtocol
-
 
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServices: %#v", filteredServices))
 	if filteredServices == nil {

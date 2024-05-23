@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
@@ -55,7 +55,7 @@ func (*profileDataSource) Schema(ctx context.Context, req datasource.SchemaReque
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Profile identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}
@@ -121,7 +121,7 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	if filteredProfiles == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned no results."))
-	} 
+	}
 	if len(filteredProfiles) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned more than one result."))
 	}
@@ -129,7 +129,7 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	profile := filteredProfiles[0] 
+	profile := filteredProfiles[0]
 	// Set state
 	state = ApiToProfile(profile)
 	// Set state

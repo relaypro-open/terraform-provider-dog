@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
@@ -20,15 +20,15 @@ type (
 	FactList []Fact
 
 	Fact struct {
-		ID     types.String               `tfsdk:"id"`
-		Name   types.String               `tfsdk:"name"`
+		ID     types.String          `tfsdk:"id"`
+		Name   types.String          `tfsdk:"name"`
 		Groups map[string]*FactGroup `tfsdk:"groups"`
 	}
 
 	FactGroup struct {
-		Vars     *string                 `tfsdk:"vars"`
-		Hosts    *string `tfsdk:"hosts"`
-		Children []string                     `tfsdk:"children"`
+		Vars     *string  `tfsdk:"vars"`
+		Hosts    *string  `tfsdk:"hosts"`
+		Children []string `tfsdk:"children"`
 	}
 )
 
@@ -60,23 +60,19 @@ func (*factDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 							MarkdownDescription: "json string of hosts",
 							Required:            true,
 						},
-						//"hosts": schema.MapAttribute{
-						//	Required:            true,
-						//	ElementType:         types.MapType{ElemType: types.StringType},
-						//},
 						"children": schema.ListAttribute{
-							Required:            true,
-							ElementType:         types.StringType,
+							Required:    true,
+							ElementType: types.StringType,
 						},
 					},
 				},
 				Optional: true,
 			},
 			"name": schema.StringAttribute{
-				Optional:            true,
+				Optional: true,
 			},
 			"id": schema.StringAttribute{
-				Optional:            true,
+				Optional: true,
 				Computed: true,
 			},
 		},

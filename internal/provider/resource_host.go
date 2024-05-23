@@ -75,14 +75,14 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				Optional:            true,
 				//Required:            true,
 			},
+			"alert_enable": schema.BoolAttribute{
+				MarkdownDescription: "alert enable",
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Host identifier",
 				Computed:            true,
-			},
-			"alert_enable": schema.BoolAttribute{
-				MarkdownDescription: "alert enable",
-				Optional:            true,
 			},
 		},
 	}
@@ -119,7 +119,7 @@ type hostResourceData struct {
 	Location    string       `tfsdk:"location"`
 	Name        string       `tfsdk:"name"`
 	Vars        *string      `tfsdk:"vars"`
-	AlertEnable *bool   `tfsdk:"alert_enable"`
+	AlertEnable *bool        `tfsdk:"alert_enable"`
 }
 
 func HostToApiHost(plan Host) api.Host {

@@ -6,16 +6,16 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/davecgh/go-spew/spew"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
-	"github.com/davecgh/go-spew/spew"
 )
 
 type (
@@ -64,15 +64,15 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 						//	ElementType:         types.MapType{ElemType: types.StringType},
 						//},
 						"children": schema.ListAttribute{
-							Required:            true,
-							ElementType:         types.StringType,
+							Required:    true,
+							ElementType: types.StringType,
 						},
 					},
 				},
-				Required:            true,
+				Required: true,
 			},
 			"name": schema.StringAttribute{
-				Required:            true,
+				Required: true,
 				Validators: []validator.String{
 					stringvalidator.LengthBetween(1, 256),
 					stringvalidator.RegexMatches(
@@ -82,7 +82,7 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				},
 			},
 			"id": schema.StringAttribute{
-				Optional:            true,
+				Optional: true,
 				Computed: true,
 			},
 		},
@@ -113,9 +113,9 @@ func (*factResource) ImportState(ctx context.Context, req resource.ImportStateRe
 }
 
 type factResourceData struct {
-	ID     types.String               `tfsdk:"id"`
+	ID     types.String          `tfsdk:"id"`
 	Groups map[string]*FactGroup `tfsdk:"groups"`
-	Name   string                     `tfsdk:"name"`
+	Name   string                `tfsdk:"name"`
 }
 
 func FactToApiFact(plan Fact) api.Fact {
@@ -205,7 +205,7 @@ func (r *factResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	tflog.Debug(ctx, spew.Sprint("ZZZfact plan: %#v", plan))
 	newFact := FactToApiFact(plan)
 	tflog.Debug(ctx, spew.Sprint("ZZZfact newFact: %#v", newFact))

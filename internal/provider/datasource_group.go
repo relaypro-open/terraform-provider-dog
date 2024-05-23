@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
-	"github.com/davecgh/go-spew/spew"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -30,6 +30,7 @@ type (
 		ProfileVersion      types.String           `tfsdk:"profile_version"`
 		Ec2SecurityGroupIds []*Ec2SecurityGroupIds `tfsdk:"ec2_security_group_ids"`
 		Vars                types.String           `tfsdk:"vars"`
+		AlertEnable         types.Bool             `tfsdk:"alert_enable"`
 	}
 
 	Ec2SecurityGroupIds struct {
@@ -95,10 +96,14 @@ func (*groupDataSource) Schema(ctx context.Context, req datasource.SchemaRequest
 				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
+			"alert_enable": schema.BoolAttribute{
+				MarkdownDescription: "alert enable",
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "group identifier",
 				Optional:            true,
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}

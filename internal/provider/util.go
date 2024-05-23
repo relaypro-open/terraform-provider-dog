@@ -1,10 +1,9 @@
 package dog
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 )
-
 
 func PrettyPrint(title string, incoming interface{}) {
 	d, _ := json.MarshalIndent(incoming, "", "  ")

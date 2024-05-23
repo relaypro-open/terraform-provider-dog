@@ -29,10 +29,9 @@ type (
 )
 
 var (
-	_ provider.Provider             = (*dogProvider)(nil)
+	_ provider.Provider = (*dogProvider)(nil)
 	//_ provider.ProviderWithMetadata = (*dogProvider)(nil)
 )
-
 
 func New(version string) func() provider.Provider {
 	return func() provider.Provider {
@@ -110,8 +109,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_endpoint == "" || api_token == "" {
 		resp.Diagnostics.AddError(
 			"config values",
-			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.ValueString() )+
-				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.ValueString() )+
+			fmt.Sprintf("config.Api_Token: %+v\n", config.Api_Token.ValueString())+
+				fmt.Sprintf("config.API_Endpoint: %+v\n", config.API_Endpoint.ValueString())+
 				fmt.Sprintf("api_endpoint: %+v\n", api_endpoint)+
 				fmt.Sprintf("api_token: %+v\n", api_token),
 		)
@@ -123,8 +122,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_endpoint == "" {
 		resp.Diagnostics.AddError(
 			"Missing Dog API Endpoint",
-			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. " +
-				"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. " +
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API endpoint. "+
+				"Set the API Endpoint value in the configuration or use the DOG_API_ENDPOINT environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}
@@ -132,8 +131,8 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	if api_token == "" {
 		resp.Diagnostics.AddError(
 			"Missing Dog API Key",
-			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. " +
-				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. " +
+			"The provider cannot create the Dog API client as there is a missing or empty value for the Dog API key. "+
+				"Set the API Key value in the configuration or use the DOG_API_TOKEN environment variable. "+
 				"If either is already set, ensure the value is not empty.",
 		)
 	}

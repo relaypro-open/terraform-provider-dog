@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/ledongthuc/goterators"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
@@ -49,12 +49,12 @@ func (*zoneDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 			"ipv4_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv4 Addresses",
 				Optional:            true,
-				ElementType: types.StringType,
+				ElementType:         types.StringType,
 			},
 			"ipv6_addresses": schema.ListAttribute{
 				MarkdownDescription: "List of Ipv6 Addresses",
 				Optional:            true,
-				ElementType: types.StringType,
+				ElementType:         types.StringType,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: "Zone name",
@@ -63,7 +63,7 @@ func (*zoneDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Zone identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}
@@ -128,7 +128,7 @@ func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	if filteredZones == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned no results."))
-	} 
+	}
 	if len(filteredZones) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned more than one result."))
 	}
@@ -136,7 +136,7 @@ func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	zone := filteredZones[0] 
+	zone := filteredZones[0]
 	// Set state
 	state = ApiToZone(zone)
 	diags := resp.State.Set(ctx, &state)

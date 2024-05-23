@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/ledongthuc/goterators"
-	"github.com/davecgh/go-spew/spew"
 	api "github.com/relaypro-open/dog_api_golang/api"
 )
 
@@ -139,7 +139,7 @@ func (*linkDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Link identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}
@@ -205,7 +205,7 @@ func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredLinks: %#v", filteredLinks))
 	if filteredLinks == nil {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned no results."))
-	} 
+	}
 	if len(filteredLinks) > 1 {
 		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned more than one result."))
 	}
@@ -213,7 +213,7 @@ func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	link := filteredLinks[0] 
+	link := filteredLinks[0]
 	// Set state
 	state = ApiToLink(link)
 	diags := resp.State.Set(ctx, &state)

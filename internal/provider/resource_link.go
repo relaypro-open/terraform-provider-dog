@@ -111,7 +111,7 @@ func (*linkResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Link identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}

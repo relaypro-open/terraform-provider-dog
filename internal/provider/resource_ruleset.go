@@ -75,7 +75,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								},
 								"environments": schema.ListAttribute{
 									ElementType: types.StringType,
-									Required: true,
+									Required:    true,
 								},
 								"group": schema.StringAttribute{
 									Required: true,
@@ -87,7 +87,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 									},
 								},
 								"group_type": schema.StringAttribute{
-									Required: true,
+									Required:   true,
 									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
 								},
 								"interface": schema.StringAttribute{
@@ -110,7 +110,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								},
 								"states": schema.ListAttribute{
 									ElementType: types.StringType,
-									Required: true,
+									Required:    true,
 									Validators: []validator.List{
 										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
 									},
@@ -118,8 +118,8 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								"type": schema.StringAttribute{
 									Required: true,
 									Validators: []validator.String{stringvalidator.OneOf(
-										"BASIC", 
-									 	//"CONNLIMIT",  //TODO
+										"BASIC",
+										//"CONNLIMIT",  //TODO
 										//"RECENT"      //TODO
 									)},
 								},
@@ -145,7 +145,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								},
 								"environments": schema.ListAttribute{
 									ElementType: types.StringType,
-									Required: true,
+									Required:    true,
 								},
 								"group": schema.StringAttribute{
 									Required: true,
@@ -157,7 +157,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 									},
 								},
 								"group_type": schema.StringAttribute{
-									Required: true,
+									Required:   true,
 									Validators: []validator.String{stringvalidator.OneOf("ANY", "GROUP", "ROLE", "ZONE")},
 								},
 								"interface": schema.StringAttribute{
@@ -180,7 +180,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								},
 								"states": schema.ListAttribute{
 									ElementType: types.StringType,
-									Required: true,
+									Required:    true,
 									Validators: []validator.List{
 										listvalidator.ValueStringsAre(stringvalidator.OneOf("NEW", "ESTABLISHED", "RELATED", "INVALID")),
 									},
@@ -188,8 +188,8 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 								"type": schema.StringAttribute{
 									Required: true,
 									Validators: []validator.String{stringvalidator.OneOf(
-										"BASIC", 
-									 	//"CONNLIMIT",  //TODO
+										"BASIC",
+										//"CONNLIMIT",  //TODO
 										//"RECENT"      //TODO
 									)},
 								},
@@ -201,7 +201,7 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Rule identifier",
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}

@@ -6,12 +6,12 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -102,10 +102,14 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				MarkdownDescription: "json string of vars",
 				Optional:            true,
 			},
+			"alert_enable": schema.BoolAttribute{
+				MarkdownDescription: "alert enable",
+				Optional:            true,
+			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "group identifier",
 				Optional:            true,
-				Computed: true,
+				Computed:            true,
 			},
 		},
 	}
@@ -143,7 +147,8 @@ type groupResourceData struct {
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
 	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
-	Vars                *string                       `tfsdk:"vars"`
+	Vars                *string                            `tfsdk:"vars"`
+	AlertEnable         *bool                              `tfsdk:"alert_enable"`
 }
 
 type ec2SecurityGroupIdsResourceData struct {
@@ -160,28 +165,55 @@ func GroupToApiGroup(plan Group) api.Group {
 		}
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
-	
+
 	if plan.Vars.ValueString() != "" {
-		newGroup := api.Group{
-			Description:         plan.Description.ValueString(),
-			Name:                plan.Name.ValueString(),
-			ProfileId:           plan.ProfileId.ValueString(),
-			ProfileName:         plan.ProfileName.ValueString(),
-			ProfileVersion:      plan.ProfileVersion.ValueString(),
-			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-			Vars:                plan.Vars.ValueString(),
+		if plan.AlertEnable.IsNull() {
+			newGroup := api.Group{
+				Description:         plan.Description.ValueString(),
+				Name:                plan.Name.ValueString(),
+				ProfileId:           plan.ProfileId.ValueString(),
+				ProfileName:         plan.ProfileName.ValueString(),
+				ProfileVersion:      plan.ProfileVersion.ValueString(),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				Vars:                plan.Vars.ValueString(),
+			}
+			return newGroup
+		} else {
+			newGroup := api.Group{
+				Description:         plan.Description.ValueString(),
+				Name:                plan.Name.ValueString(),
+				ProfileId:           plan.ProfileId.ValueString(),
+				ProfileName:         plan.ProfileName.ValueString(),
+				ProfileVersion:      plan.ProfileVersion.ValueString(),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				Vars:                plan.Vars.ValueString(),
+				AlertEnable:         plan.AlertEnable.ValueBoolPointer(),
+			}
+			return newGroup
 		}
-		return newGroup 
 	} else {
-		newGroup := api.Group{
-			Description:         plan.Description.ValueString(),
-			Name:                plan.Name.ValueString(),
-			ProfileId:           plan.ProfileId.ValueString(),
-			ProfileName:         plan.ProfileName.ValueString(),
-			ProfileVersion:      plan.ProfileVersion.ValueString(),
-			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		if plan.AlertEnable.IsNull() {
+			newGroup := api.Group{
+				Description:         plan.Description.ValueString(),
+				Name:                plan.Name.ValueString(),
+				ProfileId:           plan.ProfileId.ValueString(),
+				ProfileName:         plan.ProfileName.ValueString(),
+				ProfileVersion:      plan.ProfileVersion.ValueString(),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			}
+			return newGroup
+		} else {
+			newGroup := api.Group{
+				Description:         plan.Description.ValueString(),
+				Name:                plan.Name.ValueString(),
+				ProfileId:           plan.ProfileId.ValueString(),
+				ProfileName:         plan.ProfileName.ValueString(),
+				ProfileVersion:      plan.ProfileVersion.ValueString(),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				AlertEnable:         plan.AlertEnable.ValueBoolPointer(),
+			}
+			return newGroup
 		}
-		return newGroup 
 	}
 }
 
@@ -195,28 +227,58 @@ func ApiToGroup(group api.Group) Group {
 		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
 	}
 	if group.Vars != "" {
-		h := Group{
-			Description:         types.StringValue(group.Description),
-			ID:                  types.StringValue(group.ID),
-			Name:                types.StringValue(group.Name),
-			ProfileId:           types.StringValue(group.ProfileId),
-			ProfileName:         types.StringValue(group.ProfileName),
-			ProfileVersion:      types.StringValue(group.ProfileVersion),
-			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-			Vars:                types.StringValue(group.Vars),
+		if group.AlertEnable == nil {
+			h := Group{
+				Description:         types.StringValue(group.Description),
+				ID:                  types.StringValue(group.ID),
+				Name:                types.StringValue(group.Name),
+				ProfileId:           types.StringValue(group.ProfileId),
+				ProfileName:         types.StringValue(group.ProfileName),
+				ProfileVersion:      types.StringValue(group.ProfileVersion),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				Vars:                types.StringValue(group.Vars),
+			}
+			return h
+		} else {
+			h := Group{
+				Description:         types.StringValue(group.Description),
+				ID:                  types.StringValue(group.ID),
+				Name:                types.StringValue(group.Name),
+				ProfileId:           types.StringValue(group.ProfileId),
+				ProfileName:         types.StringValue(group.ProfileName),
+				ProfileVersion:      types.StringValue(group.ProfileVersion),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				Vars:                types.StringValue(group.Vars),
+				AlertEnable:         types.BoolValue(*group.AlertEnable),
+			}
+			return h
+
 		}
-		return h
 	} else {
-		h := Group{
-			Description:         types.StringValue(group.Description),
-			ID:                  types.StringValue(group.ID),
-			Name:                types.StringValue(group.Name),
-			ProfileId:           types.StringValue(group.ProfileId),
-			ProfileName:         types.StringValue(group.ProfileName),
-			ProfileVersion:      types.StringValue(group.ProfileVersion),
-			Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+		if group.AlertEnable == nil {
+			h := Group{
+				Description:         types.StringValue(group.Description),
+				ID:                  types.StringValue(group.ID),
+				Name:                types.StringValue(group.Name),
+				ProfileId:           types.StringValue(group.ProfileId),
+				ProfileName:         types.StringValue(group.ProfileName),
+				ProfileVersion:      types.StringValue(group.ProfileVersion),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+			}
+			return h
+		} else {
+			h := Group{
+				Description:         types.StringValue(group.Description),
+				ID:                  types.StringValue(group.ID),
+				Name:                types.StringValue(group.Name),
+				ProfileId:           types.StringValue(group.ProfileId),
+				ProfileName:         types.StringValue(group.ProfileName),
+				ProfileVersion:      types.StringValue(group.ProfileVersion),
+				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+				AlertEnable:         types.BoolValue(*group.AlertEnable),
+			}
+			return h
 		}
-		return h
 	}
 }
 
@@ -238,6 +300,7 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 		Vars:                *plan.Vars,
+		AlertEnable:         plan.AlertEnable,
 	}
 	return newGroup
 }
@@ -260,6 +323,7 @@ func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
 		ProfileVersion:      plan.ProfileVersion,
 		Ec2SecurityGroupIds: newEc2SecurityGroupIds,
 		Vars:                *plan.Vars,
+		AlertEnable:         plan.AlertEnable,
 	}
 	return newGroup
 }
@@ -274,7 +338,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	tflog.Debug(ctx, PrettyFmt("group create plan", plan))
 	newGroup := GroupToApiGroup(plan)
 	tflog.Debug(ctx, PrettyFmt("group create newGroup", newGroup))
