@@ -20,13 +20,14 @@ type (
 	HostList []Host
 
 	Host struct {
-		Environment types.String      `tfsdk:"environment"`
-		Group       types.String      `tfsdk:"group"`
-		ID          types.String      `tfsdk:"id"`
-		HostKey     types.String      `tfsdk:"hostkey"`
-		Location    types.String      `tfsdk:"location"`
-		Name        types.String      `tfsdk:"name"`
-		Vars        types.String      `tfsdk:"vars"`
+		Environment types.String `tfsdk:"environment"`
+		Group       types.String `tfsdk:"group"`
+		ID          types.String `tfsdk:"id"`
+		HostKey     types.String `tfsdk:"hostkey"`
+		Location    types.String `tfsdk:"location"`
+		Name        types.String `tfsdk:"name"`
+		Vars        types.String `tfsdk:"vars"`
+		AlertEnable types.Bool   `tfsdk:"alert_enable"`
 	}
 )
 
@@ -76,7 +77,11 @@ func (*hostDataSource) Schema(ctx context.Context, req datasource.SchemaRequest,
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Host identifier",
-				Computed: true,
+				Computed:            true,
+			},
+			"alert_enable": schema.BoolAttribute{
+				MarkdownDescription: "alert enable",
+				Optional:            true,
 			},
 		},
 	}

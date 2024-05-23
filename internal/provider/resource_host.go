@@ -6,12 +6,12 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	api "github.com/relaypro-open/dog_api_golang/api"
 	"golang.org/x/exp/slices"
@@ -78,7 +78,11 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 			"id": schema.StringAttribute{
 				Optional:            true,
 				MarkdownDescription: "Host identifier",
-				Computed: true,
+				Computed:            true,
+			},
+			"alert_enable": schema.BoolAttribute{
+				MarkdownDescription: "alert enable",
+				Optional:            true,
 			},
 		},
 	}
@@ -108,60 +112,113 @@ func (*hostResource) ImportState(ctx context.Context, req resource.ImportStateRe
 }
 
 type hostResourceData struct {
-	Environment string            `tfsdk:"environment"`
-	Group       string            `tfsdk:"group"`
-	ID          types.String      `tfsdk:"id"`
-	HostKey     string            `tfsdk:"hostkey"`
-	Location    string            `tfsdk:"location"`
-	Name        string            `tfsdk:"name"`
-	Vars        *string            `tfsdk:"vars"`
+	Environment string       `tfsdk:"environment"`
+	Group       string       `tfsdk:"group"`
+	ID          types.String `tfsdk:"id"`
+	HostKey     string       `tfsdk:"hostkey"`
+	Location    string       `tfsdk:"location"`
+	Name        string       `tfsdk:"name"`
+	Vars        *string      `tfsdk:"vars"`
+	AlertEnable *bool   `tfsdk:"alert_enable"`
 }
 
 func HostToApiHost(plan Host) api.Host {
 	if plan.Vars.ValueString() != "" {
-		newHost := api.Host{
-			Environment: plan.Environment.ValueString(),
-			Group:       plan.Group.ValueString(),
-			HostKey:     plan.HostKey.ValueString(),
-			Location:    plan.Location.ValueString(),
-			Name:        plan.Name.ValueString(),
-			Vars:        plan.Vars.ValueString(),
+		if plan.AlertEnable.IsNull() {
+			newHost := api.Host{
+				Environment: plan.Environment.ValueString(),
+				Group:       plan.Group.ValueString(),
+				HostKey:     plan.HostKey.ValueString(),
+				Location:    plan.Location.ValueString(),
+				Name:        plan.Name.ValueString(),
+				Vars:        plan.Vars.ValueString(),
+			}
+			return newHost
+		} else {
+			newHost := api.Host{
+				Environment: plan.Environment.ValueString(),
+				Group:       plan.Group.ValueString(),
+				HostKey:     plan.HostKey.ValueString(),
+				Location:    plan.Location.ValueString(),
+				Name:        plan.Name.ValueString(),
+				Vars:        plan.Vars.ValueString(),
+				AlertEnable: plan.AlertEnable.ValueBoolPointer(),
+			}
+			return newHost
 		}
-		return newHost
 	} else {
-		newHost := api.Host{
-			Environment: plan.Environment.ValueString(),
-			Group:       plan.Group.ValueString(),
-			HostKey:     plan.HostKey.ValueString(),
-			Location:    plan.Location.ValueString(),
-			Name:        plan.Name.ValueString(),
+		if plan.AlertEnable.IsNull() {
+			newHost := api.Host{
+				Environment: plan.Environment.ValueString(),
+				Group:       plan.Group.ValueString(),
+				HostKey:     plan.HostKey.ValueString(),
+				Location:    plan.Location.ValueString(),
+				Name:        plan.Name.ValueString(),
+			}
+			return newHost
+		} else {
+			newHost := api.Host{
+				Environment: plan.Environment.ValueString(),
+				Group:       plan.Group.ValueString(),
+				HostKey:     plan.HostKey.ValueString(),
+				Location:    plan.Location.ValueString(),
+				Name:        plan.Name.ValueString(),
+				AlertEnable: plan.AlertEnable.ValueBoolPointer(),
+			}
+			return newHost
 		}
-		return newHost
 	}
 }
 
 func ApiToHost(host api.Host) Host {
 	if host.Vars != "" {
-		h := Host{
-			Environment: types.StringValue(host.Environment),
-			Group:       types.StringValue(host.Group),
-			ID:          types.StringValue(host.ID),
-			HostKey:     types.StringValue(host.HostKey),
-			Location:    types.StringValue(host.Location),
-			Name:        types.StringValue(host.Name),
-			Vars:        types.StringValue(host.Vars),
+		if host.AlertEnable == nil {
+			h := Host{
+				Environment: types.StringValue(host.Environment),
+				Group:       types.StringValue(host.Group),
+				ID:          types.StringValue(host.ID),
+				HostKey:     types.StringValue(host.HostKey),
+				Location:    types.StringValue(host.Location),
+				Name:        types.StringValue(host.Name),
+				Vars:        types.StringValue(host.Vars),
+			}
+			return h
+		} else {
+			h := Host{
+				Environment: types.StringValue(host.Environment),
+				Group:       types.StringValue(host.Group),
+				ID:          types.StringValue(host.ID),
+				HostKey:     types.StringValue(host.HostKey),
+				Location:    types.StringValue(host.Location),
+				Name:        types.StringValue(host.Name),
+				Vars:        types.StringValue(host.Vars),
+				AlertEnable: types.BoolValue(*host.AlertEnable),
+			}
+			return h
 		}
-		return h
 	} else {
-		h := Host{
-			Environment: types.StringValue(host.Environment),
-			Group:       types.StringValue(host.Group),
-			ID:          types.StringValue(host.ID),
-			HostKey:     types.StringValue(host.HostKey),
-			Location:    types.StringValue(host.Location),
-			Name:        types.StringValue(host.Name),
+		if host.AlertEnable == nil {
+			h := Host{
+				Environment: types.StringValue(host.Environment),
+				Group:       types.StringValue(host.Group),
+				ID:          types.StringValue(host.ID),
+				HostKey:     types.StringValue(host.HostKey),
+				Location:    types.StringValue(host.Location),
+				Name:        types.StringValue(host.Name),
+			}
+			return h
+		} else {
+			h := Host{
+				Environment: types.StringValue(host.Environment),
+				Group:       types.StringValue(host.Group),
+				ID:          types.StringValue(host.ID),
+				HostKey:     types.StringValue(host.HostKey),
+				Location:    types.StringValue(host.Location),
+				Name:        types.StringValue(host.Name),
+				AlertEnable: types.BoolValue(*host.AlertEnable),
+			}
+			return h
 		}
-		return h
 	}
 }
 
@@ -173,6 +230,7 @@ func HostToCreateRequest(plan hostResourceData) api.HostCreateRequest {
 		Location:    plan.Location,
 		Name:        plan.Name,
 		Vars:        *plan.Vars,
+		AlertEnable: plan.AlertEnable,
 	}
 	return newHost
 }
@@ -185,6 +243,7 @@ func HostToUpdateRequest(plan hostResourceData) api.HostUpdateRequest {
 		Location:    plan.Location,
 		Name:        plan.Name,
 		Vars:        *plan.Vars,
+		AlertEnable: plan.AlertEnable,
 	}
 	return newHost
 }

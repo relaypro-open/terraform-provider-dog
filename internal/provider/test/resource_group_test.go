@@ -26,6 +26,7 @@ func TestAccDogGroup_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
 					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
 					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\",\"key2\":\"value2\"}"),
+					resource.TestCheckResourceAttr(resourceName, "alert_enable", "true"),
 				),
 			},
 			{
@@ -37,6 +38,7 @@ func TestAccDogGroup_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
 					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
 					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\"}"),
+					resource.TestCheckResourceAttr(resourceName, "alert_enable", "false"),
 				),
 			},
 			{
@@ -131,6 +133,7 @@ resource %[1]q %[2]q {
 	  key = "value"
 	  key2 = "value2"
   })
+  alert_enable = true
 }
 `, name, randomName)
 	gr := testAccDogGroupRulesetResourceConfig()
@@ -158,6 +161,7 @@ resource %[1]q %[2]q {
   vars = jsonencode({
 	  key = "value"
   })
+  alert_enable = false
 }
 `, name, randomName)
 	gr := testAccDogGroupRulesetResourceConfig()

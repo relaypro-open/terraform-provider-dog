@@ -25,6 +25,7 @@ func TestAccDogHost_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "environment", "*"),
 					resource.TestCheckResourceAttr(resourceName, "hostkey", "1726819861d5245b0afcd25127a7b181a5365620"),
 					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\",\"key2\":\"value2\"}"),
+					resource.TestCheckResourceAttr(resourceName, "alert_enable", "true"),
 				),
 			},
 			{
@@ -35,6 +36,7 @@ func TestAccDogHost_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "environment", "*"),
 					resource.TestCheckResourceAttr(resourceName, "hostkey", "1726819861d5245b0afcd25127a7b181a5365620"),
 					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\"}"),
+					resource.TestCheckResourceAttr(resourceName, "alert_enable", "false"),
 				),
 			},
 			{
@@ -58,6 +60,7 @@ resource %[1]q %[2]q {
 	  key = "value"
 	  key2 = "value2"
   })
+  alert_enable = true
 }
 `, resourceType, resourceName)
 }
@@ -73,6 +76,7 @@ resource %[1]q %[2]q {
   vars = jsonencode({
 	  key = "value"
   })
+  alert_enable = false
 }
 `, resourceType, resourceName)
 }

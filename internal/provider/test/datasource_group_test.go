@@ -39,6 +39,7 @@ resource "dog_group" %[1]q {
   vars = jsonencode({
       test = "dog_group"
   })
+  alert_enable = false
 }
 
 data "dog_group" %[1]q {
