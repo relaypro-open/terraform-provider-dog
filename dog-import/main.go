@@ -139,6 +139,10 @@ func host_export(output_dir string, environment string, host_prefix string) {
         fmt.Fprintf(tf_w, "  location    = \"%s\"\n", row.Location)
         fmt.Fprintf(tf_w, "  name        = \"%s\"\n", row.Name)
         fmt.Fprintf(tf_w, "  provider    = dog.%s\n", environment)
+		//fmt.Printf("variable val=%v is of type %v \n", row.AlertEnable, reflect.ValueOf(row.AlertEnable).Kind())
+		if row.AlertEnable != nil {
+		fmt.Fprintf(tf_w, "  alert_enable = %t\n", *row.AlertEnable)
+		}
 		if row.Vars == nil {
 		} else {
 		fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
@@ -193,6 +197,9 @@ func group_export(output_dir string, environment string) {
             regionsgid_output(tf_w, row.Ec2SecurityGroupIds)
             fmt.Fprintf(tf_w, "  ]\n")
             fmt.Fprintf(tf_w, "  provider = dog.%s\n", environment)
+			if row.AlertEnable != nil {
+			fmt.Fprintf(tf_w, "  alert_enable = %t\n", *row.AlertEnable)
+			}
 			if row.Vars == nil {
 			} else {
             fmt.Fprintf(tf_w, "  vars = jsonencode({\n")
@@ -481,7 +488,7 @@ func fact_export(output_dir string, environment string) {
 				if err != nil {
 					log.Fatal("Cannot encode to JSON ", err)
 				}
-				fmt.Printf("len(stringsJson)=%d\n", len(stringsJson))
+				//fmt.Printf("len(stringsJson)=%d\n", len(stringsJson))
 				if string(stringsJson) == "null" {
 					fmt.Fprintf(tf_w, "        children = []\n")
 				} else {
@@ -512,7 +519,6 @@ func fact_export(output_dir string, environment string) {
 			} else {
 				fmt.Fprintf(tf_w, "        vars = jsonencode({\n")
 				for key, val := range group.Vars {
-					fmt.Printf("variable val=%v is of type %v \n", val, reflect.ValueOf(val).Kind())
 					if _, ok := val.(float64); ok {
 						fmt.Fprintf(tf_w, "          %s = %#v\n", key, int(val.(float64)))
 					} else if _, ok := val.(bool); ok {
