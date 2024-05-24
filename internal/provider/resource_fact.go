@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"encoding/json"
+	"reflect"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -42,12 +44,6 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 		// This description is used by the documentation generator and the language server.
 
 		Attributes: map[string]schema.Attribute{
-			// This description is used by the documentation generator and the language server.
-			//"groups": schema.MapAttribute{
-			//ElementType: types.StringType,
-			//"groups": schema.ListNestedAttribute{
-			//NestedObject: schema.NestedAttributeObject{
-			//Attributes: map[string]schema.Attribute{
 			"groups": schema.MapNestedAttribute{
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -86,6 +82,7 @@ func (*factResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				Computed: true,
 			},
 		},
+		Version: 1,
 	}
 }
 
@@ -336,4 +333,119 @@ func (r *factResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
+}
+
+// Other Resource methods are omitted in this example
+var _ resource.Resource = &factResource{}
+var _ resource.ResourceWithUpgradeState = &factResource{}
+
+type factResourceModelV0 struct {
+	ID     types.String          `tfsdk:"id"`
+	Groups map[string]*FactGroupModelV0 `tfsdk:"groups"`
+	Name   string                `tfsdk:"name"`
+}
+
+type FactGroupModelV0 struct {
+	Vars     *string  `tfsdk:"vars"`
+	Hosts    map[string]map[string]string `tfsdk:"hosts"`
+	Children []string `tfsdk:"children"`
+}
+
+type factResourceModelV1 struct {
+	ID     types.String          `tfsdk:"id"`
+	Groups map[string]*FactGroupModelV1 `tfsdk:"groups"`
+	Name   string                `tfsdk:"name"`
+}
+
+type FactGroupModelV1 struct {
+	Vars     *string  `tfsdk:"vars"`
+	Hosts    *string  `tfsdk:"hosts"`
+	Children []string `tfsdk:"children"`
+}
+
+func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	tflog.Debug(ctx,"UpgradeState")
+	return map[int64]resource.StateUpgrader{
+		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"groups": schema.MapNestedAttribute{
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"vars": schema.StringAttribute{
+									MarkdownDescription: "json string of vars",
+									Optional:            true,
+								},
+								"hosts": schema.MapAttribute{
+									Required:            true,
+									ElementType:         types.MapType{ElemType: types.StringType},
+								},
+								"children": schema.ListAttribute{
+									Required:    true,
+									ElementType: types.StringType,
+								},
+							},
+						},
+						Required: true,
+					},
+					"name": schema.StringAttribute{
+						Required: true,
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 256),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[A-Za-z_](0-9A-Za-z_)*`),
+								"must start with alphanumeric characters, _, and -",
+							),
+						},
+					},
+					"id": schema.StringAttribute{
+						Optional: true,
+						Computed: true,
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var priorStateData factResourceModelV0
+
+				//resp.Diagnostics.Append(
+				req.State.Get(ctx, &priorStateData)
+			//)
+
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				updatedGroups := map[string]*FactGroupModelV1{}
+				for name, group := range priorStateData.Groups {
+					responseVars, _ := json.Marshal(group.Hosts)
+					hostsString := string(responseVars)
+					//fmt.Printf("variable val=%v is of type %v \n", row.AlertEnable, reflect.ValueOf(row.AlertEnable).Kind())
+					tflog.Debug(ctx,fmt.Sprintf("variable val=%v is of type %v \n", hostsString, reflect.ValueOf(hostsString).Kind() ))
+					if group.Hosts != nil {
+						g := FactGroupModelV1{
+							Vars: group.Vars,
+							Hosts:    &hostsString,
+							Children: group.Children,
+						}
+						updatedGroups[name] = &g
+				}
+			}
+
+				upgradedStateData := factResourceModelV1{
+					ID:                priorStateData.ID,
+					Name: priorStateData.Name,
+					Groups: updatedGroups,
+				}
+
+			//	if priorStateData.Groups != nil {
+			//		upgradedStateData.Groups = &v
+			//	}
+
+				//"UpgradeState"resp.Diagnostics.Append(
+			resp.State.Set(ctx, upgradedStateData)
+			//)
+			},
+		},
+	}
 }
