@@ -396,7 +396,9 @@ func profile_export(output_dir string, environment string) {
 
     c := api.NewClient(os.Getenv("DOG_API_TOKEN"), os.Getenv("DOG_API_ENDPOINT"))
 
-    res, statusCode, err := c.GetProfiles(nil)
+    options := api.ProfilesListOptions{} 
+	options.Active = true
+    res, statusCode, err := c.GetProfiles(&options)
     if err != nil {
         log.Fatalln("res: ", res, "statusCode: ", statusCode, "err: ", err)
     }
