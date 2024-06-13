@@ -281,9 +281,13 @@ func service_export(output_dir string, environment string) {
 func portprotocols_output(tf_w *bufio.Writer, portProtocols []*api.PortProtocol) {
     for _, port_protocol := range portProtocols {
         fmt.Fprintf(tf_w, "      {\n")
-		Ports := `"`+strings.Join(port_protocol.Ports, `","`) + `"`
         fmt.Fprintf(tf_w, "        protocol = \"%s\"\n", port_protocol.Protocol)
+		if len(port_protocol.Ports)  == 0  {
+		fmt.Fprintf(tf_w, "        ports    = []\n")
+		} else {
+		Ports := `"`+strings.Join(port_protocol.Ports, `","`) + `"`
 		fmt.Fprintf(tf_w, "        ports    = [%s]\n", Ports)
+		}
         fmt.Fprintf(tf_w, "      },\n")
     }
 }
@@ -427,6 +431,8 @@ func profile_export(output_dir string, environment string) {
 
 func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
     for _, rule := range rules {
+        groupTerraformName := toTerraformName(rule.Group)
+        serviceTerraformName := toTerraformName(rule.Service)
         fmt.Fprintf(tf_w, "      {\n")
         fmt.Fprintf(tf_w, "        action       = \"%s\"\n", rule.Action)
         fmt.Fprintf(tf_w, "        active       = \"%t\"\n", rule.Active)
@@ -439,19 +445,19 @@ func rules_output(tf_w *bufio.Writer, rules []*api.Rule) {
         fmt.Fprintf(tf_w, "        group       = \"all-active\"\n")
         } else {
             if rule.GroupType == "ZONE" {
-        fmt.Fprintf(tf_w, "        group       = dog_zone.%s.id\n", rule.Group)
+        fmt.Fprintf(tf_w, "        group       = dog_zone.%s.id\n", groupTerraformName)
             } else {
-        fmt.Fprintf(tf_w, "        group       = dog_group.%s.id\n", rule.Group)
+        fmt.Fprintf(tf_w, "        group       = dog_group.%s.id\n", groupTerraformName)
             }
         }
         fmt.Fprintf(tf_w, "        group_type   = \"%s\"\n", rule.GroupType)
         fmt.Fprintf(tf_w, "        interface    = \"%s\"\n", rule.Interface)
         fmt.Fprintf(tf_w, "        log = \"%t\"\n", rule.Log)
         fmt.Fprintf(tf_w, "        log_prefix   = \"%s\"\n", rule.LogPrefix)
-        if rule.Service == "any" {
-        fmt.Fprintf(tf_w, "        service      = \"%s\"\n", rule.Service)
+        if serviceTerraformName == "any" {
+        fmt.Fprintf(tf_w, "        service      = \"%s\"\n", serviceTerraformName)
         } else {
-        fmt.Fprintf(tf_w, "        service      = dog_service.%s.id\n", rule.Service)
+        fmt.Fprintf(tf_w, "        service      = dog_service.%s.id\n", serviceTerraformName)
         }
         fmt.Fprintf(tf_w, strings.ReplaceAll(
 	      fmt.Sprintf("        states      = %q\n", rule.States), "\" \"", "\",\""))
