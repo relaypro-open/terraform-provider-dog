@@ -85,6 +85,7 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				Computed:            true,
 			},
 		},
+		Version: 1,
 	}
 }
 

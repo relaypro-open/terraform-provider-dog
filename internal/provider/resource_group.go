@@ -112,6 +112,7 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				Computed:            true,
 			},
 		},
+		Version: 1,
 	}
 }
 
@@ -469,4 +470,136 @@ func (r *groupResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	resp.State.RemoveResource(ctx)
+}
+
+type groupResourceModelV0 struct {
+	Description         string                             `tfsdk:"description"`
+	ID                  types.String                       `tfsdk:"id"`
+	Name                string                             `tfsdk:"name"`
+	ProfileId           string                             `tfsdk:"profile_id"`
+	ProfileName         string                             `tfsdk:"profile_name"`
+	ProfileVersion      string                             `tfsdk:"profile_version"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+	Vars                *string                            `tfsdk:"vars"`
+}
+
+type groupResourceModelV1 struct {
+	Description         string                             `tfsdk:"description"`
+	ID                  types.String                       `tfsdk:"id"`
+	Name                string                             `tfsdk:"name"`
+	ProfileId           string                             `tfsdk:"profile_id"`
+	ProfileName         string                             `tfsdk:"profile_name"`
+	ProfileVersion      string                             `tfsdk:"profile_version"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+	Vars                *string                            `tfsdk:"vars"`
+	AlertEnable         *bool                              `tfsdk:"alert_enable"`
+}
+
+func (r *groupResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	tflog.Debug(ctx, "UpgradeState")
+	return map[int64]resource.StateUpgrader{
+		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
+		0: {
+			PriorSchema: &schema.Schema{
+				// This description is used by the documentation generator and the language server.
+				Attributes: map[string]schema.Attribute{
+					// This description is used by the documentation generator and the language server.
+					"description": schema.StringAttribute{
+						MarkdownDescription: "group description",
+						Optional:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: "group name",
+						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 28),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+								"must start with 'sg-'",
+							),
+						},
+					},
+					"profile_id": schema.StringAttribute{
+						MarkdownDescription: "group profile id",
+						Optional:            true,
+					},
+					"profile_name": schema.StringAttribute{
+						MarkdownDescription: "group profile name",
+						Optional:            true,
+					},
+					"profile_version": schema.StringAttribute{
+						MarkdownDescription: "group profile version",
+						Optional:            true,
+					},
+					"ec2_security_group_ids": schema.ListNestedAttribute{
+						MarkdownDescription: "List of EC2 Security Groups to control",
+						Optional:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+								"region": schema.StringAttribute{
+									MarkdownDescription: "EC2 Region",
+									Required:            true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(9, 256),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^(.*)-(.*)-(.*)$`),
+											"must be valid region",
+										),
+									},
+								},
+								"sgid": schema.StringAttribute{
+									MarkdownDescription: "EC2 Security Group ID",
+									Required:            true,
+									Validators: []validator.String{
+										stringvalidator.LengthBetween(3, 256),
+										stringvalidator.RegexMatches(
+											regexp.MustCompile(`^sg-(.*)$`),
+											"must start with 'sg-'",
+										),
+									},
+								},
+							},
+						},
+					},
+					"vars": schema.StringAttribute{
+						MarkdownDescription: "json string of vars",
+						Optional:            true,
+					},
+					"id": schema.StringAttribute{
+						MarkdownDescription: "group identifier",
+						Optional:            true,
+						Computed:            true,
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var priorStateData groupResourceModelV0
+
+				//resp.Diagnostics.Append(
+				req.State.Get(ctx, &priorStateData)
+				//)
+
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				var alertEnable *bool
+				req.State.GetAttribute(ctx, path.Root("alertEnable"), alertEnable)
+
+				upgradedStateData := groupResourceModelV1{
+					Description:         priorStateData.Description,
+					Name:                priorStateData.Name,
+					ProfileId:           priorStateData.ProfileId,
+					ProfileName:         priorStateData.ProfileName,
+					ProfileVersion:      priorStateData.ProfileVersion,
+					Ec2SecurityGroupIds: priorStateData.Ec2SecurityGroupIds,
+					Vars:                priorStateData.Vars,
+					AlertEnable:         alertEnable,
+					ID:                  priorStateData.ID,
+				}
+
+				resp.State.Set(ctx, upgradedStateData)
+			},
+		},
+	}
 }
