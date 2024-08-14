@@ -46,10 +46,14 @@ install: build
 
 test:
 	go test -i $(TEST) || exit 1
-	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=1
 
 testacc:
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120s -count=1
+	if [ -z "$(TEST_TAGS)" ]; then \
+		TF_ACC=1 go test -tags acceptance -v ./... -timeout 120s -count=1; \
+	else \
+		TF_LOG_PROVIDER_DOG=TRACE TF_ACC=1 go test -tags $(TEST_TAGS),provider -v ./... -timeout 120s -count=1; \
+	fi
 
 update_api:
 	GOPROXY=direct go get github.com/relaypro-open/dog_api_golang@main

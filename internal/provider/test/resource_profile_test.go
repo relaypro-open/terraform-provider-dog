@@ -1,4 +1,4 @@
-//go:build acceptance || profile
+// +build acceptance resource profile
 
 package dog_test
 

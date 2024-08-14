@@ -1,3 +1,5 @@
+// +build acceptance resource fact
+
 package dog_test
 
 import (

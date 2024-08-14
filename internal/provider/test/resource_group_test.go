@@ -1,3 +1,5 @@
+// +build acceptance resource group
+
 package dog_test
 
 import (
@@ -31,6 +33,18 @@ func TestAccDogGroup_Basic(t *testing.T) {
 			},
 			{
 				Config: testAccDogGroupConfig_basic_remove_var(name, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "description", ""),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "profile_name", "resource_group"),
+					resource.TestCheckResourceAttr(resourceName, "profile_version", "latest"),
+					resource.TestCheckResourceAttr(resourceName, "vars", "{\"key\":\"value\"}"),
+					resource.TestCheckResourceAttr(resourceName, "alert_enable", "false"),
+				),
+			},
+			{
+				Config: testAccDogGroupConfig_basic_remove_esgs(name, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 					resource.TestCheckResourceAttr(resourceName, "description", ""),
@@ -157,6 +171,30 @@ resource %[1]q %[2]q {
       region = "us-test-region"
       sgid = "sg-test"
     }
+  ]
+  vars = jsonencode({
+	  key = "value"
+  })
+  alert_enable = false
+}
+`, name, randomName)
+	gr := testAccDogGroupRulesetResourceConfig()
+	gp := testAccDogGroupProfileResourceConfig()
+
+	to := gr + gp + g
+	return to
+
+}
+
+func testAccDogGroupConfig_basic_remove_esgs(name, randomName string) string {
+	g := fmt.Sprintf(`
+resource %[1]q %[2]q {
+  description = ""
+  name = %[2]q
+  profile_id = dog_profile.resource_group.id
+  profile_name = dog_profile.resource_group.name
+  profile_version = "latest"
+  ec2_security_group_ids = [
   ]
   vars = jsonencode({
 	  key = "value"

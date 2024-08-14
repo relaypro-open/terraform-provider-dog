@@ -1,3 +1,5 @@
+// +build acceptance datasource group
+
 package dog_test
 
 import (

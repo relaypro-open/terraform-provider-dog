@@ -1,3 +1,5 @@
+// +build acceptance resource zone
+
 package dog_test
 
 import (

@@ -1,3 +1,5 @@
+// +build acceptance datasource host
+
 package dog_test
 
 import (

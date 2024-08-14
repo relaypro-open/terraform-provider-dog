@@ -1,3 +1,5 @@
+// +build acceptance provider
+
 package dog_test
 
 import (

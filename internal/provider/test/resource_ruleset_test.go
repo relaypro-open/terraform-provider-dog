@@ -1,3 +1,5 @@
+// +build acceptance resource ruleset
+
 package dog_test
 
 import (
@@ -43,6 +45,15 @@ func TestAccDogRuleset_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName2, "rules.outbound.#", "1"),
 				),
 			},
+			//{
+			//	Config: testAccDogRulesetConfig_remove_rules(resourceType, randomName2),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		resource.TestCheckResourceAttrSet(resourceName2, "id"),
+			//		resource.TestCheckResourceAttr(resourceName2, "name", randomName2),
+			//		resource.TestCheckResourceAttr(resourceName2, "rules.inbound.#", "2"),
+			//		resource.TestCheckResourceAttr(resourceName2, "rules.outbound.#", "1"),
+			//	),
+			//},
 			{
 				ResourceName:      resourceName2,
 				ImportState:       true,
@@ -156,6 +167,35 @@ resource %[1]q %[2]q {
         log = "false"
         log_prefix = ""
         service = "any"
+        states = []
+        type = "BASIC"
+      }
+    ]
+  }
+}
+`, resourceName, name)
+}
+
+func testAccDogRulesetConfig_remove_rules(resourceName, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q
+  rules = {
+    inbound = [
+    ]
+    outbound = [
+      {
+        action = "ACCEPT"
+        active = "true"
+        comment = ""
+        environments = []
+        group = "any"
+        group_type = "ANY"
+        interface = ""
+        log = "false"
+        log_prefix = ""
+        service = "any"
+
         states = []
         type = "BASIC"
       }

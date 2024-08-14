@@ -1,3 +1,5 @@
+// +build acceptance resource service
+
 package dog_test
 
 import (
