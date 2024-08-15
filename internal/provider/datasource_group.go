@@ -195,7 +195,7 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	group := filteredGroups[0]
 	// Set state
-	state = ApiToGroup(group)
+	state = ApiToGroup(ctx, group)
 	//tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroup: %#v", state))
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
