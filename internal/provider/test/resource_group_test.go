@@ -170,6 +170,10 @@ resource %[1]q %[2]q {
     { 
       region = "us-test-region"
       sgid = "sg-test"
+    },
+    {
+      region = "us-test-region2"
+      sgid = "sg-test2"
     }
   ]
   vars = jsonencode({

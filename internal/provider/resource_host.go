@@ -171,7 +171,7 @@ func HostToApiHost(plan Host) api.Host {
 	}
 }
 
-func ApiToHost(host api.Host) Host {
+func ApiToHost(ctx context.Context, host api.Host) Host {
 	if host.Vars != "" {
 		if host.AlertEnable == nil {
 			h := Host{
@@ -183,6 +183,7 @@ func ApiToHost(host api.Host) Host {
 				Name:        types.StringValue(host.Name),
 				Vars:        types.StringValue(host.Vars),
 			}
+			tflog.Debug(ctx, PrettyFmt("ApiToHost h", h))
 			return h
 		} else {
 			h := Host{
@@ -195,6 +196,7 @@ func ApiToHost(host api.Host) Host {
 				Vars:        types.StringValue(host.Vars),
 				AlertEnable: types.BoolValue(*host.AlertEnable),
 			}
+			tflog.Debug(ctx, PrettyFmt("ApiToHost h", h))
 			return h
 		}
 	} else {
@@ -207,6 +209,7 @@ func ApiToHost(host api.Host) Host {
 				Location:    types.StringValue(host.Location),
 				Name:        types.StringValue(host.Name),
 			}
+			tflog.Debug(ctx, PrettyFmt("ApiToHost h", h))
 			return h
 		} else {
 			h := Host{
@@ -218,6 +221,7 @@ func ApiToHost(host api.Host) Host {
 				Name:        types.StringValue(host.Name),
 				AlertEnable: types.BoolValue(*host.AlertEnable),
 			}
+			tflog.Debug(ctx, PrettyFmt("ApiToHost h", h))
 			return h
 		}
 	}
@@ -275,7 +279,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToHost(host)
+	state = ApiToHost(ctx, host)
 
 	plan.ID = state.ID
 
@@ -312,7 +316,7 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	state = ApiToHost(host)
+	state = ApiToHost(ctx, host)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 }
@@ -340,7 +344,7 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	host, statusCode, err := r.p.dog.UpdateHostEncode(hostID, newHost, nil)
 	log.Printf(fmt.Sprintf("host: %+v\n", host))
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
-	state = ApiToHost(host)
+	state = ApiToHost(ctx, host)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
 	}

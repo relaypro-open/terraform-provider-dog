@@ -29,6 +29,14 @@ func TestAccDogZone_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDogZoneConfig_remove_ipv4s(name, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "ipv6_addresses.#", "0"),
+				),
+			},
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -42,6 +50,16 @@ func testAccDogZoneConfig_basic(resourceName, name string) string {
 resource %[1]q %[2]q {
   name = %[2]q
   ipv4_addresses = ["1.1.1.1"]
+  ipv6_addresses = []
+}
+`, resourceName, name)
+}
+
+func testAccDogZoneConfig_remove_ipv4s(resourceName, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q
+  ipv4_addresses = []
   ipv6_addresses = []
 }
 `, resourceName, name)

@@ -31,6 +31,16 @@ func TestAccDogService_Basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccDogServiceConfig_remove_ports(name, randomName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "name", randomName),
+					resource.TestCheckResourceAttr(resourceName, "version", "1"),
+					resource.TestCheckResourceAttr(resourceName, "services.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "services.0.protocol", "tcp"),
+				),
+			},
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -48,6 +58,21 @@ resource %[1]q %[2]q {
       {
         protocol = "tcp"
         ports = ["22"]
+      },
+  ]
+}
+`, resourceName, name)
+}
+
+func testAccDogServiceConfig_remove_ports(resourceName, name string) string {
+	return fmt.Sprintf(`
+resource %[1]q %[2]q {
+  name = %[2]q
+  version = "1"
+  services = [
+      {
+        protocol = "tcp"
+        ports = []
       },
   ]
 }

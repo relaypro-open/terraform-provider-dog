@@ -7,6 +7,7 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -68,36 +69,46 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				MarkdownDescription: "group profile version",
 				Optional:            true,
 			},
-			"ec2_security_group_ids": schema.ListNestedAttribute{
-				MarkdownDescription: "List of EC2 Security Groups to control",
-				Optional:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-						"region": schema.StringAttribute{
-							MarkdownDescription: "EC2 Region",
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.LengthBetween(9, 256),
-								stringvalidator.RegexMatches(
-									regexp.MustCompile(`^(.*)-(.*)-(.*)$`),
-									"must be valid region",
-								),
-							},
-						},
-						"sgid": schema.StringAttribute{
-							MarkdownDescription: "EC2 Security Group ID",
-							Required:            true,
-							Validators: []validator.String{
-								stringvalidator.LengthBetween(3, 256),
-								stringvalidator.RegexMatches(
-									regexp.MustCompile(`^sg-(.*)$`),
-									"must start with 'sg-'",
-								),
-							},
-						},
+			"ec2_security_group_ids": schema.ListAttribute{
+				Description: "List of EC2 Security Groups to manage",
+				ElementType: types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"region": types.StringType,
+						"sgid": types.StringType,
 					},
 				},
+				Required:            true,
 			},
+			//"ec2_security_group_ids": schema.ListNestedAttribute{
+			//	MarkdownDescription: "List of EC2 Security Groups to control",
+			//	Optional:            true,
+			//	NestedObject: schema.NestedAttributeObject{
+			//		Attributes: map[string]schema.Attribute{
+			//			"region": schema.StringAttribute{
+			//				MarkdownDescription: "EC2 Region",
+			//				Required:            true,
+			//				Validators: []validator.String{
+			//					stringvalidator.LengthBetween(9, 256),
+			//					stringvalidator.RegexMatches(
+			//						regexp.MustCompile(`^(.*)-(.*)-(.*)$`),
+			//						"must be valid region",
+			//					),
+			//				},
+			//			},
+			//			"sgid": schema.StringAttribute{
+			//				MarkdownDescription: "EC2 Security Group ID",
+			//				Required:            true,
+			//				Validators: []validator.String{
+			//					stringvalidator.LengthBetween(3, 256),
+			//					stringvalidator.RegexMatches(
+			//						regexp.MustCompile(`^sg-(.*)$`),
+			//						"must start with 'sg-'",
+			//					),
+			//				},
+			//			},
+			//		},
+			//	},
+			//},
 			"vars": schema.StringAttribute{
 				MarkdownDescription: "json string of vars",
 				Optional:            true,
@@ -143,7 +154,7 @@ type groupResourceData struct {
 	//Created        int    `json:"created,omitempty"` //TODO: created has both int and string entries
 	AlertEnable         *bool                              `tfsdk:"alert_enable"`
 	Description         string                             `tfsdk:"description"`
-	Ec2SecurityGroupIds []ec2SecurityGroupIdsResourceData  `tfsdk:"ec2_security_group_ids"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
 	ID                  types.String                       `tfsdk:"id"`
 	Name                string                             `tfsdk:"name"`
 	ProfileId           string                             `tfsdk:"profile_id"`
@@ -156,17 +167,6 @@ type ec2SecurityGroupIdsResourceData struct {
 	Region string `tfsdk:"region"`
 	SgId   string `tfsdk:"sgid"`
 }
-//type Group struct {
-//	AlertEnable         *bool                  `json:"alert_enable,omitempty"`
-//	Description         string                 `json:"description"`
-//	Ec2SecurityGroupIds []*Ec2SecurityGroupIds `json:"ec2_security_group_ids"`
-//	ID                  string                 `json:"id"`
-//	Name                string                 `json:"name"`
-//	ProfileId           string                 `json:"profile_id"`
-//	ProfileName         string                 `json:"profile_name"`
-//	ProfileVersion      string                 `json:"profile_version"`
-//	Vars                string                 `json:"vars"`
-//}
 
 func GroupToApiGroup(plan Group) api.Group {
 	newGroup := api.Group{}
@@ -208,103 +208,114 @@ func GroupToApiGroup(plan Group) api.Group {
 	return newGroup
 }
 
-//func ApiToGroup(ctx context.Context, group api.Group) Group {
-//	newGroup := Group{}
-//
-//	if group.AlertEnable != nil {
-//		newGroup.AlertEnable = types.BoolValue(*group.AlertEnable)
-//		tflog.Debug(ctx, PrettyFmt("ApiToGroup newGroup AlertEnable", newGroup))
-//	}
-//	newGroup.Description = types.StringValue(group.Description)
-//	if len(group.Ec2SecurityGroupIds) > 0  {
-//		newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
-//		//newEc2SecurityGroupIds := make([]Ec2SecurityGroupIds, 0, 2)
-//		for _, region_sgid := range group.Ec2SecurityGroupIds {
-//			rs := &Ec2SecurityGroupIds{
-//				Region: types.StringValue(region_sgid.Region),
-//				SgId:   types.StringValue(region_sgid.SgId),
-//			}
-//			newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
-//		}
-//		newGroup.Ec2SecurityGroupIds = newEc2SecurityGroupIds
-//	}
-//	newGroup.ID = types.StringValue(group.ID)
-//	newGroup.Name = types.StringValue(group.Name)
-//	newGroup.ProfileId = types.StringValue(group.ProfileId)
-//	newGroup.ProfileName = types.StringValue(group.ProfileName)
-//	newGroup.ProfileVersion = types.StringValue(group.ProfileVersion)
-//	newGroup.Vars = types.StringValue(group.Vars)
-//	tflog.Debug(ctx, PrettyFmt("ApiToGroup newGroup", newGroup))
-//	return newGroup
-//}
 func ApiToGroup(ctx context.Context, group api.Group) Group {
-	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
-	for _, region_sgid := range group.Ec2SecurityGroupIds {
-		rs := &Ec2SecurityGroupIds{
-			Region: types.StringValue(region_sgid.Region),
-			SgId:   types.StringValue(region_sgid.SgId),
-		}
-		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
-	}
-	if group.Vars != "" {
-		if group.AlertEnable == nil {
-			h := Group{
-				Description:         types.StringValue(group.Description),
-				ID:                  types.StringValue(group.ID),
-				Name:                types.StringValue(group.Name),
-				ProfileId:           types.StringValue(group.ProfileId),
-				ProfileName:         types.StringValue(group.ProfileName),
-				ProfileVersion:      types.StringValue(group.ProfileVersion),
-				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-				Vars:                types.StringValue(group.Vars),
-			}
-			return h
-		} else {
-			h := Group{
-				Description:         types.StringValue(group.Description),
-				ID:                  types.StringValue(group.ID),
-				Name:                types.StringValue(group.Name),
-				ProfileId:           types.StringValue(group.ProfileId),
-				ProfileName:         types.StringValue(group.ProfileName),
-				ProfileVersion:      types.StringValue(group.ProfileVersion),
-				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-				Vars:                types.StringValue(group.Vars),
-				AlertEnable:         types.BoolValue(*group.AlertEnable),
-			}
-			return h
+	newGroup := Group{}
 
-		}
-	} else {
-		if group.AlertEnable == nil {
-			h := Group{
-				Description:         types.StringValue(group.Description),
-				ID:                  types.StringValue(group.ID),
-				Name:                types.StringValue(group.Name),
-				ProfileId:           types.StringValue(group.ProfileId),
-				ProfileName:         types.StringValue(group.ProfileName),
-				ProfileVersion:      types.StringValue(group.ProfileVersion),
-				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-			}
-			return h
-		} else {
-			h := Group{
-				Description:         types.StringValue(group.Description),
-				ID:                  types.StringValue(group.ID),
-				Name:                types.StringValue(group.Name),
-				ProfileId:           types.StringValue(group.ProfileId),
-				ProfileName:         types.StringValue(group.ProfileName),
-				ProfileVersion:      types.StringValue(group.ProfileVersion),
-				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
-				AlertEnable:         types.BoolValue(*group.AlertEnable),
-			}
-			return h
-		}
+	if group.AlertEnable != nil {
+		newGroup.AlertEnable = types.BoolValue(*group.AlertEnable)
 	}
+	newGroup.Description = types.StringValue(group.Description)
+	if len(group.Ec2SecurityGroupIds) > 0  {
+		newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
+		//newEc2SecurityGroupIds := make([]Ec2SecurityGroupIds, 0, 2)
+		for _, region_sgid := range group.Ec2SecurityGroupIds {
+			rs := &Ec2SecurityGroupIds{
+				Region: types.StringValue(region_sgid.Region),
+				SgId:   types.StringValue(region_sgid.SgId),
+			}
+			newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+		}
+		newGroup.Ec2SecurityGroupIds = newEc2SecurityGroupIds
+	} else {
+		newGroup.Ec2SecurityGroupIds = []*Ec2SecurityGroupIds{}
+	}
+	newGroup.ID = types.StringValue(group.ID)
+	newGroup.Name = types.StringValue(group.Name)
+	newGroup.ProfileId = types.StringValue(group.ProfileId)
+	newGroup.ProfileName = types.StringValue(group.ProfileName)
+	newGroup.ProfileVersion = types.StringValue(group.ProfileVersion)
+	newGroup.Vars = types.StringValue(group.Vars)
+	tflog.Debug(ctx, fmt.Sprintf("ApiToGroup newGroup: %+v\n", newGroup))
+	tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *newGroup.Ec2SecurityGroupIds[0]))
+	return newGroup
 }
 
+//func ApiToGroup(ctx context.Context, group api.Group) Group {
+//	newEc2SecurityGroupIds := []*Ec2SecurityGroupIds{}
+//	for _, region_sgid := range group.Ec2SecurityGroupIds {
+//		rs := &Ec2SecurityGroupIds{
+//			Region: types.StringValue(region_sgid.Region),
+//			SgId:   types.StringValue(region_sgid.SgId),
+//		}
+//		newEc2SecurityGroupIds = append(newEc2SecurityGroupIds, rs)
+//	}
+//	if group.Vars != "" {
+//		if group.AlertEnable == nil {
+//			h := Group{
+//				Description:         types.StringValue(group.Description),
+//				ID:                  types.StringValue(group.ID),
+//				Name:                types.StringValue(group.Name),
+//				ProfileId:           types.StringValue(group.ProfileId),
+//				ProfileName:         types.StringValue(group.ProfileName),
+//				ProfileVersion:      types.StringValue(group.ProfileVersion),
+//				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+//				Vars:                types.StringValue(group.Vars),
+//			}
+//			tflog.Debug(ctx, fmt.Sprintf("ApiToGroup No Vars, No AlertEnable h: %+v\n", h))
+//			tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *h.Ec2SecurityGroupIds[0]))
+//			return h
+//		} else {
+//			h := Group{
+//				Description:         types.StringValue(group.Description),
+//				ID:                  types.StringValue(group.ID),
+//				Name:                types.StringValue(group.Name),
+//				ProfileId:           types.StringValue(group.ProfileId),
+//				ProfileName:         types.StringValue(group.ProfileName),
+//				ProfileVersion:      types.StringValue(group.ProfileVersion),
+//				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+//				Vars:                types.StringValue(group.Vars),
+//				AlertEnable:         types.BoolValue(*group.AlertEnable),
+//			}
+//			tflog.Trace(ctx, fmt.Sprintf("ApiToGroup No Vars, AlertEnable h: %+v\n", h))
+//			tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *h.Ec2SecurityGroupIds[0]))
+//			return h
+//
+//		}
+//	} else {
+//		if group.AlertEnable == nil {
+//			h := Group{
+//				Description:         types.StringValue(group.Description),
+//				ID:                  types.StringValue(group.ID),
+//				Name:                types.StringValue(group.Name),
+//				ProfileId:           types.StringValue(group.ProfileId),
+//				ProfileName:         types.StringValue(group.ProfileName),
+//				ProfileVersion:      types.StringValue(group.ProfileVersion),
+//				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+//			}
+//			tflog.Debug(ctx, fmt.Sprintf("ApiToGroup Vars, No AlertEnable h: %+v\n", h))
+//			tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *h.Ec2SecurityGroupIds[0]))
+//			return h
+//		} else {
+//			h := Group{
+//				Description:         types.StringValue(group.Description),
+//				ID:                  types.StringValue(group.ID),
+//				Name:                types.StringValue(group.Name),
+//				ProfileId:           types.StringValue(group.ProfileId),
+//				ProfileName:         types.StringValue(group.ProfileName),
+//				ProfileVersion:      types.StringValue(group.ProfileVersion),
+//				Ec2SecurityGroupIds: newEc2SecurityGroupIds,
+//				AlertEnable:         types.BoolValue(*group.AlertEnable),
+//			}
+//			tflog.Debug(ctx, fmt.Sprintf("ApiToGroup Vars, AlertEnable h: %+v\n", h))
+//			tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *h.Ec2SecurityGroupIds[0]))
+//			return h
+//		}
+//	}
+//}
+
 func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
-	//newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
-	newEc2SecurityGroupIds := make([]*api.Ec2SecurityGroupIds, 0, 2)
+	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
+	//newEc2SecurityGroupIds := make([]*api.Ec2SecurityGroupIds, 0, 2)
 	if len(plan.Ec2SecurityGroupIds) > 0  {
 		for _, region_sgid := range plan.Ec2SecurityGroupIds {
 			rs := &api.Ec2SecurityGroupIds{
@@ -329,8 +340,8 @@ func GroupToCreateRequest(plan groupResourceData) api.GroupCreateRequest {
 }
 
 func GroupToUpdateRequest(plan groupResourceData) api.GroupUpdateRequest {
-	//newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
-	newEc2SecurityGroupIds := make([]*api.Ec2SecurityGroupIds, 0, 2)
+	newEc2SecurityGroupIds := []*api.Ec2SecurityGroupIds{}
+	//newEc2SecurityGroupIds := make([]*api.Ec2SecurityGroupIds, 0, 2)
 	if len(plan.Ec2SecurityGroupIds) > 0  {
 		for _, region_sgid := range plan.Ec2SecurityGroupIds {
 			rs := &api.Ec2SecurityGroupIds{
@@ -382,7 +393,8 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		return
 	}
 	state = ApiToGroup(ctx, group)
-	tflog.Debug(ctx, PrettyFmt("group create state", state))
+	tflog.Trace(ctx, fmt.Sprintf("group create state: %+v\n", state))
+	tflog.Debug(ctx, fmt.Sprintf("Ec2SecurityGroupIds h: %+v\n", *state.Ec2SecurityGroupIds[0]))
 
 	plan.ID = state.ID
 
@@ -442,10 +454,11 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	newGroup := GroupToApiGroup(plan)
+	tflog.Trace(ctx, fmt.Sprintf("group update newGroup: %+v\n", newGroup))
 	group, statusCode, err := r.p.dog.UpdateGroupEncode(groupID, newGroup, nil)
-	log.Printf(fmt.Sprintf("group: %+v\n", group))
-	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
+	tflog.Trace(ctx, fmt.Sprintf("group update group: %+v\n", group))
 	state = ApiToGroup(ctx, group)
+	tflog.Trace(ctx, fmt.Sprintf("group update state: %+v\n", state))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
 	}
@@ -504,7 +517,7 @@ type groupResourceModelV0 struct {
 	ProfileId           string                             `tfsdk:"profile_id"`
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
-	Ec2SecurityGroupIds []ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
 	Vars                *string                            `tfsdk:"vars"`
 }
 
@@ -515,7 +528,7 @@ type groupResourceModelV1 struct {
 	ProfileId           string                             `tfsdk:"profile_id"`
 	ProfileName         string                             `tfsdk:"profile_name"`
 	ProfileVersion      string                             `tfsdk:"profile_version"`
-	Ec2SecurityGroupIds []ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
+	Ec2SecurityGroupIds []*ec2SecurityGroupIdsResourceData `tfsdk:"ec2_security_group_ids"`
 	Vars                *string                            `tfsdk:"vars"`
 	AlertEnable         *bool                              `tfsdk:"alert_enable"`
 }

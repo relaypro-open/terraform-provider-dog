@@ -174,7 +174,7 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	// Set state
 	filteredHost := filteredHosts[0]
-	state = ApiToHost(filteredHost)
+	state = ApiToHost(ctx, filteredHost)
 	diags := resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
