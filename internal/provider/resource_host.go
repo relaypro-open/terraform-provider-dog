@@ -432,6 +432,13 @@ func (r *hostResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 					"group": schema.StringAttribute{
 						MarkdownDescription: "Host group",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(1, 26),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+								"Length limited by generated ipset name length limit'",
+							),
+						},
 					},
 					"hostkey": schema.StringAttribute{
 						MarkdownDescription: "Host key",

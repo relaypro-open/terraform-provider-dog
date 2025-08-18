@@ -49,10 +49,10 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				MarkdownDescription: "group name",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.LengthBetween(1, 28),
+					stringvalidator.LengthBetween(1, 26),
 					stringvalidator.RegexMatches(
 						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
-						"must start with 'sg-'",
+						"Length limited by generated ipset name length limit'",
 					),
 				},
 			},
@@ -512,10 +512,10 @@ func (r *groupResource) UpgradeState(ctx context.Context) map[int64]resource.Sta
 						MarkdownDescription: "group name",
 						Optional:            true,
 						Validators: []validator.String{
-							stringvalidator.LengthBetween(1, 28),
+							stringvalidator.LengthBetween(1, 26),
 							stringvalidator.RegexMatches(
 								regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
-								"must start with 'sg-'",
+								"Length limited by generated ipset name length limit'",
 							),
 						},
 					},
