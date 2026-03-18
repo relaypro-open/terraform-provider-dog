@@ -1,4 +1,4 @@
-
+//go:build acceptance || datasource || host
 // +build acceptance datasource host
 
 package dog_test

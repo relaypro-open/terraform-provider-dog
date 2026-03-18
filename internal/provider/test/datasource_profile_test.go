@@ -1,4 +1,4 @@
-
+//go:build acceptance || datasource || profile
 // +build acceptance datasource profile
 
 package dog_test

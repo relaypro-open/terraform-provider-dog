@@ -2,11 +2,11 @@ package dog
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
-	"regexp"
-	"encoding/json"
 	"reflect"
+	"regexp"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -340,21 +340,21 @@ var _ resource.Resource = &factResource{}
 var _ resource.ResourceWithUpgradeState = &factResource{}
 
 type factResourceModelV0 struct {
-	ID     types.String          `tfsdk:"id"`
+	ID     types.String                 `tfsdk:"id"`
 	Groups map[string]*FactGroupModelV0 `tfsdk:"groups"`
-	Name   string                `tfsdk:"name"`
+	Name   string                       `tfsdk:"name"`
 }
 
 type FactGroupModelV0 struct {
-	Vars     *string  `tfsdk:"vars"`
+	Vars     *string                      `tfsdk:"vars"`
 	Hosts    map[string]map[string]string `tfsdk:"hosts"`
-	Children []string `tfsdk:"children"`
+	Children []string                     `tfsdk:"children"`
 }
 
 type factResourceModelV1 struct {
-	ID     types.String          `tfsdk:"id"`
+	ID     types.String                 `tfsdk:"id"`
 	Groups map[string]*FactGroupModelV1 `tfsdk:"groups"`
-	Name   string                `tfsdk:"name"`
+	Name   string                       `tfsdk:"name"`
 }
 
 type FactGroupModelV1 struct {
@@ -364,7 +364,7 @@ type FactGroupModelV1 struct {
 }
 
 func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
-	tflog.Debug(ctx,"UpgradeState")
+	tflog.Debug(ctx, "UpgradeState")
 	return map[int64]resource.StateUpgrader{
 		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
 		0: {
@@ -378,8 +378,8 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 									Optional:            true,
 								},
 								"hosts": schema.MapAttribute{
-									Required:            true,
-									ElementType:         types.MapType{ElemType: types.StringType},
+									Required:    true,
+									ElementType: types.MapType{ElemType: types.StringType},
 								},
 								"children": schema.ListAttribute{
 									Required:    true,
@@ -410,7 +410,7 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 
 				//resp.Diagnostics.Append(
 				req.State.Get(ctx, &priorStateData)
-			//)
+				//)
 
 				if resp.Diagnostics.HasError() {
 					return
@@ -421,30 +421,30 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 					responseVars, _ := json.Marshal(group.Hosts)
 					hostsString := string(responseVars)
 					//fmt.Printf("variable val=%v is of type %v \n", row.AlertEnable, reflect.ValueOf(row.AlertEnable).Kind())
-					tflog.Debug(ctx,fmt.Sprintf("variable val=%v is of type %v \n", hostsString, reflect.ValueOf(hostsString).Kind() ))
+					tflog.Debug(ctx, fmt.Sprintf("variable val=%v is of type %v \n", hostsString, reflect.ValueOf(hostsString).Kind()))
 					if group.Hosts != nil {
 						g := FactGroupModelV1{
-							Vars: group.Vars,
+							Vars:     group.Vars,
 							Hosts:    &hostsString,
 							Children: group.Children,
 						}
 						updatedGroups[name] = &g
+					}
 				}
-			}
 
 				upgradedStateData := factResourceModelV1{
-					ID:                priorStateData.ID,
-					Name: priorStateData.Name,
+					ID:     priorStateData.ID,
+					Name:   priorStateData.Name,
 					Groups: updatedGroups,
 				}
 
-			//	if priorStateData.Groups != nil {
-			//		upgradedStateData.Groups = &v
-			//	}
+				//	if priorStateData.Groups != nil {
+				//		upgradedStateData.Groups = &v
+				//	}
 
 				//"UpgradeState"resp.Diagnostics.Append(
-			resp.State.Set(ctx, upgradedStateData)
-			//)
+				resp.State.Set(ctx, upgradedStateData)
+				//)
 			},
 		},
 	}

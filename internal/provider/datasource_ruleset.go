@@ -21,10 +21,10 @@ type (
 	RulesetList []Ruleset
 
 	Ruleset struct {
-		ID    types.String          `tfsdk:"id"`
-		Name  types.String          `tfsdk:"name"`
-		Rules *rulesetResourceRules `tfsdk:"rules"`
-		ProfileId types.String `tfsdk:"profile_id" json:"profile_id"`
+		ID        types.String          `tfsdk:"id"`
+		Name      types.String          `tfsdk:"name"`
+		Rules     *rulesetResourceRules `tfsdk:"rules"`
+		ProfileId types.String          `tfsdk:"profile_id" json:"profile_id"`
 	}
 
 	Rules struct {

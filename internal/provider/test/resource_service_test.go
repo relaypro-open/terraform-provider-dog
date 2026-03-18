@@ -1,4 +1,4 @@
-
+//go:build acceptance || resource || service
 // +build acceptance resource service
 
 package dog_test

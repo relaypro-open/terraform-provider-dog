@@ -1,4 +1,4 @@
-
+//go:build acceptance || datasource || fact
 // +build acceptance datasource fact
 
 package dog_test

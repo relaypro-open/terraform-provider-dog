@@ -1,3 +1,4 @@
+//go:build acceptance || resource || fact
 // +build acceptance resource fact
 
 package dog_test
