@@ -1,3 +1,4 @@
+
 // +build acceptance resource profile
 
 package dog_test

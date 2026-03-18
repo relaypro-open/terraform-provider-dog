@@ -1,11 +1,11 @@
-ENV=pro
+ENV=qa
 
 default: install
 
 run: build
-	mkdir -p /tmp/dog-import
-	./dog-import -environment ${ENV} -output_dir /tmp/dog-import -host_prefix ${ENV}
-	terraform fmt /tmp/dog-import
+	mkdir -p /tmp/dog-import-${ENV}
+	./dog-import -environment ${ENV} -output_dir /tmp/dog-import-${ENV} -host_prefix ${ENV}
+	terraform fmt /tmp/dog-import-${ENV}
 
 build:
 	go build

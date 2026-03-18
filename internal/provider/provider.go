@@ -144,9 +144,9 @@ func (p *dogProvider) Configure(ctx context.Context, req provider.ConfigureReque
 	c := api.NewClient(api_token, api_endpoint)
 
 	p.configured = true
-	log.Printf(fmt.Sprintf("p.dog: %+v\n", p.dog))
-	log.Printf(fmt.Sprintf("p.configured: %+v\n", p.configured))
-	log.Printf(fmt.Sprintf("p.version: %+v\n", p.version))
+	log.Printf("p.dog: %+v\n", p.dog)
+	log.Printf("p.configured: %+v\n", p.configured)
+	log.Printf("p.version: %+v\n", p.version)
 
 	p.dog = c
 

@@ -243,8 +243,8 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	factID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	fact, statusCode, err := r.p.dog.GetFactEncode(factID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -281,7 +281,7 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	newFact := FactToApiFact(plan)
 	fact, statusCode, err := r.p.dog.UpdateFactEncode(factID, newFact, nil)
-	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
+	log.Printf("fact: %+v\n", fact)
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	state = ApiToFact(fact)
 	if err != nil {

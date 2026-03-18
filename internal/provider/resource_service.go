@@ -190,9 +190,9 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	newService := ServiceToCreateRequest(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	service, statusCode, err := r.p.dog.CreateService(newService, nil)
-	log.Printf(fmt.Sprintf("service: %+v\n", service))
+	log.Printf("service: %+v\n", service)
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
@@ -228,8 +228,8 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	serviceID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	service, statusCode, err := r.p.dog.GetService(serviceID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -266,7 +266,7 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	newService := ServiceToUpdateRequest(plan)
 	service, statusCode, err := r.p.dog.UpdateService(serviceID, newService, nil)
-	log.Printf(fmt.Sprintf("service: %+v\n", service))
+	log.Printf("service: %+v\n", service)
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
 	state = ApiToService(service)
 	if err != nil {

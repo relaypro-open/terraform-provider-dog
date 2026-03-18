@@ -107,11 +107,6 @@ func (d *hostDataSource) Configure(ctx context.Context, req datasource.Configure
 	d.p.dog = client
 }
 
-type hostDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
-}
-
 func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Host
 	var hostGroup string
@@ -163,10 +158,10 @@ func (d *hostDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	filteredHosts := filteredHostsGroup
 
 	if filteredHosts == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_host data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_host data source returned no results.")
 	}
 	if len(filteredHosts) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_host data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_host data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

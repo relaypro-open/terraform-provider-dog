@@ -179,9 +179,9 @@ func (r *zoneResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	newZone := ZoneToCreateRequest(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	zone, statusCode, err := r.p.dog.CreateZone(newZone, nil)
-	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
+	log.Printf("zone: %+v\n", zone)
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
@@ -217,8 +217,8 @@ func (r *zoneResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	zoneID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	zone, statusCode, err := r.p.dog.GetZone(zoneID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -255,7 +255,7 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	newZone := ZoneToUpdateRequest(plan)
 	zone, statusCode, err := r.p.dog.UpdateZone(zoneID, newZone, nil)
-	log.Printf(fmt.Sprintf("zone: %+v\n", zone))
+	log.Printf("zone: %+v\n", zone)
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
 	state = ApiToZone(zone)
 	if err != nil {
