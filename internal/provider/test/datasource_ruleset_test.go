@@ -1,3 +1,4 @@
+//go:build acceptance || datasource || ruleset
 // +build acceptance datasource ruleset
 
 package dog_test

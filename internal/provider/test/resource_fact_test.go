@@ -1,3 +1,4 @@
+//go:build acceptance || resource || fact
 // +build acceptance resource fact
 
 package dog_test
@@ -58,7 +59,7 @@ func TestAccDogFact_Basic(t *testing.T) {
 func testAccDogFactConfig_basic(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
   groups = {
      all = {
        vars = jsonencode({
@@ -99,7 +100,7 @@ resource %[1]q %[2]q {
 func testAccDogFactConfig_add_vars(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
   groups = {
      all = {
        vars = jsonencode({
@@ -142,7 +143,7 @@ resource %[1]q %[2]q {
 func testAccDogFactConfig_remove_vars(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
   groups = {
      all = {
        vars = jsonencode({
@@ -227,7 +228,7 @@ func TestAccDogFact_Big(t *testing.T) {
 func testAccDogFactConfig_big(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
     groups = {
       all = {
         children = ["dog_test"]
@@ -301,7 +302,7 @@ resource %[1]q %[2]q {
 func testAccDogFactConfig_big_update(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
     groups = {
       all = {
         children = ["dog_test"]
@@ -375,7 +376,7 @@ resource %[1]q %[2]q {
 func testAccDogFactConfig_big_update_remove(resourceType, name string) string {
 	return fmt.Sprintf(`
 resource %[1]q %[2]q {
-  name = %[2]q 
+  name = %[2]q
     groups = {
       all = {
         children = ["dog_test"]

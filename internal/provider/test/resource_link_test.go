@@ -1,3 +1,4 @@
+//go:build acceptance || resource || link
 // +build acceptance resource link
 
 package dog_test

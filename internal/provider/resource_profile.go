@@ -51,7 +51,7 @@ func (*profileResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				MarkdownDescription: "Profile name",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.LengthAtLeast(1),
+					stringvalidator.LengthBetween(1, 26),
 				},
 			},
 			"version": schema.StringAttribute{
@@ -129,9 +129,9 @@ func (r *profileResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	newProfile := ProfileToCreateRequest(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	profile, statusCode, err := r.p.dog.CreateProfile(newProfile, nil)
-	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	log.Printf("profile: %+v\n", profile)
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -167,8 +167,8 @@ func (r *profileResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	profileID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	profile, statusCode, err := r.p.dog.GetProfile(profileID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -205,7 +205,7 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	newProfile := ProfileToUpdateRequest(plan)
 	profile, statusCode, err := r.p.dog.UpdateProfile(profileID, newProfile, nil)
-	log.Printf(fmt.Sprintf("profile: %+v\n", profile))
+	log.Printf("profile: %+v\n", profile)
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
 	state = ApiToProfile(profile)
 	if err != nil {

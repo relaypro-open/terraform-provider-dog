@@ -127,10 +127,10 @@ func (d *zoneDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	filteredZones := filteredZonesName
 
 	if filteredZones == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_zone data source returned no results.")
 	}
 	if len(filteredZones) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_zone data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_zone data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

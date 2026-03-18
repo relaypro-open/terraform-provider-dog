@@ -1,3 +1,4 @@
+//go:build acceptance || resource || zone
 // +build acceptance resource zone
 
 package dog_test

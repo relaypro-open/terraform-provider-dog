@@ -47,6 +47,9 @@ func (*rulesetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 			"name": schema.StringAttribute{
 				MarkdownDescription: "ruleset name",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.LengthBetween(1, 26),
+				},
 			},
 			"profile_id": schema.StringAttribute{
 				MarkdownDescription: "profile id",
@@ -462,9 +465,9 @@ func (r *rulesetResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	newRuleset := RulesetToCreateRequest(ctx, plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	ruleset, statusCode, err := r.p.dog.CreateRuleset(newRuleset, nil)
-	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
+	log.Printf("ruleset: %+v\n", ruleset)
 	tflog.Debug(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
 	if statusCode != 201 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -500,8 +503,8 @@ func (r *rulesetResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	rulesetID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	ruleset, statusCode, err := r.p.dog.GetRuleset(rulesetID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -538,7 +541,7 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	newRuleset := RulesetToUpdateRequest(ctx, plan)
 	ruleset, statusCode, err := r.p.dog.UpdateRuleset(rulesetID, newRuleset, nil)
-	log.Printf(fmt.Sprintf("ruleset: %+v\n", ruleset))
+	log.Printf("ruleset: %+v\n", ruleset)
 	tflog.Debug(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
 	state = ApiToRuleset(ctx, ruleset)
 	if err != nil {
