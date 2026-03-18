@@ -129,15 +129,6 @@ func (d *groupDataSource) Configure(ctx context.Context, req datasource.Configur
 	d.p.dog = client
 }
 
-type groupDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
-}
-
-//type groupDataSource struct {
-//	provider provider
-//}
-
 func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Group
 	var groupName string
@@ -184,10 +175,10 @@ func (d *groupDataSource) Read(ctx context.Context, req datasource.ReadRequest, 
 
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredGroups: %#v", filteredGroups))
 	if filteredGroups == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_group data source returned no results.")
 	}
 	if len(filteredGroups) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_group data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_group data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

@@ -1,3 +1,4 @@
+
 // +build acceptance resource link
 
 package dog_test

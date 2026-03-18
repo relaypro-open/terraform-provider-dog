@@ -50,10 +50,10 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.LengthBetween(1, 26),
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
-						"Length limited by generated ipset name length limit'",
-					),
+					//stringvalidator.RegexMatches(
+					//	regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+					//	"Length limited by generated ipset name length limit'",
+					//),
 				},
 			},
 			"profile_id": schema.StringAttribute{
@@ -345,7 +345,7 @@ func (r *groupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	tflog.Debug(ctx, PrettyFmt("group create newGroup", newGroup))
 	group, statusCode, err := r.p.dog.CreateGroupEncode(newGroup, nil)
 	tflog.Debug(ctx, PrettyFmt("group create group", group))
-	log.Printf(fmt.Sprintf("group: %+v\n", group))
+	log.Printf("group: %+v\n", group)
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create group, got error: %s", err))
@@ -418,7 +418,7 @@ func (r *groupResource) Update(ctx context.Context, req resource.UpdateRequest, 
 
 	newGroup := GroupToApiGroup(plan)
 	group, statusCode, err := r.p.dog.UpdateGroupEncode(groupID, newGroup, nil)
-	log.Printf(fmt.Sprintf("group: %+v\n", group))
+	log.Printf("group: %+v\n", group)
 	tflog.Trace(ctx, fmt.Sprintf("group: %+v\n", group))
 	state = ApiToGroup(group)
 	if err != nil {

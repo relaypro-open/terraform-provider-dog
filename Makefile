@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog
 BINARY=terraform-provider-${NAME}
-VERSION=v1.0.37
+VERSION=v1.0.38
 OS_ARCH=linux_amd64
 
 default: install
@@ -45,7 +45,7 @@ install: build
 	mv bin/${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
-	go test -i $(TEST) || exit 1
+	go test -i $(TEST)|| exit 1
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=1
 
 testacc:

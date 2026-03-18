@@ -1,3 +1,4 @@
+
 // +build acceptance resource host
 
 package dog_test

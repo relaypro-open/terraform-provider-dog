@@ -120,10 +120,10 @@ func (d *profileDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	filteredProfiles := filteredProfilesName
 
 	if filteredProfiles == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_profile data source returned no results.")
 	}
 	if len(filteredProfiles) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_profile data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_profile data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

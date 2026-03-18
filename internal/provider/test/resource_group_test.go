@@ -1,3 +1,4 @@
+
 // +build acceptance resource group
 
 package dog_test
@@ -138,7 +139,7 @@ resource %[1]q %[2]q {
   profile_name = dog_profile.resource_group.name
   profile_version = "latest"
   ec2_security_group_ids = [
-    { 
+    {
       region = "us-test-region"
       sgid = "sg-test"
     }
@@ -167,7 +168,7 @@ resource %[1]q %[2]q {
   profile_name = dog_profile.resource_group.name
   profile_version = "latest"
   ec2_security_group_ids = [
-    { 
+    {
       region = "us-test-region"
       sgid = "sg-test"
     }

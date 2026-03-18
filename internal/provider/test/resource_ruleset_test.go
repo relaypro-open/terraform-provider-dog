@@ -1,3 +1,4 @@
+
 // +build acceptance resource ruleset
 
 package dog_test
