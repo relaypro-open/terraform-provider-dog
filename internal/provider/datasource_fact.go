@@ -99,15 +99,6 @@ func (d *factDataSource) Configure(ctx context.Context, req datasource.Configure
 	d.p.dog = client
 }
 
-type factDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
-}
-
-//type factDataSource struct {
-//	provider provider
-//}
-
 func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Fact
 	var factName string
@@ -137,10 +128,10 @@ func (d *factDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	filteredFacts := filteredFactsName
 
 	if filteredFacts == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_fact data source returned no results.")
 	}
 	if len(filteredFacts) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_fact data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_fact data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

@@ -21,11 +21,10 @@ type (
 	RulesetList []Ruleset
 
 	Ruleset struct {
-		ID    types.String          `tfsdk:"id"`
-		Name  types.String          `tfsdk:"name"`
-		Rules *rulesetResourceRules `tfsdk:"rules"`
-		//ProfileId types.String `tfsdk:"profile_id" force:",omitempty"`
-		ProfileId types.String `tfsdk:"profile_id" json:"profile_id,omitempty"`
+		ID        types.String          `tfsdk:"id"`
+		Name      types.String          `tfsdk:"name"`
+		Rules     *rulesetResourceRules `tfsdk:"rules"`
+		ProfileId types.String          `tfsdk:"profile_id" json:"profile_id"`
 	}
 
 	Rules struct {
@@ -158,15 +157,6 @@ func (d *rulesetDataSource) Configure(ctx context.Context, req datasource.Config
 	d.p.dog = client
 }
 
-type rulesetDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
-}
-
-//type rulesetDataSource struct {
-//	provider provider
-//}
-
 func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Ruleset
 	var rulesetName string
@@ -197,10 +187,10 @@ func (d *rulesetDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	filteredRulesets := filteredRulesetsName
 
 	if filteredRulesets == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_ruleset data source returned no results.")
 	}
 	if len(filteredRulesets) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_ruleset data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_ruleset data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

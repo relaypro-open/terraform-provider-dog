@@ -1,3 +1,4 @@
+//go:build acceptance || datasource || fact
 // +build acceptance datasource fact
 
 package dog_test
@@ -27,7 +28,7 @@ func TestProvider_DogFactNameAttribute(t *testing.T) {
 func testAccDogFactDataSourceConfig(name string) string {
 	return fmt.Sprintf(`
 resource "dog_fact" %[1]q {
-  name = %[1]q 
+  name = %[1]q
   groups = {
 		all= {
 			vars = jsonencode({
@@ -63,9 +64,8 @@ resource "dog_fact" %[1]q {
 	}
 }
 
-
 data "dog_fact" %[1]q {
-  name = dog_fact.%[1]s.name 
+  name = dog_fact.%[1]s.name
 }
 `, name)
 }

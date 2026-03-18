@@ -263,9 +263,9 @@ func (r *linkResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	newLink := LinkToCreateRequest(plan)
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	link, statusCode, err := r.p.dog.CreateLink(newLink, nil)
-	log.Printf(fmt.Sprintf("link: %+v\n", link))
+	log.Printf("link: %+v\n", link)
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
@@ -301,8 +301,8 @@ func (r *linkResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	linkID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	link, statusCode, err := r.p.dog.GetLink(linkID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccesful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -339,7 +339,7 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	newLink := LinkToUpdateRequest(plan)
 	link, statusCode, err := r.p.dog.UpdateLink(linkID, newLink, nil)
-	log.Printf(fmt.Sprintf("link: %+v\n", link))
+	log.Printf("link: %+v\n", link)
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
 	state = ApiToLink(link)
 	if err != nil {

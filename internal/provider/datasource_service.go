@@ -161,10 +161,10 @@ func (d *serviceDataSource) Read(ctx context.Context, req datasource.ReadRequest
 
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredServices: %#v", filteredServices))
 	if filteredServices == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_service data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_service data source returned no results.")
 	}
 	if len(filteredServices) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_service data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_service data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

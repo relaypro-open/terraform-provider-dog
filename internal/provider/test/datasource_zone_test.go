@@ -1,3 +1,4 @@
+//go:build acceptance || datasource || zone
 // +build acceptance datasource zone
 
 package dog_test

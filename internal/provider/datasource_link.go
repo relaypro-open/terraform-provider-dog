@@ -165,15 +165,6 @@ func (d *linkDataSource) Configure(ctx context.Context, req datasource.Configure
 	d.p.dog = client
 }
 
-type linkDataSourceData struct {
-	ApiToken types.String `tfsdk:"api_token"`
-	Id       types.String `tfsdk:"id"`
-}
-
-//type linkDataSource struct {
-//	provider provider
-//}
-
 func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var state Link
 	var linkName string
@@ -204,10 +195,10 @@ func (d *linkDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	tflog.Debug(ctx, spew.Sprint("ZZZfilteredLinks: %#v", filteredLinks))
 	if filteredLinks == nil {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned no results."))
+		resp.Diagnostics.AddError("Data Error", "dog_link data source returned no results.")
 	}
 	if len(filteredLinks) > 1 {
-		resp.Diagnostics.AddError("Data Error", fmt.Sprintf("dog_link data source returned more than one result."))
+		resp.Diagnostics.AddError("Data Error", "dog_link data source returned more than one result.")
 	}
 	if resp.Diagnostics.HasError() {
 		return

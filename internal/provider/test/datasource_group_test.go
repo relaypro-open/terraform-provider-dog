@@ -1,3 +1,4 @@
+//go:build acceptance || datasource || group
 // +build acceptance datasource group
 
 package dog_test

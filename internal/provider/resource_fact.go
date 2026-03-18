@@ -2,11 +2,11 @@ package dog
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
-	"regexp"
-	"encoding/json"
 	"reflect"
+	"regexp"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
@@ -243,8 +243,8 @@ func (r *factResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	factID := state.ID.ValueString()
 
-	log.Printf(fmt.Sprintf("r.p: %+v\n", r.p))
-	log.Printf(fmt.Sprintf("r.p.dog: %+v\n", r.p.dog))
+	log.Printf("r.p: %+v\n", r.p)
+	log.Printf("r.p.dog: %+v\n", r.p.dog)
 	fact, statusCode, err := r.p.dog.GetFactEncode(factID, nil)
 	if statusCode != 200 {
 		resp.Diagnostics.AddError("Client Unsuccessful", fmt.Sprintf("Status Code: %d", statusCode))
@@ -281,7 +281,7 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 
 	newFact := FactToApiFact(plan)
 	fact, statusCode, err := r.p.dog.UpdateFactEncode(factID, newFact, nil)
-	log.Printf(fmt.Sprintf("fact: %+v\n", fact))
+	log.Printf("fact: %+v\n", fact)
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
 	state = ApiToFact(fact)
 	if err != nil {
@@ -340,21 +340,21 @@ var _ resource.Resource = &factResource{}
 var _ resource.ResourceWithUpgradeState = &factResource{}
 
 type factResourceModelV0 struct {
-	ID     types.String          `tfsdk:"id"`
+	ID     types.String                 `tfsdk:"id"`
 	Groups map[string]*FactGroupModelV0 `tfsdk:"groups"`
-	Name   string                `tfsdk:"name"`
+	Name   string                       `tfsdk:"name"`
 }
 
 type FactGroupModelV0 struct {
-	Vars     *string  `tfsdk:"vars"`
+	Vars     *string                      `tfsdk:"vars"`
 	Hosts    map[string]map[string]string `tfsdk:"hosts"`
-	Children []string `tfsdk:"children"`
+	Children []string                     `tfsdk:"children"`
 }
 
 type factResourceModelV1 struct {
-	ID     types.String          `tfsdk:"id"`
+	ID     types.String                 `tfsdk:"id"`
 	Groups map[string]*FactGroupModelV1 `tfsdk:"groups"`
-	Name   string                `tfsdk:"name"`
+	Name   string                       `tfsdk:"name"`
 }
 
 type FactGroupModelV1 struct {
@@ -364,7 +364,7 @@ type FactGroupModelV1 struct {
 }
 
 func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
-	tflog.Debug(ctx,"UpgradeState")
+	tflog.Debug(ctx, "UpgradeState")
 	return map[int64]resource.StateUpgrader{
 		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
 		0: {
@@ -378,8 +378,8 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 									Optional:            true,
 								},
 								"hosts": schema.MapAttribute{
-									Required:            true,
-									ElementType:         types.MapType{ElemType: types.StringType},
+									Required:    true,
+									ElementType: types.MapType{ElemType: types.StringType},
 								},
 								"children": schema.ListAttribute{
 									Required:    true,
@@ -410,7 +410,7 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 
 				//resp.Diagnostics.Append(
 				req.State.Get(ctx, &priorStateData)
-			//)
+				//)
 
 				if resp.Diagnostics.HasError() {
 					return
@@ -421,30 +421,30 @@ func (r *factResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 					responseVars, _ := json.Marshal(group.Hosts)
 					hostsString := string(responseVars)
 					//fmt.Printf("variable val=%v is of type %v \n", row.AlertEnable, reflect.ValueOf(row.AlertEnable).Kind())
-					tflog.Debug(ctx,fmt.Sprintf("variable val=%v is of type %v \n", hostsString, reflect.ValueOf(hostsString).Kind() ))
+					tflog.Debug(ctx, fmt.Sprintf("variable val=%v is of type %v \n", hostsString, reflect.ValueOf(hostsString).Kind()))
 					if group.Hosts != nil {
 						g := FactGroupModelV1{
-							Vars: group.Vars,
+							Vars:     group.Vars,
 							Hosts:    &hostsString,
 							Children: group.Children,
 						}
 						updatedGroups[name] = &g
+					}
 				}
-			}
 
 				upgradedStateData := factResourceModelV1{
-					ID:                priorStateData.ID,
-					Name: priorStateData.Name,
+					ID:     priorStateData.ID,
+					Name:   priorStateData.Name,
 					Groups: updatedGroups,
 				}
 
-			//	if priorStateData.Groups != nil {
-			//		upgradedStateData.Groups = &v
-			//	}
+				//	if priorStateData.Groups != nil {
+				//		upgradedStateData.Groups = &v
+				//	}
 
 				//"UpgradeState"resp.Diagnostics.Append(
-			resp.State.Set(ctx, upgradedStateData)
-			//)
+				resp.State.Set(ctx, upgradedStateData)
+				//)
 			},
 		},
 	}

@@ -1,3 +1,4 @@
+//go:build acceptance || provider
 // +build acceptance provider
 
 package dog_test

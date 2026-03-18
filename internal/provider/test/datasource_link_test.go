@@ -1,3 +1,4 @@
+//go:build acceptance || datasource || link
 // +build acceptance datasource link
 
 package dog_test

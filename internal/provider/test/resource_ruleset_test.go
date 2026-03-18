@@ -1,3 +1,4 @@
+//go:build acceptance || resource || ruleset
 // +build acceptance resource ruleset
 
 package dog_test
