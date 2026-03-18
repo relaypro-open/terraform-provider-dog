@@ -50,10 +50,10 @@ func (*groupResource) Schema(ctx context.Context, req resource.SchemaRequest, re
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.LengthBetween(1, 26),
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
-						"Length limited by generated ipset name length limit'",
-					),
+					//stringvalidator.RegexMatches(
+					//	regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
+					//	"Length limited by generated ipset name length limit'",
+					//),
 				},
 			},
 			"profile_id": schema.StringAttribute{
