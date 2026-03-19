@@ -3,8 +3,8 @@ HOSTNAME=github.com
 NAMESPACE=relaypro-open
 NAME=dog
 BINARY=terraform-provider-${NAME}
-VERSION=v1.0.38
-OS_ARCH=linux_amd64
+VERSION=v1.0.39
+OS_ARCH=darwin_arm
 
 default: install
 
@@ -41,8 +41,8 @@ delete_release:
 	 git push --delete origin ${VERSION}
 
 install: build
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
-	mv bin/${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	#mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	#mv bin/${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
 	go test -i $(TEST)|| exit 1
