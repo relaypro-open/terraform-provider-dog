@@ -400,7 +400,6 @@ type hostResourceModelV0 struct {
 	Location    string       `tfsdk:"location"`
 	Name        string       `tfsdk:"name"`
 	Vars        *string      `tfsdk:"vars"`
-	AlertEnable *bool        `tfsdk:"alert_enable"`
 }
 
 type hostResourceModelV1 struct {
@@ -469,21 +468,16 @@ func (r *hostResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 						MarkdownDescription: "Host identifier",
 						Computed:            true,
 					},
-				},
+					},
 			},
 			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
 				var priorStateData hostResourceModelV0
 
-				//resp.Diagnostics.Append(
-				req.State.Get(ctx, &priorStateData)
-				//)
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
 
 				if resp.Diagnostics.HasError() {
 					return
 				}
-
-				var alertEnable *bool
-				req.State.GetAttribute(ctx, path.Root("alertEnable"), alertEnable)
 
 				upgradedStateData := hostResourceModelV1{
 					Environment: priorStateData.Environment,
@@ -492,7 +486,7 @@ func (r *hostResource) UpgradeState(ctx context.Context) map[int64]resource.Stat
 					Location:    priorStateData.Location,
 					Name:        priorStateData.Name,
 					Vars:        priorStateData.Vars,
-					AlertEnable: alertEnable,
+					AlertEnable: nil,
 					ID:          priorStateData.ID,
 				}
 
