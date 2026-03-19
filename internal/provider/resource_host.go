@@ -24,8 +24,9 @@ type (
 )
 
 var (
-	_ resource.Resource                = (*hostResource)(nil)
-	_ resource.ResourceWithImportState = (*hostResource)(nil)
+	_ resource.Resource                 = (*hostResource)(nil)
+	_ resource.ResourceWithImportState  = (*hostResource)(nil)
+	_ resource.ResourceWithUpgradeState = (*hostResource)(nil)
 )
 
 func NewHostResource() resource.Resource {
