@@ -24,8 +24,9 @@ type (
 )
 
 var (
-	_ resource.Resource                = (*groupResource)(nil)
-	_ resource.ResourceWithImportState = (*groupResource)(nil)
+	_ resource.Resource                   = (*groupResource)(nil)
+	_ resource.ResourceWithImportState    = (*groupResource)(nil)
+	_ resource.ResourceWithUpgradeState   = (*groupResource)(nil)
 )
 
 func NewGroupResource() resource.Resource {
