@@ -283,9 +283,8 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	fact, statusCode, err := r.p.dog.UpdateFactEncode(factID, newFact, nil)
 	log.Printf("fact: %+v\n", fact)
 	tflog.Trace(ctx, fmt.Sprintf("fact: %+v\n", fact))
-	state = ApiToFact(fact)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create fact, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update fact, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if !slices.Contains(ok, statusCode) {
@@ -294,6 +293,7 @@ func (r *factResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToFact(fact)
 
 	plan.ID = state.ID
 

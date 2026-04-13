@@ -26,7 +26,6 @@ type (
 var (
 	_ resource.Resource                 = (*hostResource)(nil)
 	_ resource.ResourceWithImportState  = (*hostResource)(nil)
-	_ resource.ResourceWithUpgradeState = (*hostResource)(nil)
 )
 
 func NewHostResource() resource.Resource {
@@ -86,7 +85,7 @@ func (*hostResource) Schema(ctx context.Context, req resource.SchemaRequest, res
 				Computed:            true,
 			},
 		},
-		Version: 1,
+		Version: 0,
 	}
 }
 
@@ -341,9 +340,8 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	host, statusCode, err := r.p.dog.UpdateHostEncode(hostID, newHost, nil)
 	log.Printf("host: %+v\n", host)
 	tflog.Trace(ctx, fmt.Sprintf("host: %+v\n", host))
-	state = ApiToHost(host)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create host, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update host, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -352,6 +350,7 @@ func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToHost(host)
 
 	plan.ID = state.ID
 
@@ -393,106 +392,3 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	resp.State.RemoveResource(ctx)
 }
 
-type hostResourceModelV0 struct {
-	Environment string       `tfsdk:"environment"`
-	Group       string       `tfsdk:"group"`
-	ID          types.String `tfsdk:"id"`
-	HostKey     string       `tfsdk:"hostkey"`
-	Location    string       `tfsdk:"location"`
-	Name        string       `tfsdk:"name"`
-	Vars        *string      `tfsdk:"vars"`
-}
-
-type hostResourceModelV1 struct {
-	Environment string       `tfsdk:"environment"`
-	Group       string       `tfsdk:"group"`
-	ID          types.String `tfsdk:"id"`
-	HostKey     string       `tfsdk:"hostkey"`
-	Location    string       `tfsdk:"location"`
-	Name        string       `tfsdk:"name"`
-	Vars        *string      `tfsdk:"vars"`
-	AlertEnable *bool        `tfsdk:"alert_enable"`
-}
-
-func (r *hostResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
-	tflog.Debug(ctx, "UpgradeState")
-	return map[int64]resource.StateUpgrader{
-		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
-		0: {
-			PriorSchema: &schema.Schema{
-				// This description is used by the documentation generator and the language server.
-				MarkdownDescription: "Host data source",
-
-				Attributes: map[string]schema.Attribute{
-					// This description is used by the documentation generator and the language server.
-					"environment": schema.StringAttribute{
-						MarkdownDescription: "Host environment",
-						Optional:            true,
-					},
-					"group": schema.StringAttribute{
-						MarkdownDescription: "Host group",
-						Optional:            true,
-						Validators: []validator.String{
-							stringvalidator.LengthBetween(1, 26),
-							stringvalidator.RegexMatches(
-								regexp.MustCompile(`^[A-Za-z0-9_.-](.*)$`),
-								"Length limited by generated ipset name length limit'",
-							),
-						},
-					},
-					"hostkey": schema.StringAttribute{
-						MarkdownDescription: "Host key",
-						Optional:            true,
-						Validators: []validator.String{
-							stringvalidator.LengthBetween(10, 256),
-							stringvalidator.RegexMatches(
-								regexp.MustCompile(`^[A-Za-z0-9+%_.-](.*)$`),
-								"must start with alphanumeric characters, %, _, ., -",
-							),
-						},
-					},
-					"location": schema.StringAttribute{
-						MarkdownDescription: "Host location",
-						Optional:            true,
-					},
-					"name": schema.StringAttribute{
-						MarkdownDescription: "Host name",
-						Optional:            true,
-					},
-					"vars": schema.StringAttribute{
-						MarkdownDescription: "json string of vars",
-						Optional:            true,
-						//Required:            true,
-					},
-					"id": schema.StringAttribute{
-						Optional:            true,
-						MarkdownDescription: "Host identifier",
-						Computed:            true,
-					},
-					},
-			},
-			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
-				var priorStateData hostResourceModelV0
-
-				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
-
-				if resp.Diagnostics.HasError() {
-					return
-				}
-
-				upgradedStateData := hostResourceModelV1{
-					Environment: priorStateData.Environment,
-					Group:       priorStateData.Group,
-					HostKey:     priorStateData.HostKey,
-					Location:    priorStateData.Location,
-					Name:        priorStateData.Name,
-					Vars:        priorStateData.Vars,
-					AlertEnable: nil,
-					ID:          priorStateData.ID,
-				}
-
-				resp.State.Set(ctx, upgradedStateData)
-			},
-		},
-	}
-}

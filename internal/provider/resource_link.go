@@ -226,27 +226,32 @@ func LinkToUpdateRequest(plan linkResourceData) api.LinkUpdateRequest {
 func ApiToLink(link api.Link) Link {
 	newLink := Link{
 		AddressHandling: types.StringValue(link.AddressHandling),
-		Connection: &Connection{
-			ApiPort:  types.Int64Value(int64(link.Connection.ApiPort)),
-			Host:     types.StringValue(link.Connection.Host),
-			Password: types.StringValue(link.Connection.Password),
-			Port:     types.Int64Value(int64(link.Connection.Port)),
-			SSLOptions: &SSLOptions{
+		ConnectionType:  types.StringValue(link.ConnectionType),
+		Direction:       types.StringValue(link.Direction),
+		Enabled:         types.BoolValue(link.Enabled),
+		Name:            types.StringValue(link.Name),
+		ID:              types.StringValue(link.ID),
+	}
+
+	if link.Connection != nil {
+		newLink.Connection = &Connection{
+			ApiPort:     types.Int64Value(int64(link.Connection.ApiPort)),
+			Host:        types.StringValue(link.Connection.Host),
+			Password:    types.StringValue(link.Connection.Password),
+			Port:        types.Int64Value(int64(link.Connection.Port)),
+			User:        types.StringValue(link.Connection.User),
+			VirtualHost: types.StringValue(link.Connection.VirtualHost),
+		}
+		if link.Connection.SSLOptions != nil {
+			newLink.Connection.SSLOptions = &SSLOptions{
 				CaCertFile:           types.StringValue(link.Connection.SSLOptions.CaCertFile),
 				CertFile:             types.StringValue(link.Connection.SSLOptions.CertFile),
 				FailIfNoPeerCert:     types.BoolValue(link.Connection.SSLOptions.FailIfNoPeerCert),
 				KeyFile:              types.StringValue(link.Connection.SSLOptions.KeyFile),
 				ServerNameIndication: types.StringValue(link.Connection.SSLOptions.ServerNameIndication),
 				Verify:               types.StringValue(link.Connection.SSLOptions.Verify),
-			},
-			User:        types.StringValue(link.Connection.User),
-			VirtualHost: types.StringValue(link.Connection.VirtualHost),
-		},
-		ConnectionType: types.StringValue(link.ConnectionType),
-		Direction:      types.StringValue(link.Direction),
-		Enabled:        types.BoolValue(link.Enabled),
-		Name:           types.StringValue(link.Name),
-		ID:             types.StringValue(link.ID),
+			}
+		}
 	}
 	return newLink
 }
@@ -341,9 +346,8 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	link, statusCode, err := r.p.dog.UpdateLink(linkID, newLink, nil)
 	log.Printf("link: %+v\n", link)
 	tflog.Trace(ctx, fmt.Sprintf("link: %+v\n", link))
-	state = ApiToLink(link)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create link, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update link, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -352,6 +356,7 @@ func (r *linkResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToLink(link)
 
 	plan.ID = state.ID
 

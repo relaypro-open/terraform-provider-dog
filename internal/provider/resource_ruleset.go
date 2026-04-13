@@ -298,28 +298,20 @@ func RulesetToCreateRequest(ctx context.Context, plan rulesetResourceData) api.R
 		outboundRules = append(outboundRules, rule)
 	}
 
-	tflog.Debug(ctx, spew.Sprint("ZZZplan.ProfileId: %#v", plan.ProfileId))
-	if plan.ProfileId == nil {
-		newRuleset := api.RulesetCreateRequest{
-			Name: plan.Name,
-			Rules: &api.Rules{
-				Inbound:  inboundRules,
-				Outbound: outboundRules,
-			},
-		}
-		tflog.Debug(ctx, spew.Sprint("ZZZnewRuleset: %#v", newRuleset))
-		return newRuleset
-	} else {
-		newRuleset := api.RulesetCreateRequest{
-			Name: plan.Name,
-			Rules: &api.Rules{
-				Inbound:  inboundRules,
-				Outbound: outboundRules,
-			},
-			ProfileId: plan.ProfileId,
-		}
-		return newRuleset
+	var profileId *string
+	if plan.ProfileId != nil && *plan.ProfileId != "" {
+		profileId = plan.ProfileId
 	}
+
+	newRuleset := api.RulesetCreateRequest{
+		Name: plan.Name,
+		Rules: &api.Rules{
+			Inbound:  inboundRules,
+			Outbound: outboundRules,
+		},
+		ProfileId: profileId,
+	}
+	return newRuleset
 }
 
 func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.RulesetUpdateRequest {
@@ -360,70 +352,62 @@ func RulesetToUpdateRequest(ctx context.Context, plan rulesetResourceData) api.R
 		outboundRules = append(outboundRules, rule)
 	}
 
-	newString := "123"
-	newStringPointer := &newString
-
-	tflog.Debug(ctx, spew.Sprint("ZZZplan.ProfileId: %#v", plan.ProfileId))
-	if plan.ProfileId == nil {
-		newRuleset := api.RulesetUpdateRequest{
-			Name: plan.Name,
-			Rules: &api.Rules{
-				Inbound:  inboundRules,
-				Outbound: outboundRules,
-			},
-			ProfileId: newStringPointer,
-		}
-		tflog.Debug(ctx, spew.Sprint("ZZZnewRuleset: %#v", newRuleset))
-		return newRuleset
-	} else {
-		newRuleset := api.RulesetUpdateRequest{
-			Name: plan.Name,
-			Rules: &api.Rules{
-				Inbound:  inboundRules,
-				Outbound: outboundRules,
-			},
-			ProfileId: plan.ProfileId,
-		}
-		return newRuleset
+	var profileId *string
+	if plan.ProfileId != nil && *plan.ProfileId != "" {
+		profileId = plan.ProfileId
 	}
+
+	newRuleset := api.RulesetUpdateRequest{
+		Name: plan.Name,
+		Rules: &api.Rules{
+			Inbound:  inboundRules,
+			Outbound: outboundRules,
+		},
+		ProfileId: profileId,
+	}
+	return newRuleset
 }
 
 func ApiToRuleset(ctx context.Context, ruleset api.Ruleset) Ruleset {
 	newInboundRules := []*rulesetResourceRule{}
-	for _, inbound_rule := range ruleset.Rules.Inbound {
-		rule := &rulesetResourceRule{
-			Action:       types.StringValue(inbound_rule.Action),
-			Active:       types.BoolValue(inbound_rule.Active),
-			Comment:      types.StringValue(inbound_rule.Comment),
-			Environments: inbound_rule.Environments,
-			Group:        types.StringValue(inbound_rule.Group),
-			GroupType:    types.StringValue(inbound_rule.GroupType),
-			Interface:    types.StringValue(inbound_rule.Interface),
-			Log:          types.BoolValue(inbound_rule.Log),
-			LogPrefix:    types.StringValue(inbound_rule.LogPrefix),
-			Service:      types.StringValue(inbound_rule.Service),
-			States:       inbound_rule.States,
-			Type:         types.StringValue(inbound_rule.Type),
+	if ruleset.Rules != nil {
+		for _, inbound_rule := range ruleset.Rules.Inbound {
+			rule := &rulesetResourceRule{
+				Action:       types.StringValue(inbound_rule.Action),
+				Active:       types.BoolValue(inbound_rule.Active),
+				Comment:      types.StringValue(inbound_rule.Comment),
+				Environments: inbound_rule.Environments,
+				Group:        types.StringValue(inbound_rule.Group),
+				GroupType:    types.StringValue(inbound_rule.GroupType),
+				Interface:    types.StringValue(inbound_rule.Interface),
+				Log:          types.BoolValue(inbound_rule.Log),
+				LogPrefix:    types.StringValue(inbound_rule.LogPrefix),
+				Service:      types.StringValue(inbound_rule.Service),
+				States:       inbound_rule.States,
+				Type:         types.StringValue(inbound_rule.Type),
+			}
+			newInboundRules = append(newInboundRules, rule)
 		}
-		newInboundRules = append(newInboundRules, rule)
 	}
 	newOutboundRules := []*rulesetResourceRule{}
-	for _, outbound_rule := range ruleset.Rules.Outbound {
-		rule := &rulesetResourceRule{
-			Action:       types.StringValue(outbound_rule.Action),
-			Active:       types.BoolValue(outbound_rule.Active),
-			Comment:      types.StringValue(outbound_rule.Comment),
-			Environments: outbound_rule.Environments,
-			Group:        types.StringValue(outbound_rule.Group),
-			GroupType:    types.StringValue(outbound_rule.GroupType),
-			Interface:    types.StringValue(outbound_rule.Interface),
-			Log:          types.BoolValue(outbound_rule.Log),
-			LogPrefix:    types.StringValue(outbound_rule.LogPrefix),
-			Service:      types.StringValue(outbound_rule.Service),
-			States:       outbound_rule.States,
-			Type:         types.StringValue(outbound_rule.Type),
+	if ruleset.Rules != nil {
+		for _, outbound_rule := range ruleset.Rules.Outbound {
+			rule := &rulesetResourceRule{
+				Action:       types.StringValue(outbound_rule.Action),
+				Active:       types.BoolValue(outbound_rule.Active),
+				Comment:      types.StringValue(outbound_rule.Comment),
+				Environments: outbound_rule.Environments,
+				Group:        types.StringValue(outbound_rule.Group),
+				GroupType:    types.StringValue(outbound_rule.GroupType),
+				Interface:    types.StringValue(outbound_rule.Interface),
+				Log:          types.BoolValue(outbound_rule.Log),
+				LogPrefix:    types.StringValue(outbound_rule.LogPrefix),
+				Service:      types.StringValue(outbound_rule.Service),
+				States:       outbound_rule.States,
+				Type:         types.StringValue(outbound_rule.Type),
+			}
+			newOutboundRules = append(newOutboundRules, rule)
 		}
-		newOutboundRules = append(newOutboundRules, rule)
 	}
 
 	tflog.Debug(ctx, spew.Sprint("ZZZruleset: %#v", ruleset))
@@ -543,9 +527,8 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 	ruleset, statusCode, err := r.p.dog.UpdateRuleset(rulesetID, newRuleset, nil)
 	log.Printf("ruleset: %+v\n", ruleset)
 	tflog.Debug(ctx, fmt.Sprintf("ruleset: %+v\n", ruleset))
-	state = ApiToRuleset(ctx, ruleset)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create ruleset, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update ruleset, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -554,6 +537,7 @@ func (r *rulesetResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToRuleset(ctx, ruleset)
 
 	plan.ID = state.ID
 

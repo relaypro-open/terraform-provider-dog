@@ -268,9 +268,8 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 	service, statusCode, err := r.p.dog.UpdateService(serviceID, newService, nil)
 	log.Printf("service: %+v\n", service)
 	tflog.Trace(ctx, fmt.Sprintf("service: %+v\n", service))
-	state = ApiToService(service)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create service, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update service, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -279,6 +278,7 @@ func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToService(service)
 
 	plan.ID = state.ID
 

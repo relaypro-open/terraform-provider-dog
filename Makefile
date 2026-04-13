@@ -43,6 +43,7 @@ delete_release:
 install: build
 
 test:
+	#ASDF_TERRAFORM_VERSION=1.5.7 make testacc TEST_TAGS=group
 	go test -i $(TEST)|| exit 1
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=1
 

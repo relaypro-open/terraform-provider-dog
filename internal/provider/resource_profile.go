@@ -207,9 +207,8 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 	profile, statusCode, err := r.p.dog.UpdateProfile(profileID, newProfile, nil)
 	log.Printf("profile: %+v\n", profile)
 	tflog.Trace(ctx, fmt.Sprintf("profile: %+v\n", profile))
-	state = ApiToProfile(profile)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create profile, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update profile, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -218,6 +217,7 @@ func (r *profileResource) Update(ctx context.Context, req resource.UpdateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToProfile(profile)
 
 	plan.ID = state.ID
 

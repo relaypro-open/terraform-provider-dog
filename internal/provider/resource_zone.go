@@ -257,9 +257,8 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	zone, statusCode, err := r.p.dog.UpdateZone(zoneID, newZone, nil)
 	log.Printf("zone: %+v\n", zone)
 	tflog.Trace(ctx, fmt.Sprintf("zone: %+v\n", zone))
-	state = ApiToZone(zone)
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create zone, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update zone, got error: %s", err))
 	}
 	ok := []int{303, 200, 201}
 	if slices.Contains(ok, statusCode) != true {
@@ -268,6 +267,7 @@ func (r *zoneResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	state = ApiToZone(zone)
 
 	plan.ID = state.ID
 
